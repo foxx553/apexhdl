@@ -5,8 +5,7 @@
 set gpio_width 8
 
 ################################################################
-# This is a generated script based on design: complete_block
-#
+# This is a generated script
 # Though there are limitations about the generated script,
 # the main purpose of this utility is to make learning
 # IP Integrator Tcl commands easier.
@@ -61,7 +60,7 @@ if { $list_projs eq "" } {
 
 # CHANGE DESIGN NAME HERE
 variable design_name
-set design_name fpga_evaluator
+set design_name evaluator
 
 # If you do not already have an existing IP Integrator design open,
 # you can create a design using the following command:

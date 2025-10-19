@@ -1,9 +1,10 @@
 -------------------------------------
 -- Engineer: Florian Delhon
--- Module Name: not_control - behavorial
 -- Target: PYNQ-Z2
--- Description: NOT gate
--- Revision: v0.01
+-- Module Name: not_control
+-- Function: not
+-- Data width: 8 bits
+-- Range: -
 -------------------------------------
 
 library IEEE;
@@ -20,9 +21,9 @@ entity not_control is
     );
 end not_control;
 
-architecture behavorial of not_control is
+architecture behavioral of not_control is
 begin
    
     result <= not input_a;
 
-end behavorial;
+end behavioral;
