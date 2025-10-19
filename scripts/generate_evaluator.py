@@ -78,6 +78,7 @@ end behavioral;
 
 """
 
+    # VHDL file writing
     with open(f"../sources/{evaluator_name}.vhd", "w") as file:
         file.write(vhdl_code)
 

@@ -12,8 +12,8 @@
 - `*.py` = Python script to generate VHDL code for the core evaluator modules
 
 ## `sources`
-- `.vhd` = VHDL code for the core evaluator modules
+- `*.vhd` = VHDL code for the core evaluator modules
 
 ## `wrappers`
-- `.tcl` = TCL script to wrap the core evaluator module into a complete block design involving, among others, the Processing System, AXI GPIOs, ...
+- `*.tcl` = TCL script to wrap the core evaluator module into a complete block design involving, among others, the Processing System, AXI GPIOs, ...
 - `*.jpg` = Illustration to show what the wrapper does
