@@ -12,11 +12,11 @@ use IEEE.NUMERIC_STD.ALL;
 
 entity not_control is
     generic (
-        PRECISION : positive := 8
+        DATA_WIDTH : positive := 8
     );
     port (
-        input_a : in STD_LOGIC_VECTOR(PRECISION - 1 downto 0);
-        result : out STD_LOGIC_VECTOR(PRECISION - 1 downto 0)
+        input_a : in STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0);
+        result : out STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0)
     );
 end not_control;
 
