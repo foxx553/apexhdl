@@ -16,3 +16,4 @@
 
 ## `wrappers`
 - `.tcl` = TCL script to wrap the core evaluator module into a complete block design involving, among others, the Processing System, AXI GPIOs, ...
+- `*.jpg` = Illustration to show what the wrapper does
