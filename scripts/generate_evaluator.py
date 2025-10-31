@@ -7,7 +7,7 @@ def main():
         print(f"""
 General usage: generate_evaluator.py <method> <evaluator_name> [args...]
 Specific usage: Depending on <method>
-    > lut: generate_evaluator.py lut <evaluator_name> <function_of_x> <data_width> <x_min> <x_max> <y_min> <y_max>
+    > rom: generate_evaluator.py rom <evaluator_name> <function_of_x> <data_width> <x_min> <x_max> <y_min> <y_max>
     > binary: generate_evaluator.py binary <evaluator_name> <function_of_x> <data_width> <offset_width> <x_min> <x_max> <y_min> <y_max>
     > unary: generate_evaluator.py unary <evaluator_name> <function_of_x> <data_width> <x_min> <x_max> <y_min> <y_max>
     > hybrid: generate_evaluator.py hybrid <evaluator_name> <function_of_x> <data_width> <offset_width> <x_min> <x_max> <y_min> <y_max>

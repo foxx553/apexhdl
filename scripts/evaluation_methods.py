@@ -1,11 +1,11 @@
 from utils import compute_discrete_output, int_to_lsb
 
-def lut_method(args):
-    """ Generate VHDL code for a LUT function evaluator """
+def rom_method(args):
+    """ Generate VHDL code for a ROM function evaluator """
 
     # Args check
     if len(args) != 7:
-        print("Usage: generate_evaluator.py lut <evaluator_name> <function_of_x> <data_width> <x_min> <x_max> <y_min> <y_max>")
+        print("Usage: generate_evaluator.py rom <evaluator_name> <function_of_x> <data_width> <x_min> <x_max> <y_min> <y_max>")
         return
     
     # Args extraction
@@ -17,10 +17,10 @@ def lut_method(args):
     y_discrete_values = compute_discrete_output(function_of_x, data_width, x_min, x_max, y_min, y_max)
 
     # VHDL behavioral code generation
-    lut_code = "\twith input_a select result <=\n"
+    rom_code = ""
     for x_value, y_value in enumerate(y_discrete_values):
-        lut_code += f"\t\t\"{int_to_lsb(y_value, data_width)}\" when \"{int_to_lsb(x_value, data_width)}\",\n"
-    lut_code += f"\t\t\"{int_to_lsb(0, data_width)}\" when others;"
+        rom_code += f"\t\t{x_value} => \"{int_to_lsb(y_value, data_width)}\",\n"
+    rom_code += f"\t\tothers => \"{int_to_lsb(0, data_width)}\""
 
     # VHDL complete code generation
     return f"""
@@ -29,7 +29,7 @@ def lut_method(args):
 -- Target: PYNQ-Z2
 -- Module Name: {evaluator_name}
 -- Function: f(x) = {function_of_x}
--- Evaluator method: LUT
+-- Evaluator method: ROM
 -- Data width: {data_width} bits
 -- Range: x in [{x_min};{x_max}[, y in [{y_min};{y_max}[
 -------------------------------------
@@ -49,10 +49,17 @@ entity {evaluator_name} is
 end {evaluator_name};
 
 architecture arch_{evaluator_name} of {evaluator_name} is
+    
+    attribute rom_style : string;
+    type rom_array_t is array (0 to 2**DATA_WIDTH - 1) of STD_LOGIC_VECTOR (DATA_WIDTH - 1 downto 0);
+    constant ROM_VALUES : rom_array_t := (
+{rom_code}
+    );
+    attribute rom_style of ROM_VALUES : constant is "distributed";
+
 begin
 
-    -- LUT
-{lut_code}
+    result <= ROM_VALUES(to_integer(unsigned(input_a)));
 
 end arch_{evaluator_name};
     """
@@ -79,7 +86,7 @@ def unary_method(args):
     y_discrete_values = compute_discrete_output(function_of_x, data_width, x_min, x_max, y_min, y_max)
 
     # Computing unary core routing logic
-    unary_core_array = [[-1] for y in range(2**data_width)]
+    unary_core_array = [[-1] for _ in range(2**data_width)]
     for output_value in range(2**data_width):
         for x_value, y_value in enumerate(y_discrete_values):
             if y_value == output_value:
@@ -162,7 +169,7 @@ def hybrid_method(args):
     return ""
 
 evaluation_methods_map = {
-    "lut": lut_method,
+    "rom": rom_method,
     "binary": binary_method,
     "unary": unary_method,
     "hybrid": hybrid_method
