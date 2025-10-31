@@ -26,6 +26,7 @@ end lut_8bit_tanh;
 architecture arch_lut_8bit_tanh of lut_8bit_tanh is
 begin
 
+    -- LUT
 	with input_a select result <=
 		"00000000" when "00000000",
 		"00000000" when "00000001",
