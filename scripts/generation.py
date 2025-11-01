@@ -85,25 +85,29 @@ def unary_method(args):
     # Discrete output calculation
     y_discrete_values = compute_discrete_output(function_of_x, data_width, x_min, x_max, y_min, y_max)
 
-    ##############################################################
-    ## WARNING = At the moment, only for increasing monotonical ##
-    ##############################################################
-
     # Computing unary core routing logic
-    unary_core_array = [[0 for _ in range(2**data_width - 1)] for _ in range(2**data_width - 1)]
+    unary_core_array = [[0 for _ in range(2**data_width)] for _ in range(2**data_width)]
     y_cursor = 0
     for x_value, y_value in enumerate(y_discrete_values):
         if y_value != y_cursor:
-            for i in range(y_cursor, y_value):
-                unary_core_array[i][max(0, x_value - 1)] = 1
+            step = 1 if y_value > y_cursor else -1
+            for i in range(y_cursor, y_value, step):
+                unary_core_array[i][x_value] = 1
             y_cursor = y_value
 
     # Converting routing logic to VHDL code
     unary_core_code = ""
     for y_value, x_values in enumerate(unary_core_array):
+        has_one = False
         for x_value, is_connected in enumerate(x_values):
             if is_connected == 1:
-                unary_core_code += f"\tdecoder_input({y_value}) <= encoder_output({x_value});\n"
+                if not has_one:
+                    unary_core_code += f"\tdecoder_input({y_value}) <= encoder_output({x_value})"
+                    has_one = True
+                else:
+                    unary_core_code += f" xor encoder_output({x_value})"
+        if has_one:
+            unary_core_code += f";\n"
 
     # VHDL complete code generation
     return f"""
@@ -133,8 +137,8 @@ end {evaluator_name};
 
 architecture arch_{evaluator_name} of {evaluator_name} is
 
-    signal encoder_output: STD_LOGIC_VECTOR(2**DATA_WIDTH - 2 downto 0);
-    signal decoder_input: STD_LOGIC_VECTOR(2**DATA_WIDTH - 2 downto 0);
+    signal encoder_output: STD_LOGIC_VECTOR(2**DATA_WIDTH - 1 downto 0);
+    signal decoder_input: STD_LOGIC_VECTOR(2**DATA_WIDTH - 1 downto 0);
 
 begin
 
@@ -143,7 +147,7 @@ begin
         variable input_int : integer;
     begin
         input_int := to_integer(unsigned(input_a));
-        for i in 0 to 2**DATA_WIDTH - 2 loop
+        for i in 0 to 2**DATA_WIDTH - 1 loop
             if i < input_int then
                 encoder_output(i) <= '1';
             else
@@ -161,7 +165,7 @@ begin
         variable count : integer := 0;
     begin
         count := 0;
-        for i in 0 to 2**DATA_WIDTH - 2 loop
+        for i in 1 to 2**DATA_WIDTH - 1 loop
             if decoder_input(i) = '1' then
                 count := count + 1;
             end if;

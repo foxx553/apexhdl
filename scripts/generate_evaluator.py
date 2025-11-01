@@ -25,7 +25,7 @@ Specific usage: Depending on <method>
     evaluation_method = evaluation_methods_map.get(evaluator_type)
     dir_path = f"../sources/{evaluator_name}"
     os.makedirs(dir_path, exist_ok=True)
-    print(f"Note = Files will be generated in ../sources/{evaluator_type}")
+    print(f"Note = Files will be generated in ../sources/{evaluator_name}")
     print("1/5 = Extracted generation arguments")
 
     # Evaluator generation
