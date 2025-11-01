@@ -85,26 +85,25 @@ def unary_method(args):
     # Discrete output calculation
     y_discrete_values = compute_discrete_output(function_of_x, data_width, x_min, x_max, y_min, y_max)
 
+    ##############################################################
+    ## WARNING = At the moment, only for increasing monotonical ##
+    ##############################################################
+
     # Computing unary core routing logic
-    unary_core_array = [[-1] for _ in range(2**data_width)]
-    for output_value in range(2**data_width):
-        for x_value, y_value in enumerate(y_discrete_values):
-            if y_value == output_value:
-                if unary_core_array[output_value][0] == -1:
-                    unary_core_array[output_value][0] = x_value
-                else:
-                    unary_core_array[output_value].append(x_value)
-    
+    unary_core_array = [[0 for _ in range(2**data_width - 1)] for _ in range(2**data_width - 1)]
+    y_cursor = 0
+    for x_value, y_value in enumerate(y_discrete_values):
+        if y_value != y_cursor:
+            for i in range(y_cursor, y_value):
+                unary_core_array[i][max(0, x_value - 1)] = 1
+            y_cursor = y_value
+
     # Converting routing logic to VHDL code
     unary_core_code = ""
-    for output_value in range(len(unary_core_array)):
-        if unary_core_array[output_value][0] != -1:
-            for index, x_value in enumerate(unary_core_array[output_value]):
-                if index == 0:
-                    unary_core_code += f"\tdecoder_input({output_value}) <= encoder_output({x_value})"
-                else:
-                    unary_core_code += f" or encoder_output({x_value})"
-            unary_core_code += ";\n"
+    for y_value, x_values in enumerate(unary_core_array):
+        for x_value, is_connected in enumerate(x_values):
+            if is_connected == 1:
+                unary_core_code += f"\tdecoder_input({y_value}) <= encoder_output({x_value});\n"
 
     # VHDL complete code generation
     return f"""
@@ -134,31 +133,42 @@ end {evaluator_name};
 
 architecture arch_{evaluator_name} of {evaluator_name} is
 
-    signal encoder_output: STD_LOGIC_VECTOR(2**DATA_WIDTH - 1 downto 0);
-    signal decoder_input: STD_LOGIC_VECTOR(2**DATA_WIDTH - 1 downto 0);
+    signal encoder_output: STD_LOGIC_VECTOR(2**DATA_WIDTH - 2 downto 0);
+    signal decoder_input: STD_LOGIC_VECTOR(2**DATA_WIDTH - 2 downto 0);
 
 begin
 
-    -- One-hot encoder    
-    one_hot_encoder: process(input_a)
+    -- Thermometer encoder
+    thermometer_encoder: process(input_a)
+        variable input_int : integer;
     begin
-        encoder_output <= (others => '0');
-        encoder_output(to_integer(unsigned(input_a))) <= '1';
-    end process one_hot_encoder;
-
-    -- Unary code
-{unary_core_code}
-
-    -- One-hot decoder
-    one_hot_decoder: process(decoder_input)
-    begin
-        result <= (others => '0');
-        for i in 0 to decoder_input'length - 1 loop
-            if decoder_input(i) = '1' then
-                result <= std_logic_vector(to_unsigned(i, result'length));
+        input_int := to_integer(unsigned(input_a));
+        for i in 0 to 2**DATA_WIDTH - 2 loop
+            if i < input_int then
+                encoder_output(i) <= '1';
+            else
+                encoder_output(i) <= '0';
             end if;
         end loop;
-    end process one_hot_decoder;
+    end process thermometer_encoder;
+
+
+    -- Unary core
+{unary_core_code}
+
+    -- Thermometer decoder
+    thermometer_decoder: process(decoder_input)
+        variable count : integer := 0;
+    begin
+        count := 0;
+        for i in 0 to 2**DATA_WIDTH - 2 loop
+            if decoder_input(i) = '1' then
+                count := count + 1;
+            end if;
+        end loop;
+        result <= std_logic_vector(to_unsigned(count, DATA_WIDTH));
+    end process thermometer_decoder;
+
 
 end arch_{evaluator_name};
     """

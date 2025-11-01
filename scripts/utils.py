@@ -42,3 +42,73 @@ def compute_discrete_output(function_str, data_width, x_min, x_max, y_min, y_max
     # Function space computation
     y_float_values = [f(x) for x in x_float_values]
     return [clamp_nearest(y, y_min, y_step, data_width) for y in y_float_values]
+
+def generate_testbench(evaluator_name):
+    """ Generates an exhaustive testbench for validation """
+
+    return f"""
+-------------------------------------
+-- Engineer: Florian Delhon
+-- Target: PYNQ-Z2
+-- Module Name: tb_{evaluator_name}
+-- Description: Testbench for module {evaluator_name}
+-------------------------------------
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+use STD.TEXTIO.ALL;
+
+entity tb_{evaluator_name} is
+end tb_{evaluator_name};
+
+architecture arch_tb_{evaluator_name} of tb_{evaluator_name} is
+
+    constant DATA_WIDTH : positive := 8;
+    signal input_a : STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0);
+    signal result  : STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0);
+
+    component {evaluator_name}
+        generic (
+            DATA_WIDTH : positive := 8
+        );
+        port (
+            input_a : in STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0);
+            result  : out STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0)
+        );
+    end component;
+
+    file output_file : TEXT open WRITE_MODE is "../sources/{evaluator_name}/results_{evaluator_name}.txt";
+
+begin
+
+    uut: {evaluator_name}
+        generic map (
+            DATA_WIDTH => DATA_WIDTH
+        )
+        port map (
+            input_a => input_a,
+            result  => result
+        );
+
+    tb_proc: process
+        variable line_out : line;
+        variable input_str, result_str : string(1 to DATA_WIDTH);
+    begin
+        for i in 0 to 2**DATA_WIDTH - 1 loop
+            input_a <= std_logic_vector(to_unsigned(i, DATA_WIDTH));
+
+            wait for 10 ns;
+
+            write(line_out, integer'image(i));
+            write(line_out, string'(","));
+            write(line_out, integer'image(to_integer(unsigned(result))));
+            writeline(output_file, line_out);
+
+        end loop;
+        
+        std.env.stop(0);
+    end process;
+
+end arch_tb_{evaluator_name};
+"""
