@@ -191,10 +191,11 @@ def unary_method(args):
     # Computing unary core routing logic
     unary_core_array = [[0 for _ in range(2**data_width)] for _ in range(2**data_width)]
     y_cursor = 0
+    unary_core_array[0][0] = 1
     for x_value, y_value in enumerate(y_discrete_values):
         if y_value != y_cursor:
             step = 1 if y_value > y_cursor else -1
-            for i in range(y_cursor, y_value, step):
+            for i in range(y_cursor + step, y_value + step, step):
                 unary_core_array[i][x_value] = 1
             y_cursor = y_value
 
@@ -251,7 +252,7 @@ begin
     begin
         input_int := to_integer(unsigned(input_a));
         for i in 0 to 2**DATA_WIDTH - 1 loop
-            if i < input_int then
+            if i <= input_int then
                 encoder_output(i) <= '1';
             else
                 encoder_output(i) <= '0';

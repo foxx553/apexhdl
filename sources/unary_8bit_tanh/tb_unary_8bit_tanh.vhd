@@ -17,6 +17,7 @@ end tb_unary_8bit_tanh;
 architecture arch_tb_unary_8bit_tanh of tb_unary_8bit_tanh is
 
     constant DATA_WIDTH : positive := 8;
+
     signal input_a : STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0);
     signal result  : STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0);
 
