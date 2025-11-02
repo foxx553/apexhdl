@@ -43,80 +43,29 @@ def compute_discrete_output(function_str, x_data_width, x_min, x_max, y_data_wid
     y_float_values = [f(x) for x in x_float_values]
     return [clamp_nearest(y, y_min, y_step, y_data_width) for y in y_float_values]
 
-def generate_testbench(evaluator_type, args):
-    """ Generates an exhaustive testbench for validation """
+def compute_relative_discrete_output(function_str, x_data_width, x_min, x_max, y_data_width, y_min, y_max, y_offset):
+    """ Gets the discrete output array corresponding to a function into a discrete window, with a specific offset """
 
-    # Args extraction
-    evaluator_name = args[0]
-    data_width = int(args[2])
-    segment_idx_width, group_idx_width = 0, 0
-    if evaluator_type == "binary":
-        segment_idx_width, group_idx_width = int(args[7]), int(args[8]) 
+    # Gather absolute values
+    absolute_values = compute_discrete_output(function_str, x_data_width, x_min, x_max, y_data_width, y_min, y_max)
+    
+    # Offset it by the bias
+    relative_values = [y - clamp_nearest(y_offset, y_min, (y_max - y_min) / (2 ** y_data_width), y_data_width) for y in absolute_values]
+    print(relative_values)
+    return relative_values
 
-    return f"""
--------------------------------------
--- Engineer: Florian Delhon
--- Target: PYNQ-Z2
--- Module Name: tb_{evaluator_name}
--- Description: Testbench for module {evaluator_name}
--------------------------------------
+def compute_unary_routing_logic(x_data_width, y_data_width, y_discrete_values):
+    """ Generates unary core routing logic """
+    
+    # Computing routing logic
+    unary_core_array = [[0 for _ in range(2**x_data_width)] for _ in range(2**y_data_width)]
+    y_cursor = 0
+    unary_core_array[0][0] = 1
+    for x_value, y_value in enumerate(y_discrete_values):
+        if y_value != y_cursor:
+            step = 1 if y_value > y_cursor else -1
+            for i in range(y_cursor + step, y_value + step, step):
+                unary_core_array[i][x_value] = 1
+            y_cursor = y_value
 
-library IEEE;
-use IEEE.STD_LOGIC_1164.ALL;
-use IEEE.NUMERIC_STD.ALL;
-use STD.TEXTIO.ALL;
-
-entity tb_{evaluator_name} is
-end tb_{evaluator_name};
-
-architecture arch_tb_{evaluator_name} of tb_{evaluator_name} is
-
-    constant DATA_WIDTH : positive := {data_width};{f"\n\tconstant GROUP_IDX_WIDTH : positive := {group_idx_width};\n\tconstant SEGMENT_IDX_WIDTH : positive := {segment_idx_width};" if evaluator_type == "binary" else ""}
-
-    signal input_a : STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0);
-    signal result  : STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0);
-
-    component {evaluator_name}
-        generic (
-            DATA_WIDTH : positive := {data_width}{f";\n\t\t\tGROUP_IDX_WIDTH : positive := {group_idx_width};\n\t\t\tSEGMENT_IDX_WIDTH : positive := {segment_idx_width}" if evaluator_type == "binary" else ""}
-        );
-        port (
-            input_a : in STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0);
-            result  : out STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0)
-        );
-    end component;
-
-    file output_file : TEXT open WRITE_MODE is "../sources/{evaluator_name}/results_{evaluator_name}.txt";
-
-begin
-
-    uut: {evaluator_name}
-        generic map (
-            DATA_WIDTH => DATA_WIDTH{",\n\t\t\tGROUP_IDX_WIDTH => GROUP_IDX_WIDTH,\n\t\t\tSEGMENT_IDX_WIDTH => SEGMENT_IDX_WIDTH" if evaluator_type == "binary" else ""}
-        )
-        port map (
-            input_a => input_a,
-            result  => result
-        );
-
-    tb_proc: process
-        variable line_out : line;
-        variable input_str, result_str : string(1 to DATA_WIDTH);
-    begin
-        for i in 0 to 2**DATA_WIDTH - 1 loop
-            input_a <= std_logic_vector(to_unsigned(i, DATA_WIDTH));
-
-            wait for 10 ns;
-
-            write(line_out, integer'image(i));
-            write(line_out, string'(","));
-            write(line_out, integer'image(to_integer(unsigned(result))));
-            writeline(output_file, line_out);
-
-        end loop;
-        
-        std.env.stop(0);
-    end process;
-
-end arch_tb_{evaluator_name};
-"""
+    return unary_core_array

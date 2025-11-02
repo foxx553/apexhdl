@@ -1,6 +1,5 @@
 from generation import evaluation_methods_map
-from validation import run_testbench, plot_comparison
-from utils import generate_testbench
+from validation import run_testbench, plot_comparison, generate_testbench
 import sys
 import os
 
@@ -14,7 +13,7 @@ Specific usage: Depending on <method>
     > rom: generate_evaluator.py rom <evaluator_name> <function_of_x> <data_width> <x_min> <x_max> <y_min> <y_max>
     > binary: generate_evaluator.py binary <evaluator_name> <function_of_x> <data_width> <x_min> <x_max> <y_min> <y_max> <segment_idx_width> <group_idx_width>
     > unary: generate_evaluator.py unary <evaluator_name> <function_of_x> <data_width> <x_min> <x_max> <y_min> <y_max>
-    > hybrid: generate_evaluator.py hybrid <evaluator_name> <function_of_x> <data_width> <x_min> <x_max> <y_min> <y_max> <segment_width>
+    > hybrid: generate_evaluator.py hybrid <evaluator_name> <function_of_x> <data_width> <x_min> <x_max> <y_min> <y_max> <segment_idx_width>
 """)
         return
 
