@@ -28,23 +28,30 @@ def int_to_lsb(n, data_width):
     masked = n & ((2 ** data_width) - 1)
     return format(masked, f'0{data_width}b')
 
-def compute_discrete_output(function_str, data_width, x_min, x_max, y_min, y_max):
+def compute_discrete_output(function_str, x_data_width, x_min, x_max, y_data_width, y_min, y_max):
     """ Gets the discrete output array corresponding to a function into a discrete window """
 
     # Function parsing
     f = parse_function(function_str)
 
     # Function space discretization
-    x_step = (x_max - x_min) / (2 ** data_width)
-    y_step = (y_max - y_min) / (2 ** data_width)
+    x_step = (x_max - x_min) / (2 ** x_data_width)
+    y_step = (y_max - y_min) / (2 ** y_data_width)
     x_float_values = np.arange(x_min, x_max, x_step)
 
     # Function space computation
     y_float_values = [f(x) for x in x_float_values]
-    return [clamp_nearest(y, y_min, y_step, data_width) for y in y_float_values]
+    return [clamp_nearest(y, y_min, y_step, y_data_width) for y in y_float_values]
 
-def generate_testbench(evaluator_name):
+def generate_testbench(evaluator_type, args):
     """ Generates an exhaustive testbench for validation """
+
+    # Args extraction
+    evaluator_name = args[0]
+    data_width = int(args[2])
+    segment_idx_width, group_idx_width = 0, 0
+    if evaluator_type == "binary":
+        segment_idx_width, group_idx_width = int(args[7]), int(args[8]) 
 
     return f"""
 -------------------------------------
@@ -64,13 +71,14 @@ end tb_{evaluator_name};
 
 architecture arch_tb_{evaluator_name} of tb_{evaluator_name} is
 
-    constant DATA_WIDTH : positive := 8;
+    constant DATA_WIDTH : positive := {data_width};{f"\n\tconstant GROUP_IDX_WIDTH : positive := {group_idx_width};\n\tconstant SEGMENT_IDX_WIDTH : positive := {segment_idx_width};" if evaluator_type == "binary" else ""}
+
     signal input_a : STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0);
     signal result  : STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0);
 
     component {evaluator_name}
         generic (
-            DATA_WIDTH : positive := 8
+            DATA_WIDTH : positive := {data_width}{f";\n\t\t\tGROUP_IDX_WIDTH : positive := {group_idx_width};\n\t\t\tSEGMENT_IDX_WIDTH : positive := {segment_idx_width}" if evaluator_type == "binary" else ""}
         );
         port (
             input_a : in STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0);
@@ -84,7 +92,7 @@ begin
 
     uut: {evaluator_name}
         generic map (
-            DATA_WIDTH => DATA_WIDTH
+            DATA_WIDTH => DATA_WIDTH{",\n\t\t\tGROUP_IDX_WIDTH => GROUP_IDX_WIDTH,\n\t\t\tSEGMENT_IDX_WIDTH => SEGMENT_IDX_WIDTH" if evaluator_type == "binary" else ""}
         )
         port map (
             input_a => input_a,

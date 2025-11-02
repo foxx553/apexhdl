@@ -5,7 +5,8 @@ import subprocess
 import os
 
 def run_testbench(evaluator_name):
-    
+    """ Run testbench using GHDL """
+
     # Note = Delete GHDL work directory to trigger full analysis
     if os.path.exists("./work-obj08.cf"):
         os.remove("./work-obj08.cf")
@@ -15,13 +16,14 @@ def run_testbench(evaluator_name):
     subprocess.run(["ghdl", "-e", "--std=08", f"tb_{evaluator_name}"], check=True)
     subprocess.run(["ghdl", "-r", "--std=08", f"tb_{evaluator_name}"], check=True)
 
-def plot_comparison(evaluator_type, args):
+def plot_comparison(args):
+    """ Plot evaluator results """
 
     # Args extraction
     evaluator_name = args[0]
     function_str = args[1]
     data_width = int(args[2])
-    x_min, x_max, y_min, y_max = map(int, args[3:7]) if evaluator_type == "rom" or "unary" else map(int, args[4:8])
+    x_min, x_max, y_min, y_max = map(int, args[3:7])
 
     # Validation parameters
     results_file_path = f"../sources/{evaluator_name}/results_{evaluator_name}.txt"

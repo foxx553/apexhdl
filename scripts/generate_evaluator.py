@@ -12,9 +12,9 @@ def main():
 General usage: generate_evaluator.py <method> <evaluator_name> [args...]
 Specific usage: Depending on <method>
     > rom: generate_evaluator.py rom <evaluator_name> <function_of_x> <data_width> <x_min> <x_max> <y_min> <y_max>
-    > binary: generate_evaluator.py binary <evaluator_name> <function_of_x> <data_width> <offset_width> <x_min> <x_max> <y_min> <y_max>
+    > binary: generate_evaluator.py binary <evaluator_name> <function_of_x> <data_width> <x_min> <x_max> <y_min> <y_max> <segment_idx_width> <group_idx_width>
     > unary: generate_evaluator.py unary <evaluator_name> <function_of_x> <data_width> <x_min> <x_max> <y_min> <y_max>
-    > hybrid: generate_evaluator.py hybrid <evaluator_name> <function_of_x> <data_width> <offset_width> <x_min> <x_max> <y_min> <y_max>
+    > hybrid: generate_evaluator.py hybrid <evaluator_name> <function_of_x> <data_width> <x_min> <x_max> <y_min> <y_max> <segment_width>
 """)
         return
 
@@ -39,7 +39,7 @@ Specific usage: Depending on <method>
     print("2/5 = Generated function evaluator")
 
     # Testbench generation
-    tb_vhdl_code = generate_testbench(evaluator_name)
+    tb_vhdl_code = generate_testbench(evaluator_type, evaluation_method_args)
     with open(f"../sources/{evaluator_name}/tb_{evaluator_name}.vhd", "w") as file:
         file.write(tb_vhdl_code)
     print("3/5 = Generated testbench for function evaluator")
@@ -49,7 +49,7 @@ Specific usage: Depending on <method>
     print("4/5 = Run testbench")
 
     # Plot comparison results
-    plot_comparison(evaluator_type, evaluation_method_args)
+    plot_comparison(evaluation_method_args)
     print("5/5 = Plot comparison results")
 
 if __name__ == "__main__":

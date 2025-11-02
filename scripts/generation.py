@@ -1,4 +1,4 @@
-from utils import compute_discrete_output, int_to_lsb
+from utils import compute_discrete_output, int_to_lsb, parse_function
 
 def rom_method(args):
     """ Generate VHDL code for a ROM function evaluator """
@@ -14,7 +14,7 @@ def rom_method(args):
     data_width, x_min, x_max, y_min, y_max = map(int, args[2:7])
 
     # Discrete output calculation
-    y_discrete_values = compute_discrete_output(function_of_x, data_width, x_min, x_max, y_min, y_max)
+    y_discrete_values = compute_discrete_output(function_of_x, data_width, x_min, x_max, data_width, y_min, y_max)
 
     # VHDL behavioral code generation
     rom_code = ""
@@ -51,7 +51,7 @@ end {evaluator_name};
 architecture arch_{evaluator_name} of {evaluator_name} is
     
     attribute rom_style : string;
-    type rom_array_t is array (0 to 2**DATA_WIDTH - 1) of STD_LOGIC_VECTOR (DATA_WIDTH - 1 downto 0);
+    type rom_array_t is array (0 to 2**DATA_WIDTH - 1) of STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0);
     constant ROM_VALUES : rom_array_t := (
 {rom_code}
     );
@@ -67,7 +67,110 @@ end arch_{evaluator_name};
 def binary_method(args):
     """ Generate VHDL code for a binary function evaluator """
 
-    return ""
+    # Args check
+    if len(args) != 9:
+        print("Usage: generate_evaluator.py binary <evaluator_name> <function_of_x> <data_width> <x_min> <x_max> <y_min> <y_max> <segment_idx_width> <group_idx_width>")
+        return
+    
+    # Args extraction
+    evaluator_name = args[0]
+    function_of_x = args[1]
+    data_width, x_min, x_max, y_min, y_max, segment_idx_width, group_idx_width = map(int, args[2:9])
+    segment_width = data_width - segment_idx_width
+
+    # Offset table calculation
+    function_calculator = parse_function(function_of_x)
+    offset_table = []
+    delta_x_group = (x_max - x_min) / 2**group_idx_width
+    delta_x_segment = (x_max - x_min) / 2**segment_idx_width
+    for i in range(2**group_idx_width):
+        group_slope = (function_calculator((i + 1) * delta_x_group) - function_calculator(i * delta_x_group)) / delta_x_group
+        offset_table += compute_discrete_output(f"{group_slope}*x", segment_width, 0, delta_x_segment, data_width, 0, y_max - y_min)
+
+    # Input table calculation
+    input_table = compute_discrete_output(function_of_x, segment_idx_width, x_min, x_max, data_width, y_min, y_max)
+
+    # VHDL behavioral code generation
+    offset_code = ""
+    for x_value, y_value in enumerate(offset_table):
+        offset_code += f"\t\t{x_value} => \"{int_to_lsb(y_value, data_width)}\",\n"
+    offset_code += f"\t\tothers => \"{int_to_lsb(0, data_width)}\""
+    input_code = ""
+    for x_value, y_value in enumerate(input_table):
+        input_code += f"\t\t{x_value} => \"{int_to_lsb(y_value, data_width)}\",\n"
+    input_code += f"\t\tothers => \"{int_to_lsb(0, data_width)}\""
+
+    # VHDL complete code generation
+    return f"""
+-------------------------------------
+-- Engineer: Florian Delhon
+-- Target: PYNQ-Z2
+-- Module Name: {evaluator_name}
+-- Function: f(x) = {function_of_x}
+-- Evaluator method: Binary
+-- Data width: {data_width} bits
+-- Group index width: {group_idx_width} bits
+-- Segment index width: {segment_idx_width} bits
+-- Range: x in [{x_min};{x_max}[, y in [{y_min};{y_max}[
+-------------------------------------
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+
+entity {evaluator_name} is
+    generic (
+        DATA_WIDTH : positive := {data_width};
+        GROUP_IDX_WIDTH : positive := {group_idx_width};
+        SEGMENT_IDX_WIDTH : positive := {segment_idx_width}
+    );
+    port (
+        input_a : in STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0);
+        result : out STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0)
+    );
+end {evaluator_name};
+
+architecture arch_{evaluator_name} of {evaluator_name} is
+    
+    attribute rom_style : string;
+    signal offset_entry : STD_LOGIC_VECTOR(GROUP_IDX_WIDTH + DATA_WIDTH - SEGMENT_IDX_WIDTH - 1 downto 0);
+    signal offset_value : STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0);
+    signal input_value : STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0);
+    
+    -- Offset table
+    type offset_array_t is array (0 to 2**(GROUP_IDX_WIDTH + DATA_WIDTH - SEGMENT_IDX_WIDTH) - 1) of STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0);
+    constant OFFSET_TABLE : offset_array_t := (
+{offset_code}
+    );
+    attribute rom_style of OFFSET_TABLE : constant is "distributed";
+
+    -- Input table
+    type input_array_t is array (0 to 2**SEGMENT_IDX_WIDTH - 1) of STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0);
+    constant INPUT_TABLE : input_array_t := (
+{input_code}
+    );
+    attribute rom_style of INPUT_TABLE : constant is "distributed";
+    
+begin
+
+    offset_entry <= input_a(DATA_WIDTH - 1 downto DATA_WIDTH - GROUP_IDX_WIDTH) & input_a(DATA_WIDTH - SEGMENT_IDX_WIDTH - 1 downto 0);
+
+    offset_value <= OFFSET_TABLE(to_integer(unsigned(offset_entry)));
+
+    input_value <= INPUT_TABLE(to_integer(unsigned(input_a(DATA_WIDTH - 1 downto DATA_WIDTH - SEGMENT_IDX_WIDTH))));
+
+    adder: process(input_value, offset_value)
+        variable sum : integer := 0;
+    begin
+        sum := to_integer(unsigned(offset_value)) + to_integer(unsigned(input_value));
+        if sum > 2**DATA_WIDTH - 1 then
+            sum := 2**DATA_WIDTH - 1;
+        end if;
+        result <= std_logic_vector(to_unsigned(sum, DATA_WIDTH));
+    end process adder;
+
+end arch_{evaluator_name};
+    """
 
 def unary_method(args):
     """ Generate VHDL code for a unary function evaluator """
@@ -83,7 +186,7 @@ def unary_method(args):
     data_width, x_min, x_max, y_min, y_max = map(int, args[2:7])
 
     # Discrete output calculation
-    y_discrete_values = compute_discrete_output(function_of_x, data_width, x_min, x_max, y_min, y_max)
+    y_discrete_values = compute_discrete_output(function_of_x, data_width, x_min, x_max, data_width, y_min, y_max)
 
     # Computing unary core routing logic
     unary_core_array = [[0 for _ in range(2**data_width)] for _ in range(2**data_width)]
