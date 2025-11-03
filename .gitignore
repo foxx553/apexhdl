@@ -1,3 +1,5 @@
 **/__pycache__/**
 *.cf
 **/sources/**
+*.o
+*.exe
