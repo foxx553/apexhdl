@@ -127,7 +127,7 @@ architecture arch_tb_{evaluator_name} of tb_{evaluator_name} is
 
     component {evaluator_name}
         generic (
-            DATA_WIDTH : positive := {data_width}{f";\n\t\t\tSEGMENT_IDX_WIDTH : positive := {segment_idx_width}" if evaluator_type == "binary" or evaluator_type == "hybrid" else ""}{f";\n\t\t\GROUP_IDX_WIDTH : positive := {group_idx_width}" if evaluator_type == "binary" else ""}
+            DATA_WIDTH : positive := {data_width}{f";\n\t\t\tSEGMENT_IDX_WIDTH : positive := {segment_idx_width}" if evaluator_type == "binary" or evaluator_type == "hybrid" else ""}{f";\n\t\t\tGROUP_IDX_WIDTH : positive := {group_idx_width}" if evaluator_type == "binary" else ""}
         );
         port (
             input_a : in STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0);
@@ -141,7 +141,7 @@ begin
 
     uut: {evaluator_name}
         generic map (
-            DATA_WIDTH => DATA_WIDTH{",\n\t\t\tSEGMENT_IDX_WIDTH => SEGMENT_IDX_WIDTH" if evaluator_type == "binary" or evaluator_type == "hybrid" else ""}{",\n\t\t\GROUP_IDX_WIDTH => GROUP_IDX_WIDTH" if evaluator_type == "binary" else ""}
+            DATA_WIDTH => DATA_WIDTH{",\n\t\t\tSEGMENT_IDX_WIDTH => SEGMENT_IDX_WIDTH" if evaluator_type == "binary" or evaluator_type == "hybrid" else ""}{",\n\t\t\tGROUP_IDX_WIDTH => GROUP_IDX_WIDTH" if evaluator_type == "binary" else ""}
         )
         port map (
             input_a => input_a,
