@@ -26,7 +26,7 @@ def rom_method(args):
     # VHDL complete code generation
     return f"""
 -------------------------------------
--- Engineer: Florian Delhon
+-- Engineers: Florian Delhon, Kevin Peymani
 -- Target: PYNQ-Z2
 -- Module Name: {evaluator_name}
 -- Function: f(x) = {function_of_x}
@@ -105,7 +105,7 @@ def binary_method(args):
     # VHDL complete code generation
     return f"""
 -------------------------------------
--- Engineer: Florian Delhon
+-- Engineers: Florian Delhon, Kevin Peymani
 -- Target: PYNQ-Z2
 -- Module Name: {evaluator_name}
 -- Function: f(x) = {function_of_x}
@@ -220,7 +220,7 @@ def unary_method(args):
     # VHDL complete code generation
     return f"""
 -------------------------------------
--- Engineer: Florian Delhon
+-- Engineers: Florian Delhon, Kevin Peymani
 -- Target: PYNQ-Z2
 -- Module Name: {evaluator_name}
 -- Function: f(x) = {function_of_x}
@@ -363,7 +363,7 @@ def hybrid_method(args):
     # VHDL complete code generation
     return f"""
 -------------------------------------
--- Engineer: Florian Delhon
+-- Engineers: Florian Delhon, Kevin Peymani
 -- Target: PYNQ-Z2
 -- Module Name: {evaluator_name}
 -- Function: f(x) = {function_of_x}

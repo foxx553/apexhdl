@@ -104,7 +104,7 @@ def generate_testbench(evaluator_type, args):
 
     return f"""
 -------------------------------------
--- Engineer: Florian Delhon
+-- Engineers: Florian Delhon, Kevin Peymani
 -- Target: PYNQ-Z2
 -- Module Name: tb_{evaluator_name}
 -- Description: Testbench for module {evaluator_name}
