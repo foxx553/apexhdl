@@ -1,11 +1,11 @@
-from utils import compute_discrete_output, compute_relative_discrete_output, int_to_lsb, parse_function
+from .utils import compute_discrete_output, compute_relative_discrete_output, int_to_lsb, parse_function
 import math
 
 def rom_method(args):
     """ Generate VHDL code for a ROM function evaluator """
 
     # Args check
-    if len(args) != 7:
+    if len(args) != 7 and len(args) != 8:
         print("Usage: generate_evaluator.py rom <evaluator_name> <function_of_x> <data_width> <x_min> <x_max> <y_min> <y_max>")
         return
     
@@ -33,7 +33,7 @@ def rom_method(args):
 -- Function: f(x) = {function_of_x}
 -- Evaluator method: ROM
 -- Data width: {data_width} bits
--- Range: x in [{x_min};{x_max}[, y in [{y_min};{y_max}[
+-- Range: x in [{x_min}; {x_max}[, y in [{y_min}; {y_max}[
 -------------------------------------
 
 library IEEE;
@@ -70,7 +70,7 @@ def binary_method(args):
     """ Generate VHDL code for a binary function evaluator """
 
     # Args check
-    if len(args) != 9:
+    if len(args) != 9 and len(args) != 10:
         print("Usage: generate_evaluator.py binary <evaluator_name> <function_of_x> <data_width> <x_min> <x_max> <y_min> <y_max> <segment_idx_width> <group_idx_width>")
         return
     
@@ -114,7 +114,7 @@ def binary_method(args):
 -- Data width: {data_width} bits
 -- Group index width: {group_idx_width} bits
 -- Segment index width: {segment_idx_width} bits
--- Range: x in [{x_min};{x_max}[, y in [{y_min};{y_max}[
+-- Range: x in [{x_min}; {x_max}[, y in [{y_min}; {y_max}[
 -------------------------------------
 
 library IEEE;
@@ -181,7 +181,7 @@ def unary_method(args):
     """ Generate VHDL code for a unary function evaluator """
 
     # Args check
-    if len(args) != 7:
+    if len(args) != 7 and len(args) != 8:
         print("Usage: generate_evaluator.py unary <evaluator_name> <function_of_x> <data_width> <x_min> <x_max> <y_min> <y_max>")
         return
     
@@ -228,7 +228,7 @@ def unary_method(args):
 -- Function: f(x) = {function_of_x}
 -- Evaluator method: Unary
 -- Data width: {data_width} bits
--- Range: x in [{x_min};{x_max}[, y in [{y_min};{y_max}[
+-- Range: x in [{x_min}; {x_max}[, y in [{y_min}; {y_max}[
 -------------------------------------
 
 library IEEE;
@@ -291,7 +291,7 @@ def hybrid_method(args):
     """ Generate VHDL code for a hybrid binary/unary function evaluator """
 
     # Args check
-    if len(args) != 8:
+    if len(args) != 8 and len(args) != 9:
         print("Usage: generate_evaluator.py hybrid <evaluator_name> <function_of_x> <data_width> <x_min> <x_max> <y_min> <y_max> <segment_idx_width>")
         return
     
@@ -372,7 +372,7 @@ def hybrid_method(args):
 -- Evaluator method: Hybrid
 -- Data width: {data_width} bits
 -- Segment index width: {segment_idx_width} bits
--- Range: x in [{x_min};{x_max}[, y in [{y_min};{y_max}[
+-- Range: x in [{x_min}; {x_max}[, y in [{y_min}; {y_max}[
 -------------------------------------
 
 library IEEE;

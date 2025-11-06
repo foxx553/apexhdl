@@ -1,5 +1,11 @@
+# Folders
 **/__pycache__/**
+**/output/**
+**/.Xil/**
+
+# Files
+*.log
 *.cf
-**/sources/**
 *.o
 *.exe
+*.jou

@@ -1,4 +1,4 @@
-from utils import parse_function, clamp_nearest
+from .utils import parse_function, clamp_nearest
 import matplotlib.pyplot as plt
 import numpy as np
 import subprocess
@@ -12,9 +12,9 @@ def run_testbench(evaluator_name):
         os.remove("./work-obj08.cf")
     
     # Run GHDL simulation
-    subprocess.run(["ghdl", "-a", "--std=08", f"../sources/{evaluator_name}/{evaluator_name}.vhd", f"../sources/{evaluator_name}/tb_{evaluator_name}.vhd"], check=True)
-    subprocess.run(["ghdl", "-e", "--std=08", f"tb_{evaluator_name}"], check=True)
-    subprocess.run(["ghdl", "-r", "--std=08", f"tb_{evaluator_name}"], check=True)
+    subprocess.run(["ghdl", "-a", "--std=08", f"../output/{evaluator_name}/vhdl/{evaluator_name}.vhd", f"../output/{evaluator_name}/vhdl/tb_{evaluator_name}.vhd"], capture_output=True, check=True)
+    subprocess.run(["ghdl", "-e", "--std=08", f"tb_{evaluator_name}"], capture_output=True, check=True)
+    subprocess.run(["ghdl", "-r", "--std=08", f"tb_{evaluator_name}"], capture_output=True, check=True)
 
 def plot_comparison(args):
     """ Plot evaluator results """
@@ -26,7 +26,7 @@ def plot_comparison(args):
     x_min, x_max, y_min, y_max = map(float, args[3:7])
 
     # Validation parameters
-    results_file_path = f"../sources/{evaluator_name}/results_{evaluator_name}.txt"
+    results_file_path = f"../output/{evaluator_name}/tb/results_{evaluator_name}.txt"
     math_function = parse_function(function_str)
     x_step = (x_max - x_min) / (2 ** data_width)
     y_step = (y_max - y_min) / (2 ** data_width)
@@ -59,7 +59,7 @@ def plot_comparison(args):
     plt.xlabel('x')
     plt.ylabel('Values')
     plt.grid(True)
-    plt.savefig(f"../sources/{evaluator_name}/plot_experimental_{evaluator_name}.png")
+    plt.savefig(f"../output/{evaluator_name}/tb/plot_experimental_{evaluator_name}.png")
 
     # Computing and saving theoretical plot
     plt.figure(figsize=(20, 10))
@@ -68,7 +68,7 @@ def plot_comparison(args):
     plt.xlabel('x')
     plt.ylabel('Values')
     plt.grid(True)
-    plt.savefig(f"../sources/{evaluator_name}/plot_theoretical_{evaluator_name}.png")
+    plt.savefig(f"../output/{evaluator_name}/tb/plot_theoretical_{evaluator_name}.png")
 
     # Computing and saving comparison plot
     plt.figure(figsize=(20, 10))
@@ -79,7 +79,7 @@ def plot_comparison(args):
     plt.ylabel('Values')
     plt.grid(True)
     plt.legend()
-    plt.savefig(f"../sources/{evaluator_name}/plot_comparison_{evaluator_name}.png")
+    plt.savefig(f"../output/{evaluator_name}/tb/plot_comparison_{evaluator_name}.png")
 
     # Computing and saving absolute error plot
     plt.figure(figsize=(20, 10))
@@ -88,7 +88,7 @@ def plot_comparison(args):
     plt.xlabel('x')
     plt.ylabel('Absolute error')
     plt.grid(True)
-    plt.savefig(f"../sources/{evaluator_name}/plot_error_{evaluator_name}.png")
+    plt.savefig(f"../output/{evaluator_name}/tb/plot_error_{evaluator_name}.png")
 
 def generate_testbench(evaluator_type, args):
     """ Generates an exhaustive testbench for validation """
@@ -120,28 +120,16 @@ end tb_{evaluator_name};
 
 architecture arch_tb_{evaluator_name} of tb_{evaluator_name} is
 
-    constant DATA_WIDTH : positive := {data_width};{f"\n\tconstant SEGMENT_IDX_WIDTH : positive := {segment_idx_width};" if evaluator_type == "binary" or evaluator_type == "hybrid" else ""}{f"\n\tconstant GROUP_IDX_WIDTH : positive := {group_idx_width};" if evaluator_type == "binary" else ""}
+    signal input_a : STD_LOGIC_VECTOR({data_width - 1} downto 0);
+    signal result  : STD_LOGIC_VECTOR({data_width - 1} downto 0);
 
-    signal input_a : STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0);
-    signal result  : STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0);
-
-    component {evaluator_name}
-        generic (
-            DATA_WIDTH : positive := {data_width}{f";\n\t\t\tSEGMENT_IDX_WIDTH : positive := {segment_idx_width}" if evaluator_type == "binary" or evaluator_type == "hybrid" else ""}{f";\n\t\t\tGROUP_IDX_WIDTH : positive := {group_idx_width}" if evaluator_type == "binary" else ""}
-        );
-        port (
-            input_a : in STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0);
-            result  : out STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0)
-        );
-    end component;
-
-    file output_file : TEXT open WRITE_MODE is "../sources/{evaluator_name}/results_{evaluator_name}.txt";
+    file output_file : TEXT open WRITE_MODE is "../output/{evaluator_name}/tb/results_{evaluator_name}.txt";
 
 begin
 
-    uut: {evaluator_name}
+    uut : entity work.{evaluator_name}
         generic map (
-            DATA_WIDTH => DATA_WIDTH{",\n\t\t\tSEGMENT_IDX_WIDTH => SEGMENT_IDX_WIDTH" if evaluator_type == "binary" or evaluator_type == "hybrid" else ""}{",\n\t\t\tGROUP_IDX_WIDTH => GROUP_IDX_WIDTH" if evaluator_type == "binary" else ""}
+            DATA_WIDTH => {data_width}{f",\n\t\t\tSEGMENT_IDX_WIDTH => {segment_idx_width}" if evaluator_type == "binary" or evaluator_type == "hybrid" else ""}{f",\n\t\t\tGROUP_IDX_WIDTH => {group_idx_width}" if evaluator_type == "binary" else ""}
         )
         port map (
             input_a => input_a,
@@ -150,10 +138,10 @@ begin
 
     tb_proc: process
         variable line_out : line;
-        variable input_str, result_str : string(1 to DATA_WIDTH);
+        variable input_str, result_str : string(1 to {data_width});
     begin
-        for i in 0 to 2**DATA_WIDTH - 1 loop
-            input_a <= std_logic_vector(to_unsigned(i, DATA_WIDTH));
+        for i in 0 to 2**{data_width} - 1 loop
+            input_a <= std_logic_vector(to_unsigned(i, {data_width}));
 
             wait for 10 ns;
 
