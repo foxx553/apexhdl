@@ -12,7 +12,8 @@ def rom_method(args):
     # Args extraction
     evaluator_name = args[0]
     function_of_x = args[1]
-    data_width, x_min, x_max, y_min, y_max = map(int, args[2:7])
+    data_width = int(args[2])
+    x_min, x_max, y_min, y_max = map(float, args[3:7])
 
     # Discrete output calculation
     y_discrete_values = compute_discrete_output(function_of_x, data_width, x_min, x_max, data_width, y_min, y_max)
@@ -187,7 +188,8 @@ def unary_method(args):
     # Args extraction
     evaluator_name = args[0]
     function_of_x = args[1]
-    data_width, x_min, x_max, y_min, y_max = map(int, args[2:7])
+    data_width = args[2]
+    x_min, x_max, y_min, y_max = map(float, args[3:7])
 
     # Discrete output calculation
     y_discrete_values = compute_discrete_output(function_of_x, data_width, x_min, x_max, data_width, y_min, y_max)
