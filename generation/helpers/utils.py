@@ -1,5 +1,36 @@
 from sympy import symbols, sympify, lambdify
 import numpy as np
+import os
+import zipfile
+
+def extract_hwh_from_xsa(xsa_file_path, hwh_file_name):
+    """ Extract HWH file from XSA archive """
+
+    output_dir = os.path.dirname(xsa_file_path)
+    
+    with zipfile.ZipFile(xsa_file_path, 'r') as xsa_zip:
+        
+        # Finding HWH file among XSA files
+        file_list = xsa_zip.namelist()
+        hwh_files = [file for file in file_list if file.endswith('.hwh')]
+        
+        # Extract HWH file
+        filename = hwh_files[0]
+        xsa_zip.extract(filename, output_dir)
+        
+        # Rename the extracted file to the desired name
+        extracted_file_path = os.path.join(output_dir, filename)
+        final_file_path = os.path.join(output_dir, hwh_file_name)
+        
+        # Remove target if it exists, then rename
+        if os.path.exists(final_file_path):
+            os.remove(final_file_path)
+        os.rename(extracted_file_path, final_file_path)
+    
+    # Remove the XSA archive
+    os.remove(xsa_file_path)
+    
+    return
 
 def parse_function(function_str):
     """ Parse a function of x string """
