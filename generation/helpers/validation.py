@@ -44,13 +44,15 @@ def plot_comparison(args):
     x_values = np.arange(x_min, x_max, 0.001)
     y_evaluator = []
     y_theoretical = []
-    absolute_error = []
+    absolute_errors = []
     for x_value in x_values:
         theoretical = math_function(x_value)
         evaluator = y_min + raw_y_values[clamp_nearest(x_value, x_min, x_step, data_width)] * y_step
         y_theoretical.append(theoretical)
         y_evaluator.append(evaluator)
-        absolute_error.append(abs(theoretical - evaluator))
+        absolute_errors.append(abs(theoretical - evaluator))
+    mean_error = np.mean(absolute_errors)
+    max_error = np.max(absolute_errors)
 
     # Computing and saving experimental plot
     plt.figure(figsize=(20, 10))
@@ -78,16 +80,19 @@ def plot_comparison(args):
     plt.xlabel('x')
     plt.ylabel('Values')
     plt.grid(True)
-    plt.legend()
+    plt.legend(loc='upper center', bbox_to_anchor=(1, 0.5))
     plt.savefig(f"../output/{evaluator_name}/sim/plot_comparison_{evaluator_name}.png")
 
     # Computing and saving absolute error plot
     plt.figure(figsize=(20, 10))
-    plt.plot(x_values, absolute_error, color='blue', linewidth=1)
+    plt.plot(x_values, absolute_errors, color='blue', linewidth=1, label="Absolute errors")
+    plt.plot(x_values, [max_error for _ in range(len(x_values))], color='red', linewidth=2, label=f"Max error = {"{:.3g}".format(max_error)}")
+    plt.plot(x_values, [mean_error for _ in range(len(x_values))], color='orange', linewidth=2, label=f"Mean error = {"{:.3g}".format(mean_error)}")
     plt.title('Absolute error of evaluator values')
     plt.xlabel('x')
     plt.ylabel('Absolute error')
     plt.grid(True)
+    plt.legend(loc='upper center', bbox_to_anchor=(1, 0.5))
     plt.savefig(f"../output/{evaluator_name}/sim/plot_error_{evaluator_name}.png")
 
 def generate_testbench(evaluator_type, args):

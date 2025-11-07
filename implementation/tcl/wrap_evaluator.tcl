@@ -751,16 +751,11 @@ proc create_root_design { parentCell gpio_width rtl_module_name  } {
   # Create instance: rst_ps7_0_100M, and set properties
   set rst_ps7_0_100M [ create_bd_cell -type ip -vlnv xilinx.com:ip:proc_sys_reset:5.0 rst_ps7_0_100M ]
 
-# Use evaluator VHDL module as RTL block
-puts "INFO: Attempting to create BD cell for module: $rtl_module_name"
+  # Double-check compile order
+  update_compile_order -fileset sources_1
 
-# Double-check compile order
-update_compile_order -fileset sources_1
-
-# Create the module reference - this should now work with automatic hierarchy update
-create_bd_cell -type module -reference $rtl_module_name rtl_module
-
-puts "INFO: Successfully created BD cell for $rtl_module_name"
+  # Create the module reference - this should now work with automatic hierarchy update
+  create_bd_cell -type module -reference $rtl_module_name rtl_module
 
   # Create interface connections
   connect_bd_intf_net -intf_net processing_system7_0_DDR [get_bd_intf_ports DDR] [get_bd_intf_pins processing_system7_0/DDR]
