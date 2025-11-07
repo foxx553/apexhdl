@@ -25,6 +25,12 @@ def main():
               
 * General usage: 
     > generate_evaluator.py <method> <evaluator_name> [args...]
+    > evaluator_name : The name you want to give to the generated output folder
+    > function_of_x : Math function (numpy format)
+    > data_width : Number of bits used to evaluate the function
+    > x/y_min/max : Function bounds
+    > segment_idx_width : Number of bits used to represent a segment (binary and hybrid only)
+    > group_idx_width: Number of bits used to express the number of groups (binary only)
               
 * Specific usage: Depending on <method>
     > rom: generate_evaluator.py rom <evaluator_name> <function_of_x> <data_width> <x_min> <x_max> <y_min> <y_max>
