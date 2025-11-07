@@ -1,8 +1,11 @@
 from helpers.generation import evaluation_methods_map
 from helpers.validation import run_testbench, plot_comparison, generate_testbench
 from helpers.analysis import generate_top, run_vivado_analysis
+from helpers.implementation import run_vivado_implementation, generate_notebook
+from helpers.utils import extract_hwh_from_xsa
 import sys
 import os
+import nbformat as nbf
 
 def main():
 
@@ -17,11 +20,11 @@ def main():
     > [To be done] Generates full design on Vivado, providing ready-to-use bitstream, hardware-handoff & notebook files for PYNQ-Z2 framework
     
 * Notes:
-    > Simulation requires lightweight GHDL installation
-    > Reports & implementation require Vivado installation and board files for PYNQ-Z2 (xc7z020clg400-1)
-    > Real test requires PYNQ-Z2 board, and an SD card flashed with PYNQ-Z2 boot image
+    > 1) Simulation requires lightweight GHDL installation
+    > 2) Reports & implementation require Vivado installation and board files for PYNQ-Z2 (xc7z020clg400-1)
+    > 3) Real test requires PYNQ-Z2 board, and an SD card flashed with PYNQ-Z2 boot image
+    > Stopping after steps 1), 2) or 3) can be done by using respectively --sim, --rpt, --bit (default value)
     > For documentation & resources about PYNQ-Z2, see https://www.tulembedded.com/FPGA/ProductsPYNQ-Z2.html
-    /!\\ If only GHDL is available, please specify --simulation-only at the end of the command to run only the simulation 
               
 * General usage: 
     > generate_evaluator.py <method> <evaluator_name> [args...]
@@ -40,13 +43,17 @@ def main():
     evaluator_name = sys.argv[2]
     data_width = sys.argv[4]
     evaluation_method_args = sys.argv[2:]
-    simulation_only = sys.argv[len(sys.argv) - 1] == "--simulation-only"
-    number_of_steps = 5 if simulation_only else 7
+    last_arg = sys.argv[len(sys.argv) - 1]
+    step_map, step_count = ["--sim", "--rpt", "--bit"], [5, 7, 8]
+    step_specifier = 2 if last_arg not in step_map else step_map.index(last_arg)
+    number_of_steps = step_count[step_specifier]
     evaluation_method = evaluation_methods_map.get(evaluator_type)
     base_path = f"../output/{evaluator_name}"
-    subdirs = ["vhdl", "tb"]
-    if not simulation_only:
-        subdirs.append(["rpt"])
+    subdirs = ["vhdl", "sim"]
+    if step_specifier > 0:
+        subdirs.append("rpt")
+        if step_specifier > 1:
+            subdirs.append("bit")
     for subdir in subdirs:
         dir_path = os.path.join(base_path, subdir)
         os.makedirs(dir_path, exist_ok=True)
@@ -77,9 +84,9 @@ def main():
     plot_comparison(evaluation_method_args)
     print(f"[5/{number_of_steps}] Finished plotting comparison results")
 
-    # --SIMULATION-ONLY barrier
-    if simulation_only:
-        print(f"[Completed] Successfully generated simulation-only files in folder ../output/{evaluator_name}")
+    # --sim barrier
+    if step_specifier == 0:
+        print(f"[Completed] Successfully generated sim files in folder ../output/{evaluator_name}")
         return
 
     # Top-module generation
@@ -87,12 +94,26 @@ def main():
     tb_vhdl_code = generate_top(evaluator_type, evaluation_method_args)
     with open(f"../output/{evaluator_name}/vhdl/top_{evaluator_name}.vhd", "w") as file:
         file.write(tb_vhdl_code)
-    print(f"[6/{number_of_steps}] = Generated top module for function evaluator")
+    print(f"[6/{number_of_steps}] Generated top module for function evaluator")
 
     # Vivado reporting of function evaluator
-    print("Running analysis with Vivado...")
-    run_vivado_analysis(evaluator_name, data_width)
-    print(f"[7/{number_of_steps}] = Finished running Vivado analysis")
+    print("Running evaluator analysis with Vivado...")
+    run_vivado_analysis(evaluator_name)
+    print(f"[7/{number_of_steps}] Finished running Vivado analysis")
+
+    # --rpt barrier
+    if step_specifier == 1:
+        print(f"[Completed] Successfully generated sim & rpt files in folder ../output/{evaluator_name}")
+        return
+
+    # Vivado wrapping é implementation of function evaluator
+    print("Running evaluator wrapping & implementation with Vivado...")
+    evaluator_notebook = generate_notebook(evaluation_method_args)
+    with open(f"../output/{evaluator_name}/bit/{evaluator_name}.ipynb", "w") as file:
+        nbf.write(evaluator_notebook, file)
+    run_vivado_implementation(evaluator_name, data_width)
+    extract_hwh_from_xsa(f"../output/{evaluator_name}/bit/{evaluator_name}.xsa", f"{evaluator_name}.hwh")
+    print(f"[8/{number_of_steps}] Finished running Vivado wrapping & implementation")
 
     print(f"[Completed] Successfully generated all files in folder ../output/{evaluator_name}")
 

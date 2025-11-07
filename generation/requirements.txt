@@ -1,3 +1,7 @@
-matplotlib>=3.10.1
-numpy>=2.2.2
-sympy>=1.14.0
+matplotlib
+nbformat
+numpy
+shutil
+sympy
+utils
+zipfile

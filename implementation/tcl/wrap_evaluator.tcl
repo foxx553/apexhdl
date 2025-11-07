@@ -1,10 +1,4 @@
 ################################################################
-# Set gpio_width to match the evaluator width
-################################################################
-
-set gpio_width 8
-
-################################################################
 # This is a generated script
 # Though there are limitations about the generated script,
 # the main purpose of this utility is to make learning
@@ -43,20 +37,6 @@ if { [string first $scripts_vivado_version $current_vivado_version] == -1 } {
 ################################################################
 # START
 ################################################################
-
-# To test this script, run the following commands from Vivado Tcl console:
-# source complete_block_script.tcl
-
-# If there is no project opened, this script will create a
-# project, but make sure you do not have an existing project
-# <./myproj/project_1.xpr> in the current working folder.
-
-set list_projs [get_projects -quiet]
-if { $list_projs eq "" } {
-   create_project project_1 myproj -part xc7z020clg400-1
-   set_property BOARD_PART tul.com.tw:pynq-z2:part0:1.0 [current_project]
-}
-
 
 # CHANGE DESIGN NAME HERE
 variable design_name
@@ -169,7 +149,7 @@ if { $bCheckIPsPassed != 1 } {
 
 # Procedure to create entire design; Provide argument to make
 # procedure reusable. If parentCell is "", will use root.
-proc create_root_design { parentCell gpio_width } {
+proc create_root_design { parentCell gpio_width rtl_module_name  } {
 
   variable script_folder
   variable design_name
@@ -771,9 +751,16 @@ proc create_root_design { parentCell gpio_width } {
   # Create instance: rst_ps7_0_100M, and set properties
   set rst_ps7_0_100M [ create_bd_cell -type ip -vlnv xilinx.com:ip:proc_sys_reset:5.0 rst_ps7_0_100M ]
 
-  # Use top-level VHDL module as RTL block
-  set rtl_module_name [get_property top [current_fileset]]
-  create_bd_cell -type module -reference $rtl_module_name rtl_module
+# Use evaluator VHDL module as RTL block
+puts "INFO: Attempting to create BD cell for module: $rtl_module_name"
+
+# Double-check compile order
+update_compile_order -fileset sources_1
+
+# Create the module reference - this should now work with automatic hierarchy update
+create_bd_cell -type module -reference $rtl_module_name rtl_module
+
+puts "INFO: Successfully created BD cell for $rtl_module_name"
 
   # Create interface connections
   connect_bd_intf_net -intf_net processing_system7_0_DDR [get_bd_intf_ports DDR] [get_bd_intf_pins processing_system7_0/DDR]
@@ -807,6 +794,6 @@ proc create_root_design { parentCell gpio_width } {
 # MAIN FLOW
 ##################################################################
 
-create_root_design "" $gpio_width
+# create_root_design "" $gpio_width $rtl_module_name
 
 

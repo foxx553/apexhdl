@@ -2,10 +2,16 @@
 **/__pycache__/**
 **/output/**
 **/.Xil/**
+**/.gen/**
+**/.srcs/**
+**/NA/**
 
-# Files
+# Extensions
 *.log
 *.cf
 *.o
 *.exe
 *.jou
+
+# Files
+clockInfo.txt

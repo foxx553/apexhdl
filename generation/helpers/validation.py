@@ -26,7 +26,7 @@ def plot_comparison(args):
     x_min, x_max, y_min, y_max = map(float, args[3:7])
 
     # Validation parameters
-    results_file_path = f"../output/{evaluator_name}/tb/results_{evaluator_name}.txt"
+    results_file_path = f"../output/{evaluator_name}/sim/results_{evaluator_name}.txt"
     math_function = parse_function(function_str)
     x_step = (x_max - x_min) / (2 ** data_width)
     y_step = (y_max - y_min) / (2 ** data_width)
@@ -59,7 +59,7 @@ def plot_comparison(args):
     plt.xlabel('x')
     plt.ylabel('Values')
     plt.grid(True)
-    plt.savefig(f"../output/{evaluator_name}/tb/plot_experimental_{evaluator_name}.png")
+    plt.savefig(f"../output/{evaluator_name}/sim/plot_experimental_{evaluator_name}.png")
 
     # Computing and saving theoretical plot
     plt.figure(figsize=(20, 10))
@@ -68,7 +68,7 @@ def plot_comparison(args):
     plt.xlabel('x')
     plt.ylabel('Values')
     plt.grid(True)
-    plt.savefig(f"../output/{evaluator_name}/tb/plot_theoretical_{evaluator_name}.png")
+    plt.savefig(f"../output/{evaluator_name}/sim/plot_theoretical_{evaluator_name}.png")
 
     # Computing and saving comparison plot
     plt.figure(figsize=(20, 10))
@@ -79,7 +79,7 @@ def plot_comparison(args):
     plt.ylabel('Values')
     plt.grid(True)
     plt.legend()
-    plt.savefig(f"../output/{evaluator_name}/tb/plot_comparison_{evaluator_name}.png")
+    plt.savefig(f"../output/{evaluator_name}/sim/plot_comparison_{evaluator_name}.png")
 
     # Computing and saving absolute error plot
     plt.figure(figsize=(20, 10))
@@ -88,7 +88,7 @@ def plot_comparison(args):
     plt.xlabel('x')
     plt.ylabel('Absolute error')
     plt.grid(True)
-    plt.savefig(f"../output/{evaluator_name}/tb/plot_error_{evaluator_name}.png")
+    plt.savefig(f"../output/{evaluator_name}/sim/plot_error_{evaluator_name}.png")
 
 def generate_testbench(evaluator_type, args):
     """ Generates an exhaustive testbench for validation """
@@ -123,7 +123,7 @@ architecture arch_tb_{evaluator_name} of tb_{evaluator_name} is
     signal input_a : STD_LOGIC_VECTOR({data_width - 1} downto 0);
     signal result  : STD_LOGIC_VECTOR({data_width - 1} downto 0);
 
-    file output_file : TEXT open WRITE_MODE is "../output/{evaluator_name}/tb/results_{evaluator_name}.txt";
+    file output_file : TEXT open WRITE_MODE is "../output/{evaluator_name}/sim/results_{evaluator_name}.txt";
 
 begin
 
