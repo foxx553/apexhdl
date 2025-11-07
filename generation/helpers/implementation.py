@@ -47,7 +47,6 @@ def read_result():
     # Testing cells
     evaluator_notebook.cells.append(new_markdown_cell("# 3. Play with it!"))
     evaluator_notebook.cells.append(new_code_cell(f"""
-import math
 import numpy as np
 
 x_values = np.arange({x_min}, {x_max}, x_step)
