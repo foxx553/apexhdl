@@ -30,18 +30,18 @@ def plot_comparison(args):
     math_function = parse_function(function_str)
     x_step = (x_max - x_min) / (2 ** data_width)
     y_step = (y_max - y_min) / (2 ** data_width)
+    theoretical_step = 0.001
 
     # Read results file
     raw_y_values = []
     with open(results_file_path, 'r') as file:
         for line in file:
-            # Strip whitespace and split by comma
             parts = line.strip().split(',')
             if len(parts) == 2:
                 raw_y_values.append(int(parts[1]))
 
     # Computing theoretical and experimental values
-    x_values = np.arange(x_min, x_max, 0.001)
+    x_values = np.arange(x_min, x_max, theoretical_step)
     y_evaluator = []
     y_theoretical = []
     absolute_errors = []
@@ -53,6 +53,8 @@ def plot_comparison(args):
         absolute_errors.append(abs(theoretical - evaluator))
     mean_error = np.mean(absolute_errors)
     max_error = np.max(absolute_errors)
+    with open(results_file_path, "a") as file:
+        file.write(f"\n{"{:.3g}".format(max_error)},{"{:.3g}".format(mean_error)}")
 
     # Computing and saving experimental plot
     plt.figure(figsize=(20, 10))
