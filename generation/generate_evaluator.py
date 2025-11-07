@@ -17,7 +17,7 @@ def main():
     > Generates a testbench for VHDL module validation
     > Runs the testbench using GHDL & plots the comparison with theoretical results
     > Generates full report on timing/resources/power using Vivado, for PYNQ-Z2 board
-    > [To be done] Generates full design on Vivado, providing ready-to-use bitstream, hardware-handoff & notebook files for PYNQ-Z2 framework
+    > Generates full design on Vivado, providing ready-to-use bitstream, hardware-handoff & notebook files for PYNQ-Z2 framework
     
 * Notes:
     > 1) Simulation requires lightweight GHDL installation
