@@ -1,7 +1,4 @@
 matplotlib
 nbformat
 numpy
-shutil
 sympy
-utils
-zipfile
