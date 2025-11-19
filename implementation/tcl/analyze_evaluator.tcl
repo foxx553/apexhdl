@@ -9,6 +9,9 @@ add_files ../output/${module_name}/vhdl/${module_name}.vhd
 add_files ../output/${module_name}/vhdl/top_${module_name}.vhd
 add_files ../implementation/xdc/timing_constraints.xdc
 
+# Set-up VHDL-2008
+set_property FILE_TYPE {VHDL 2008} [get_files -filter {FILE_TYPE == VHDL}]
+
 # Set top module
 set_property TOP top_${module_name} [current_fileset]
 

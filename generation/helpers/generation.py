@@ -86,7 +86,7 @@ def binary_method(args):
     delta_x_group = (x_max - x_min) / 2**group_idx_width
     delta_x_segment = (x_max - x_min) / 2**segment_idx_width
     for i in range(2**group_idx_width):
-        delta_y_group = (function_calculator((i + 1) * delta_x_group + x_min) - function_calculator(i * delta_x_group + x_min))
+        delta_y_group = function_calculator((i + 1) * delta_x_group + x_min) - function_calculator(i * delta_x_group + x_min)
         group_slope = delta_y_group / delta_x_group
         offset_table += compute_relative_discrete_output(f"{group_slope}*x", segment_width, 0, delta_x_segment, data_width + 1, y_min - y_max, y_max - y_min, 0)
 
