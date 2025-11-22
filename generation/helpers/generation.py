@@ -1,4 +1,4 @@
-from .utils import compute_discrete_output, compute_relative_discrete_output, int_to_lsb, parse_function
+from .utils import compute_discrete_output, compute_relative_discrete_output, int_to_lsb, parse_function, clamp_nearest
 import math
 
 def rom_method(args):
@@ -80,18 +80,25 @@ def binary_method(args):
     data_width, x_min, x_max, y_min, y_max, segment_idx_width, group_idx_width = int(args[2]), float(args[3]), float(args[4]), float(args[5]), float(args[6]), int(args[7]), int(args[8])
     segment_width = data_width - segment_idx_width
 
-    # Offset table calculation
+    # Offset table and Input table calculations
     function_calculator = parse_function(function_of_x)
     offset_table = []
+    input_table = []
     delta_x_group = (x_max - x_min) / 2**group_idx_width
     delta_x_segment = (x_max - x_min) / 2**segment_idx_width
-    for i in range(2**group_idx_width):
-        delta_y_group = function_calculator((i + 1) * delta_x_group + x_min) - function_calculator(i * delta_x_group + x_min)
+    y_step = (y_max - y_min) / 2**data_width
+    for group_idx in range(2**group_idx_width):
+        delta_y_group = function_calculator((group_idx + 1) * delta_x_group + x_min) - function_calculator(group_idx * delta_x_group + x_min)
         group_slope = delta_y_group / delta_x_group
-        offset_table += compute_relative_discrete_output(f"{group_slope}*x", segment_width, 0, delta_x_segment, data_width + 1, y_min - y_max, y_max - y_min, 0)
+        segment_y_offset = 0
+        offset_table += compute_relative_discrete_output(f"{group_slope}*x", segment_width, 0, delta_x_segment, data_width + 1, y_min - y_max, y_max - y_min, segment_y_offset)
 
-    # Input table calculation
-    input_table = compute_discrete_output(function_of_x, segment_idx_width, x_min, x_max, data_width, y_min, y_max)
+        for segment_idx in range(2**(segment_idx_width-group_idx_width)):
+            x_start_segment = group_idx * delta_x_group + segment_idx * delta_x_segment + x_min
+            y_start_segment = function_calculator(x_start_segment)
+            y_middle_segment = function_calculator(x_start_segment + delta_x_segment / 2)
+            shift = y_middle_segment - (y_start_segment + group_slope*delta_x_segment/2)
+            input_table.append(clamp_nearest(y_start_segment + shift, y_min, y_step, data_width))
 
     # VHDL behavioral code generation
     offset_code = ""

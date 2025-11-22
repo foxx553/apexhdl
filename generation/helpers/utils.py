@@ -48,9 +48,9 @@ def parse_function(function_str):
 def clamp_nearest(value, window_min, window_step, window_bit_width):
     """ Clamp to nearest discrete value """
 
-    float_quotient = (value - window_min) / window_step
-    float_remainder = float_quotient % 1
-    nearest_int = int(float_quotient) if float_remainder < 0.5 else int(float_quotient) + 1
+    nbr_steps_from_min = (value - window_min) / window_step
+    float_remainder = nbr_steps_from_min % 1
+    nearest_int = int(nbr_steps_from_min) if float_remainder < 0.5 else int(nbr_steps_from_min) + 1
     return max(0, min(nearest_int, 2 ** window_bit_width - 1))
 
 def int_to_lsb(n, data_width):
@@ -82,7 +82,6 @@ def compute_relative_discrete_output(function_str, x_data_width, x_min, x_max, y
     
     # Offset it by the bias
     relative_values = [y - clamp_nearest(y_offset, y_min, (y_max - y_min) / (2 ** y_data_width), y_data_width) for y in absolute_values]
-    print(relative_values)
     return relative_values
 
 def compute_unary_routing_logic(x_data_width, y_data_width, y_discrete_values):
