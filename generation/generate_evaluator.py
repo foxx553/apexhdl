@@ -1,7 +1,7 @@
 from helpers.generation import evaluation_methods_map
 from helpers.validation import run_testbench, plot_comparison, generate_testbench
 from helpers.analysis import generate_top, run_vivado_analysis
-from helpers.implementation import run_vivado_implementation, generate_notebook
+from helpers.implementation import run_vivado_implementation, generate_notebook, generate_stream_top
 from helpers.utils import extract_hwh_from_xsa
 import sys
 import os
@@ -25,6 +25,10 @@ def main():
     > 3) Real test requires PYNQ-Z2 board, and an SD card flashed with PYNQ-Z2 boot image
     > Stopping after steps 1), 2) or 3) can be done by using respectively --sim, --rpt, --bit (default value)
     > For documentation & resources about PYNQ-Z2, see https://www.tulembedded.com/FPGA/ProductsPYNQ-Z2.html
+
+* Image processing:
+    > If the evaluator has the data_width, x_min, x_max, y_min, y_max = 8, 0, 256, 0, 256...
+ 		... then the generated notebook will include a snippet to test processing on a grayscale image
               
 * General usage: 
     > generate_evaluator.py <method> <evaluator_name> [args...]
@@ -114,10 +118,13 @@ def main():
 
     # Vivado wrapping é implementation of function evaluator
     print("Running evaluator wrapping & implementation with Vivado...")
+    stream_top = generate_stream_top(evaluator_type, evaluation_method_args)
+    with open(f"../output/{evaluator_name}/vhdl/stream_top_{evaluator_name}.vhd", "w") as file:
+        file.write(stream_top)
     evaluator_notebook = generate_notebook(evaluation_method_args)
     with open(f"../output/{evaluator_name}/bit/{evaluator_name}.ipynb", "w") as file:
         nbf.write(evaluator_notebook, file)
-    run_vivado_implementation(evaluator_name, data_width)
+    run_vivado_implementation(evaluator_name)
     extract_hwh_from_xsa(f"../output/{evaluator_name}/bit/{evaluator_name}.xsa", f"{evaluator_name}.hwh")
     print(f"[8/{number_of_steps}] Finished running Vivado wrapping & implementation")
 
