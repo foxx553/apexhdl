@@ -18,32 +18,27 @@ def main():
     > Runs the testbench using GHDL & plots the comparison with theoretical results
     > Generates full report on timing/resources/power using Vivado, for PYNQ-Z2 board
     > Generates full design on Vivado, providing ready-to-use bitstream, hardware-handoff & notebook files for PYNQ-Z2 framework
-    
-* Notes:
+              
+* Manual: 
+    > generate_evaluator.py <method> <evaluator_name> <function_of_x> <data_width> <x_min> <x_max> <y_min> <y_max> [<segment_idx_width> <group_idx_width>]
+    > method: rom, binary, unary or hybrid
+    > evaluator_name: The name you want to give to the generated output folder
+    > function_of_x: Math function (numpy format)
+    > data_width: Number of bits used to evaluate the function
+    > x/y_min/max: Function bounds
+    > segment_idx_width (if method == binary or hybrid): Number of bits used to represent a segment
+    > group_idx_width (if method == binary): Number of bits used to express the number of groups
+
+* Note 1 - Tools:
     > 1) Simulation requires lightweight GHDL installation
     > 2) Reports & implementation require Vivado installation and board files for PYNQ-Z2 (xc7z020clg400-1)
     > 3) Real test requires PYNQ-Z2 board, and an SD card flashed with PYNQ-Z2 boot image
     > Stopping after steps 1), 2) or 3) can be done by using respectively --sim, --rpt, --bit (default value)
     > For documentation & resources about PYNQ-Z2, see https://www.tulembedded.com/FPGA/ProductsPYNQ-Z2.html
 
-* Image processing:
+* Note 2 - Image processing:
     > If the evaluator has the data_width, x_min, x_max, y_min, y_max = 8, 0, 256, 0, 256...
  		... then the generated notebook will include a snippet to test processing on a grayscale image
-              
-* General usage: 
-    > generate_evaluator.py <method> <evaluator_name> [args...]
-    > evaluator_name : The name you want to give to the generated output folder
-    > function_of_x : Math function (numpy format)
-    > data_width : Number of bits used to evaluate the function
-    > x/y_min/max : Function bounds
-    > segment_idx_width : Number of bits used to represent a segment (binary and hybrid only)
-    > group_idx_width: Number of bits used to express the number of groups (binary only)
-              
-* Specific usage: Depending on <method>
-    > rom: generate_evaluator.py rom <evaluator_name> <function_of_x> <data_width> <x_min> <x_max> <y_min> <y_max>
-    > binary: generate_evaluator.py binary <evaluator_name> <function_of_x> <data_width> <x_min> <x_max> <y_min> <y_max> <segment_idx_width> <group_idx_width>
-    > unary: generate_evaluator.py unary <evaluator_name> <function_of_x> <data_width> <x_min> <x_max> <y_min> <y_max>
-    > hybrid: generate_evaluator.py hybrid <evaluator_name> <function_of_x> <data_width> <x_min> <x_max> <y_min> <y_max> <segment_idx_width>
 """)
         return
 
