@@ -33,7 +33,7 @@ def main():
     > 1) Simulation requires lightweight GHDL installation
     > 2) Reports & implementation require Vivado installation and board files for PYNQ-Z2 (xc7z020clg400-1)
     > 3) Real test requires PYNQ-Z2 board, and an SD card flashed with PYNQ-Z2 boot image
-    > Stopping after steps 1), 2) or 3) can be done by using respectively --sim, --rpt, --bit (default value)
+    > Stopping after steps 1), 2) or 3) can be done by using respectively --sim (default value), --rpt, --bit
     > For documentation & resources about PYNQ-Z2, see https://www.tulembedded.com/FPGA/ProductsPYNQ-Z2.html
 
 * Note 2 - Image processing:
@@ -50,7 +50,7 @@ def main():
     evaluation_method_args = sys.argv[2:]
     last_arg = sys.argv[len(sys.argv) - 1]
     step_map, step_count = ["--sim", "--rpt", "--bit"], [5, 7, 8]
-    step_specifier = 2 if last_arg not in step_map else step_map.index(last_arg)
+    step_specifier = 0 if last_arg not in step_map else step_map.index(last_arg)
     number_of_steps = step_count[step_specifier]
     evaluation_method = evaluation_methods_map.get(evaluator_type)
     base_path = f"../output/{evaluator_name}"
