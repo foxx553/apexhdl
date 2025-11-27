@@ -6,6 +6,7 @@ from helpers.utils import extract_hwh_from_xsa
 import sys
 import os
 import nbformat as nbf
+import time
 
 def main():
 
@@ -33,7 +34,7 @@ def main():
     > 1) Simulation requires lightweight GHDL installation
     > 2) Reports & implementation require Vivado installation and board files for PYNQ-Z2 (xc7z020clg400-1)
     > 3) Real test requires PYNQ-Z2 board, and an SD card flashed with PYNQ-Z2 boot image
-    > Stopping after steps 1), 2) or 3) can be done by using respectively --sim (default value), --rpt, --bit
+    > Stopping after steps 1), 2) or 3) can be done by using respectively --sim (default value), --rpt (or --rpt-synth to get only post-synthesis utilization report), --bit
     > For documentation & resources about PYNQ-Z2, see https://www.tulembedded.com/FPGA/ProductsPYNQ-Z2.html
 
 * Note 2 - Image processing:
@@ -42,6 +43,8 @@ def main():
 """)
         return
 
+    start = time.time()
+    
     # Args extraction and folder creation
     print("Extracting evaluator parameters & creating directories...")
     evaluator_type = sys.argv[1]
@@ -49,7 +52,7 @@ def main():
     data_width = sys.argv[4]
     evaluation_method_args = sys.argv[2:]
     last_arg = sys.argv[len(sys.argv) - 1]
-    step_map, step_count = ["--sim", "--rpt", "--bit"], [5, 7, 8]
+    step_map, step_count = ["--sim", "--rpt-synth", "--rpt", "--bit"], [5, 7, 8]
     step_specifier = 0 if last_arg not in step_map else step_map.index(last_arg)
     number_of_steps = step_count[step_specifier]
     evaluation_method = evaluation_methods_map.get(evaluator_type)
@@ -91,7 +94,8 @@ def main():
 
     # --sim barrier
     if step_specifier == 0:
-        print(f"[Completed] Successfully generated sim files in folder ../output/{evaluator_name}")
+        end = time.time()
+        print(f"[Completed] Successfully generated sim files in folder ../output/{evaluator_name} after {end - start} seconds")
         return
 
     # Top-module generation
@@ -103,12 +107,13 @@ def main():
 
     # Vivado reporting of function evaluator
     print("Running evaluator analysis with Vivado...")
-    run_vivado_analysis(evaluator_name)
+    run_vivado_analysis(evaluator_name, "synth" if step_specifier == 1 else "impl")
     print(f"[7/{number_of_steps}] Finished running Vivado analysis")
 
     # --rpt barrier
-    if step_specifier == 1:
-        print(f"[Completed] Successfully generated sim & rpt files in folder ../output/{evaluator_name}")
+    if step_specifier == 1 or step_specifier == 2:
+        end = time.time()
+        print(f"[Completed] Successfully generated sim & rpt files in folder ../output/{evaluator_name} after {end - start} seconds")
         return
 
     # Vivado wrapping é implementation of function evaluator
@@ -122,8 +127,10 @@ def main():
     run_vivado_implementation(evaluator_name)
     extract_hwh_from_xsa(f"../output/{evaluator_name}/bit/{evaluator_name}.xsa", f"{evaluator_name}.hwh")
     print(f"[8/{number_of_steps}] Finished running Vivado wrapping & implementation")
+    
+    end = time.time()
 
-    print(f"[Completed] Successfully generated all files in folder ../output/{evaluator_name}")
+    print(f"[Completed] Successfully generated all files in folder ../output/{evaluator_name} after {end - start} seconds")
 
 if __name__ == "__main__":
     main()

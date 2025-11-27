@@ -12,9 +12,9 @@ def run_testbench(evaluator_name):
         os.remove("./work-obj08.cf")
     
     # Run GHDL simulation
-    subprocess.run(["ghdl", "-a", "--std=08", f"../output/{evaluator_name}/vhdl/{evaluator_name}.vhd", f"../output/{evaluator_name}/vhdl/tb_{evaluator_name}.vhd"], capture_output=True, check=True)
-    subprocess.run(["ghdl", "-e", "--std=08", f"tb_{evaluator_name}"], capture_output=True, check=True)
-    subprocess.run(["ghdl", "-r", "--std=08", f"tb_{evaluator_name}"], capture_output=True, check=True)
+    subprocess.run(["ghdl", "-a", "--std=08", f"../output/{evaluator_name}/vhdl/{evaluator_name}.vhd", f"../output/{evaluator_name}/vhdl/tb_{evaluator_name}.vhd"], capture_output=False, check=True)
+    subprocess.run(["ghdl", "-e", "--std=08", f"tb_{evaluator_name}"], capture_output=False, check=True)
+    subprocess.run(["ghdl", "-r", "--std=08", f"tb_{evaluator_name}"], capture_output=False, check=True)
 
 def plot_comparison(args):
     """ Plot evaluator results """
@@ -45,38 +45,21 @@ def plot_comparison(args):
     y_evaluator = []
     y_theoretical = []
     absolute_errors = []
+    relative_errors = []
     for x_value in x_values:
         theoretical = math_function(x_value)
         evaluator = y_min + raw_y_values[clamp_nearest(x_value, x_min, x_step, data_width)] * y_step
         y_theoretical.append(theoretical)
         y_evaluator.append(evaluator)
         absolute_errors.append(abs(theoretical - evaluator))
+        relative_errors.append(0 if theoretical == 0 else abs((theoretical - evaluator) / theoretical))
     mean_error = np.mean(absolute_errors)
     max_error = np.max(absolute_errors)
+    mean_relative_error = np.mean(relative_errors)
+    max_relative_error = np.max(relative_errors)
     with open(results_file_path, "a") as file:
         file.write(f"\n{"{:.3g}".format(max_error)},{"{:.3g}".format(mean_error)}")
-
-    # Computing and saving experimental plot
-    plt.figure(figsize=(20, 10))
-    plt.plot(x_values, y_evaluator, color='red', linewidth=3)
-    plt.title('Experimental values', fontsize=30)
-    plt.xlabel('x', fontsize=28)
-    plt.ylabel('Values', fontsize=28)
-    plt.grid(True)
-    plt.xticks(fontsize=20)
-    plt.yticks(fontsize=20)
-    plt.savefig(f"../output/{evaluator_name}/sim/plot_experimental_{evaluator_name}.png")
-
-    # Computing and saving theoretical plot
-    plt.figure(figsize=(20, 10))
-    plt.plot(x_values, y_theoretical, color='blue', linewidth=3)
-    plt.title('Theoretical values', fontsize=30)
-    plt.xlabel('x', fontsize=28)
-    plt.ylabel('Values', fontsize=28)
-    plt.grid(True)
-    plt.xticks(fontsize=20)
-    plt.yticks(fontsize=20)
-    plt.savefig(f"../output/{evaluator_name}/sim/plot_theoretical_{evaluator_name}.png")
+        file.write(f"\n{"{:.3g}".format(max_relative_error)},{"{:.3g}".format(mean_relative_error)}")
 
     # Computing and saving comparison plot
     plt.figure(figsize=(20, 10))
@@ -89,7 +72,7 @@ def plot_comparison(args):
     plt.xticks(fontsize=20)
     plt.yticks(fontsize=20)
     plt.legend(loc='upper center', bbox_to_anchor=(0.95, 0.6), fontsize=25)
-    plt.savefig(f"../output/{evaluator_name}/sim/plot_comparison_{evaluator_name}.png")
+    plt.savefig(f"../output/{evaluator_name}/sim/curves_{evaluator_name}.png")
 
     # Computing and saving absolute error plot
     plt.figure(figsize=(20, 10))
@@ -103,7 +86,21 @@ def plot_comparison(args):
     plt.xticks(fontsize=20)
     plt.yticks(fontsize=20)
     plt.legend(loc='upper center', bbox_to_anchor=(0.95, 0.6), fontsize=25)
-    plt.savefig(f"../output/{evaluator_name}/sim/plot_error_{evaluator_name}.png")
+    plt.savefig(f"../output/{evaluator_name}/sim/error_absolute_{evaluator_name}.png")
+
+	# Computing and saving relative error plot
+    plt.figure(figsize=(20, 10))
+    plt.plot(x_values, relative_errors, color='blue', linewidth=3, label="Relative errors")
+    plt.plot(x_values, [max_relative_error for _ in range(len(x_values))], color='red', linewidth=4, label=f"Max error = {"{:.3g}".format(max_relative_error)}")
+    plt.plot(x_values, [mean_relative_error for _ in range(len(x_values))], color='orange', linewidth=4, label=f"Mean error = {"{:.3g}".format(mean_relative_error)}")
+    plt.title('Relative error of evaluator values', fontsize=30)
+    plt.xlabel('x', fontsize=28)
+    plt.ylabel('Relative error', fontsize=28)
+    plt.grid(True)
+    plt.xticks(fontsize=20)
+    plt.yticks(fontsize=20)
+    plt.legend(loc='upper center', bbox_to_anchor=(0.95, 0.6), fontsize=25)
+    plt.savefig(f"../output/{evaluator_name}/sim/error_relative_{evaluator_name}.png")
 
 def generate_testbench(evaluator_type, args):
     """ Generates an exhaustive testbench for validation """

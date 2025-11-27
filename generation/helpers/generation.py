@@ -184,6 +184,140 @@ begin
 end arch_{evaluator_name};
     """
 
+
+def symmetric_method(args):
+    """ Generate VHDL code for a symmetric function evaluator """
+
+    # Args check
+    if len(args) != 9 and len(args) != 10:
+        print("Usage: generate_evaluator.py symmetric <evaluator_name> <function_of_x> <data_width> <x_min> <x_max> <y_min> <y_max> <segment_idx_width> <group_idx_width>")
+        return
+    
+    # Args extraction
+    evaluator_name = args[0]
+    function_of_x = args[1]
+    data_width, x_min, x_max, y_min, y_max, segment_idx_width, group_idx_width = int(args[2]), float(args[3]), float(args[4]), float(args[5]), float(args[6]), int(args[7]), int(args[8])
+    segment_width = data_width - segment_idx_width
+
+    # Offset table and Input table calculations
+    function_calculator = parse_function(function_of_x)
+    offset_table = []
+    input_table = []
+    delta_x_group = (x_max - x_min) / 2**group_idx_width
+    delta_x_segment = (x_max - x_min) / 2**segment_idx_width
+    y_step = (y_max - y_min) / 2**data_width
+    for group_idx in range(2**group_idx_width):
+        delta_y_group = function_calculator((group_idx + 1) * delta_x_group + x_min) - function_calculator(group_idx * delta_x_group + x_min)
+        group_slope = delta_y_group / delta_x_group
+        segment_y_offset = group_slope * (delta_x_segment / 2)
+        offset_table += compute_relative_discrete_output(f"{group_slope}*x", segment_width - 1, 0, delta_x_segment / 2, data_width, (y_min - y_max) / 2, (y_max - y_min) / 2, segment_y_offset)
+
+        for segment_idx in range(2**(segment_idx_width-group_idx_width)):
+            x_start_segment = group_idx * delta_x_group + segment_idx * delta_x_segment + x_min
+            x_middle_segment = x_start_segment + delta_x_segment / 2
+            y_middle_segment = function_calculator(x_middle_segment)
+            input_table.append(clamp_nearest(y_middle_segment, y_min, y_step, data_width))
+
+    # VHDL behavioral code generation
+    offset_code = ""
+    for x_value, y_value in enumerate(offset_table):
+        offset_code += f"\t\t{x_value} => \"{int_to_lsb(y_value, data_width)}\",\n"
+    offset_code += f"\t\tothers => \"{int_to_lsb(0, data_width)}\""
+    input_code = ""
+    for x_value, y_value in enumerate(input_table):
+        input_code += f"\t\t{x_value} => \"{int_to_lsb(y_value, data_width)}\",\n"
+    input_code += f"\t\tothers => \"{int_to_lsb(0, data_width)}\""
+
+    # VHDL complete code generation
+    return f"""
+-------------------------------------
+-- Engineers: Florian Delhon, Kevin Peymani
+-- Target: PYNQ-Z2
+-- Module Name: {evaluator_name}
+-- Function: f(x) = {function_of_x}
+-- Evaluator method: Symmetric
+-- Data width: {data_width} bits
+-- Group index width: {group_idx_width} bits
+-- Segment index width: {segment_idx_width} bits
+-- Range: x in [{x_min}; {x_max}[, y in [{y_min}; {y_max}[
+-------------------------------------
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+
+entity {evaluator_name} is
+    generic (
+        DATA_WIDTH : positive := {data_width};
+        GROUP_IDX_WIDTH : positive := {group_idx_width};
+        SEGMENT_IDX_WIDTH : positive := {segment_idx_width}
+    );
+    port (
+        input_a : in STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0);
+        result : out STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0)
+    );
+end {evaluator_name};
+
+architecture arch_{evaluator_name} of {evaluator_name} is
+    
+    attribute rom_style : string;
+    signal offset_entry_lower : STD_LOGIC_VECTOR(DATA_WIDTH - SEGMENT_IDX_WIDTH - 2 downto 0);
+    signal offset_entry_lower_raw : STD_LOGIC_VECTOR(DATA_WIDTH - SEGMENT_IDX_WIDTH - 2 downto 0);
+    signal offset_entry : STD_LOGIC_VECTOR(GROUP_IDX_WIDTH + DATA_WIDTH - SEGMENT_IDX_WIDTH - 2 downto 0);
+    signal offset_value_raw : STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0);
+    signal offset_value : STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0);
+    signal input_value : STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0);
+	signal invert : STD_LOGIC;
+    
+    -- Offset table
+    type offset_array_t is array (0 to 2**(GROUP_IDX_WIDTH + DATA_WIDTH - SEGMENT_IDX_WIDTH - 1) - 1) of STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0);
+    constant OFFSET_TABLE : offset_array_t := (
+{offset_code}
+    );
+    attribute rom_style of OFFSET_TABLE : constant is "distributed";
+
+    -- Input table
+    type input_array_t is array (0 to 2**SEGMENT_IDX_WIDTH - 1) of STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0);
+    constant INPUT_TABLE : input_array_t := (
+{input_code}
+    );
+    attribute rom_style of INPUT_TABLE : constant is "distributed";
+    
+begin
+
+	invert <= input_a(DATA_WIDTH - SEGMENT_IDX_WIDTH - 1);
+
+    offset_entry_lower_raw <= input_a(DATA_WIDTH - SEGMENT_IDX_WIDTH - 2 downto 0);
+    offset_entry_lower <= offset_entry_lower_raw when invert = '0' else not offset_entry_lower_raw;
+
+    offset_entry <= input_a(DATA_WIDTH - 1 downto DATA_WIDTH - GROUP_IDX_WIDTH) & offset_entry_lower;
+
+    offset_value_raw <= OFFSET_TABLE(to_integer(unsigned(offset_entry)));
+    offset_value <= offset_value_raw when invert = '0' else not offset_value_raw;
+
+    input_value <= INPUT_TABLE(to_integer(unsigned(input_a(DATA_WIDTH - 1 downto DATA_WIDTH - SEGMENT_IDX_WIDTH))));
+
+    adder: process(input_value, offset_value)
+        variable sum : signed(DATA_WIDTH + 1 downto 0);
+    begin
+		if invert = '0' then
+            sum := resize(signed(offset_value), DATA_WIDTH + 2) + signed(resize(unsigned(input_value), DATA_WIDTH + 2));
+        else
+            sum := resize(signed(offset_value), DATA_WIDTH + 2) + signed(resize(unsigned(input_value), DATA_WIDTH + 2) + 1);
+        end if;
+        if sum(DATA_WIDTH + 1) = '1' then
+            result <= (others => '0');
+        elsif sum(DATA_WIDTH) = '1' then
+            result <= (others => '1');
+        else
+        	result <= std_logic_vector(sum(DATA_WIDTH - 1 downto 0));
+        end if;
+    end process adder;
+
+end arch_{evaluator_name};
+    """
+
+
 def unary_method(args):
     """ Generate VHDL code for a unary function evaluator """
 
@@ -444,6 +578,7 @@ end arch_{evaluator_name};
 evaluation_methods_map = {
     "rom": rom_method,
     "binary": binary_method,
+    "symmetric": symmetric_method,
     "unary": unary_method,
     "hybrid": hybrid_method
 }   

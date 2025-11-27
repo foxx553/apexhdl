@@ -5,6 +5,7 @@
 **/.gen/**
 **/.srcs/**
 **/NA/**
+**/local/**
 
 # Extensions
 *.log
@@ -12,6 +13,7 @@
 *.o
 *.exe
 *.jou
+*.zip
 
 # Files
 clockInfo.txt

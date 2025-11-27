@@ -45,7 +45,7 @@ begin
 end arch_top_{evaluator_name};
 """
 
-def run_vivado_analysis(evaluator_name):
+def run_vivado_analysis(evaluator_name, run_mode):
     """Run Vivado TCL script and capture results"""
     
     # Vivado execution in batch mode
@@ -53,7 +53,7 @@ def run_vivado_analysis(evaluator_name):
         "vivado",
         "-mode", "batch",
         "-source", "../implementation/tcl/analyze_evaluator.tcl",
-        "-tclargs", evaluator_name
+        "-tclargs", evaluator_name, run_mode
     ]
     result = subprocess.run(cmd, shell=True, text=True)
     if os.path.exists(f"../output/{evaluator_name}/rpt/vivado.log"):

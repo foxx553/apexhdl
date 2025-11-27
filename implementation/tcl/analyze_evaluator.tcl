@@ -1,5 +1,6 @@
 # Get command line arguments for module name
 set module_name [lindex $argv 0]
+set run_mode [lindex $argv 1]
 
 # Create in-memory project
 create_project -in_memory -part xc7z020clg400-1
@@ -15,16 +16,27 @@ set_property FILE_TYPE {VHDL 2008} [get_files -filter {FILE_TYPE == VHDL}]
 # Set top module
 set_property TOP top_${module_name} [current_fileset]
 
-# Run full implementation flow
+# Run synthesis
 synth_design
-opt_design
-place_design
-route_design
 
-# Generate reports
-report_timing -max_paths 10 -delay_type min_max -sort_by group -file ../output/${module_name}/rpt/${module_name}_timing.rpt
-report_utilization -hierarchical -file ../output/${module_name}/rpt/${module_name}_utilization.rpt
-report_power -file ../output/${module_name}/rpt/${module_name}_power.rpt
+if {$run_mode == "synth"} {
+	
+	# Generate post-synthesis utilization report
+	report_utilization -hierarchical -file ../output/${module_name}/rpt/${module_name}_synth_utilization.rpt
+
+} else {
+	
+	# Run implementation
+	opt_design
+	place_design
+	route_design
+
+	# Generate all post-implementation reports
+	report_utilization -hierarchical -file ../output/${module_name}/rpt/${module_name}_utilization.rpt
+	report_timing -max_paths 10 -delay_type min_max -sort_by group -file ../output/${module_name}/rpt/${module_name}_timing.rpt
+	report_power -file ../output/${module_name}/rpt/${module_name}_power.rpt
+	
+}
 
 # Close project
 close_project
