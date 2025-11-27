@@ -9,6 +9,9 @@ add_files ../output/${module_name}/vhdl/${module_name}.vhd
 add_files ../output/${module_name}/vhdl/stream_top_${module_name}.vhd
 add_files ../implementation/xdc/pynq-z2-template.xdc
 
+# Set-up VHDL-2008 for evaluator module
+set_property FILE_TYPE {VHDL 2008} [get_files ../output/${module_name}/vhdl/${module_name}.vhd]
+
 # Set top module and update compilation order
 set_property TOP stream_top_${module_name} [current_fileset]
 set_property source_mgmt_mode All [current_project]

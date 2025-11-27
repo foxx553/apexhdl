@@ -34,8 +34,15 @@ def parse_results_file(filepath):
 def benchmark_module(run_mode, params):
     """ Launches the benchmark of one module """
 
+	# Options
+    options = {
+        "synth": "--rpt-synth",
+        "impl": "--rpt",
+        "bit": "--bit"
+	}
+
     # Launch generation of VHDL module & its metrics
-    cmd = ["python", "../generation/generate_evaluator.py"] + params + ["--rpt" if run_mode == "impl" else "--rpt-synth"]
+    cmd = ["python", "../generation/generate_evaluator.py"] + params + [options.get(run_mode, "--rpt-synth")]
     print(f"Running cmd {cmd}...")
     subprocess.run(cmd, capture_output=True, check=True)
 
@@ -45,8 +52,8 @@ def benchmark_module(run_mode, params):
     group_idx_width = params[9] if len(params) > 9 else None
 
 	# Reports parsing
-    area = parse_utilization_report(f"../output/{evaluator_name}/rpt/{evaluator_name}_utilization.rpt") if run_mode == "impl" else parse_utilization_report(f"../output/{evaluator_name}/rpt/{evaluator_name}_synth_utilization.rpt")
-    latency = parse_timing_report(f"../output/{evaluator_name}/rpt/{evaluator_name}_timing.rpt") if run_mode == "impl" else ""
+    area = parse_utilization_report(f"../output/{evaluator_name}/rpt/{evaluator_name}_utilization.rpt") if run_mode == "impl" or run_mode == "bit" else parse_utilization_report(f"../output/{evaluator_name}/rpt/{evaluator_name}_synth_utilization.rpt")
+    latency = parse_timing_report(f"../output/{evaluator_name}/rpt/{evaluator_name}_timing.rpt") if run_mode == "impl" or run_mode == "bit" else ""
     max_error, mean_error, max_relative_error, mean_relative_error = parse_results_file(f"../output/{evaluator_name}/sim/results_{evaluator_name}.txt")
 
     return f"{evaluator_type}; {evaluator_name}; {function_of_x}; {data_width}; {x_min}; {x_max}; {y_min}; {y_max}; {segment_idx_width or ""}; {group_idx_width or ""}; {area}; {latency}; {max_error}; {mean_error}; {max_relative_error}; {mean_relative_error};\n"
@@ -55,29 +62,16 @@ def benchmark_module(run_mode, params):
 def main():
     """ Launches the full benchmark on the provided set of parameters """
     
-    # add_header = True
-    # benchmark_name = "001"
-    # run_mode = "synth"
-    # methods = ["symmetric", "binary", "rom", "hybrid"]
-    # precisions = [8, 10, 12, 14, 16]
-    # functions = [
-    #     ["sin_low_freq", "\"sin(x*pi)\"", -1, 1, -1.1, 1.1],
-    #     ["sin_high_freq", "\"sin(5*x*pi)\"", -1, 1, -1.1, 1.1],
-    #     ["gelu", "\"0.5*x*(1+tanh(sqrt(2/pi)*(x+0.044715*x**3)))\"", -3, 5, -0.3, 5.1],
-    #     ["tanh", "\"128*tanh(0.03*(x-128))+128\"", 0, 256, 0, 256]
-    # ]
-    
-    
-    add_header = False
+    add_header = True
     benchmark_name = "001"
     run_mode = "synth"
-    methods = ["unary"]
-    precisions = [8, 10]
+    methods = ["symmetric", "binary", "rom", "hybrid", "unary"]
+    precisions = [8, 10, 12, 14, 16]
     functions = [
-        ["sin_low_freq", "\"sin(x*pi)\"", -1, 1, -1.1, 1.1],
-        ["sin_high_freq", "\"sin(5*x*pi)\"", -1, 1, -1.1, 1.1],
-        ["gelu", "\"0.5*x*(1+tanh(sqrt(2/pi)*(x+0.044715*x**3)))\"", -3, 5, -0.3, 5.1],
-        ["tanh", "\"128*tanh(0.03*(x-128))+128\"", 0, 256, 0, 256]
+        ["sin_low_freq", "sin(x*pi)", -1, 1, -1.1, 1.1],
+        ["sin_high_freq", "sin(5*x*pi)", -1, 1, -1.1, 1.1],
+        ["gelu", "0.5*x*(1+tanh(sqrt(2/pi)*(x+0.044715*x**3)))", -3, 5, -0.3, 5.1],
+        ["tanh", "128*tanh(0.03*(x-128))+128", 0, 256, 0, 256]
     ]
 
     sample_count = len(precisions) * len(methods) * len(functions)

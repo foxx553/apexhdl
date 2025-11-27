@@ -87,34 +87,63 @@ dma_recv.transfer(y_discrete_values)
 dma_recv.wait()
 y_experimental_values = convert_y_to_real_vectorized(y_discrete_values)
 
-# Error computation
+# Absolute error computation
 y_absolute_errors = np.abs(y_theoretical_values - y_experimental_values)
 max_absolute_error = np.max(y_absolute_errors)
 mean_absolute_error = np.mean(y_absolute_errors)
+
+# Relative error computation
+y_relative_errors = np.where(
+    y_theoretical_values == 0,
+    0.0,
+    np.abs((y_theoretical_values - y_experimental_values) / y_theoretical_values)
+)
+max_relative_error = np.max(y_relative_errors)
+mean_relative_error = np.mean(y_relative_errors)
+
 """))
     evaluator_notebook.cells.append(new_code_cell(f"""
 # Plot comparison theoretical vs. experimental
 plt.figure(figsize=(20, 10))
-plt.plot(x_real_values, y_theoretical_values, color='blue', linewidth=1, label='Theoretical values')
-plt.plot(x_real_values, y_experimental_values, color='red', linewidth=1, label='Experimental values')
-plt.title('Theoretical values vs. experimental values')
-plt.xlabel('x')
-plt.ylabel('Values')
+plt.plot(x_real_values, y_theoretical_values, color='blue', linewidth=3, label='Theoretical values')
+plt.plot(x_real_values, y_experimental_values, color='red', linewidth=3, label='Experimental values')
+plt.title('Theoretical values vs. experimental values', fontsize=30)
+plt.xlabel('x', fontsize=28)
+plt.ylabel('Values', fontsize=28)
 plt.grid(True)
-plt.legend(loc='upper center', bbox_to_anchor=(1, 0.5))
+plt.xticks(fontsize=20)
+plt.yticks(fontsize=20)
+plt.legend(loc='upper center', bbox_to_anchor=(0.95, 0.6), fontsize=25)
 plt.show()
 """))
     evaluator_notebook.cells.append(new_code_cell("""
 # Plot absolute error
 plt.figure(figsize=(20, 10))
-plt.plot(x_real_values, y_absolute_errors, color='blue', linewidth=1, label="Absolute errors")
-plt.plot(x_real_values, [max_absolute_error for _ in range(len(x_real_values))], color='red', linewidth=2, label=f"Max error = {max_absolute_error:.3g}")
-plt.plot(x_real_values, [mean_absolute_error for _ in range(len(x_real_values))], color='orange', linewidth=2, label=f"Mean error = {mean_absolute_error:.3g}")
-plt.title('Absolute error of evaluator values')
-plt.xlabel('x')
-plt.ylabel('Absolute error')
+plt.plot(x_real_values, y_absolute_errors, color='blue', linewidth=3, label="Absolute errors")
+plt.plot(x_real_values, [max_absolute_error for _ in range(len(x_real_values))], color='red', linewidth=4, label=f"Max error = {max_absolute_error:.3g}")
+plt.plot(x_real_values, [mean_absolute_error for _ in range(len(x_real_values))], color='orange', linewidth=4, label=f"Mean error = {mean_absolute_error:.3g}")
+plt.title('Absolute error of evaluator values', fontsize=30)
+plt.xlabel('x', fontsize=28)
+plt.ylabel('Absolute error', fontsize=28)
 plt.grid(True)
-plt.legend(loc='upper center', bbox_to_anchor=(1, 0.5))
+plt.xticks(fontsize=20)
+plt.yticks(fontsize=20)
+plt.legend(loc='upper center', bbox_to_anchor=(0.95, 0.6), fontsize=25)
+plt.show()
+"""))
+    evaluator_notebook.cells.append(new_code_cell("""
+# Plot relative error
+plt.figure(figsize=(20, 10))
+plt.plot(x_real_values, y_relative_errors, color='blue', linewidth=3, label="Relative errors")
+plt.plot(x_real_values, [max_relative_error for _ in range(len(x_real_values))], color='red', linewidth=4, label=f"Max error = {max_relative_error:.3g}")
+plt.plot(x_real_values, [mean_relative_error for _ in range(len(x_real_values))], color='orange', linewidth=4, label=f"Mean error = {mean_relative_error:.3g}")
+plt.title('Relative error of evaluator values', fontsize=30)
+plt.xlabel('x', fontsize=28)
+plt.ylabel('Relative error', fontsize=28)
+plt.grid(True)
+plt.xticks(fontsize=20)
+plt.yticks(fontsize=20)
+plt.legend(loc='upper center', bbox_to_anchor=(0.95, 0.6), fontsize=25)
 plt.show()
 """))
     

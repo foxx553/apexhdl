@@ -52,7 +52,7 @@ def main():
     data_width = sys.argv[4]
     evaluation_method_args = sys.argv[2:]
     last_arg = sys.argv[len(sys.argv) - 1]
-    step_map, step_count = ["--sim", "--rpt-synth", "--rpt", "--bit"], [5, 7, 8]
+    step_map, step_count = ["--sim", "--rpt-synth", "--rpt", "--bit"], [5, 7, 7, 8]
     step_specifier = 0 if last_arg not in step_map else step_map.index(last_arg)
     number_of_steps = step_count[step_specifier]
     evaluation_method = evaluation_methods_map.get(evaluator_type)
