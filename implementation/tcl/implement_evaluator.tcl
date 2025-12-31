@@ -1,4 +1,4 @@
-# Get command line arguments for module name and GPIO width
+# Get command line arguments for module name
 set module_name [lindex $argv 0]
 
 # Create in-memory project for faster processing
