@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Optional
 
 @dataclass
 class EvaluatorContext:
@@ -18,20 +18,20 @@ class EvaluatorContext:
         y_max (float): Maximum Y value of the approximation region
 
         data_width (int): Number of bits of the approximation
-        segment_idx_width (int): Number of bits for indexing segments (if applicable)
-        group_idx_width (int): Number of bits for indexing groups of segments (if applicable)
+        segment_idx_width (Optional[int]): Number of bits for indexing segments (if applicable)
+        group_idx_width (Optional[int]): Number of bits for indexing groups of segments (if applicable)
 
-        fpga_board (str): Part number of the target FPGA
-        analysis_contraints_file_path (str): XDC file containing hardware constraints for the standalone analysis
-        implementation_constraints_file_path (str): XDC file containing hardware constraints for the complete implementation
-        design_wrapper_file_path (str): TCL file containing the TCL procedure which will wrap the generated circuit
+        fpga_board (Optional[str]): Part number of the target FPGA
+        analysis_contraints_file_path (Optional[str]): XDC file containing hardware constraints for the standalone analysis
+        implementation_constraints_file_path (Optional[str]): XDC file containing hardware constraints for the complete implementation
+        design_wrapper_file_path (Optional[str]): TCL file containing the TCL procedure which will wrap the generated circuit
 
-        ip_address (str): IP address for SSH connection to the target FPGA
-        username (str): Username for SSH connection to the target FPGA
-        password (str): Password for SSH connection to the target FPGA
-        fpga_working_folder_path (str): Folder on the target FPGA in which all files will be sent and executed
-        pynq_venv_setup_script_path (str): Shell script of the PYNQ image which activates the Python Virtual Environment
-        xilinx_runtime_script_path (str): Shell script of the PYNQ image which sets up the necessary environment variables for the Xilinx Run Time
+        ip_address (Optional[str]): IP address for SSH connection to the target FPGA
+        username (Optional[str]): Username for SSH connection to the target FPGA
+        password (Optional[str]): Password for SSH connection to the target FPGA
+        fpga_working_folder_path (Optional[str]): Folder on the target FPGA in which all files will be sent and executed
+        pynq_venv_setup_script_path (Optional[str]): Shell script of the PYNQ image which activates the Python Virtual Environment
+        xilinx_runtime_script_path (Optional[str]): Shell script of the PYNQ image which sets up the necessary environment variables for the Xilinx Run Time
     """
     
     # General
@@ -48,20 +48,20 @@ class EvaluatorContext:
 
     # Generation
     data_width: int
-    segment_idx_width: int
-    group_idx_width: int
+    segment_idx_width: Optional[int]
+    group_idx_width: Optional[int]
 
     # Hardware
-    fpga_board: str
-    analysis_contraints_file_path: str
-    implementation_constraints_file_path: str
-    design_wrapper_file_path: str
+    fpga_board: Optional[str]
+    analysis_contraints_file_path: Optional[str]
+    implementation_constraints_file_path: Optional[str]
+    design_wrapper_file_path: Optional[str]
 
     # SSH
-    ip_address: str
-    username: str
-    password: str
-    fpga_working_folder_path: str
-    pynq_venv_setup_script_path: str
-    xilinx_runtime_script_path: str
+    ip_address: Optional[str]
+    username: Optional[str]
+    password: Optional[str]
+    fpga_working_folder_path: Optional[str]
+    pynq_venv_setup_script_path: Optional[str]
+    xilinx_runtime_script_path: Optional[str]
     

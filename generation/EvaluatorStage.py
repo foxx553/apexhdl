@@ -8,7 +8,7 @@ class EvaluatorStage(ABC):
     """
 
 	@abstractmethod
-	def execute(self, context: EvaluatorContext) -> None:
+	def execute(self, context: EvaluatorContext) -> bool:
 		"""
         Main method for the pipeline stage
         
