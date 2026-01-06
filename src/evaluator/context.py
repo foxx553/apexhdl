@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import Any, Optional
 
 @dataclass
-class EvaluatorContext:
+class Context:
     """
     Context of the approximator's generation
 
