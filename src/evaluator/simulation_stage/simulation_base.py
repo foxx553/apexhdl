@@ -10,7 +10,7 @@ class SimulationStage(ABC):
 	@abstractmethod
 	def execute(self, ctx: Context) -> bool:
 		"""
-        Main method for the pipeline stage
+        Main method for simulation stage execution
         
         Parameters:
             ctx (Context): Context of the current approximator simulation

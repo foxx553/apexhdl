@@ -11,23 +11,25 @@ class ImplementationRegistry:
         _variants (List[tuple[Predicate, ImplementationClass]]): List of all variants stored in the registry
     """
 
-    _variants: List[tuple[Predicate, ImplementationClass]] = []
+    _variants: List[tuple[int, Predicate, ImplementationClass]] = []
     
     @classmethod
-    def register(cls, predicate: Predicate):
+    def register(cls, predicate: Predicate, priority: int = 0):
         """
         Decorator for variant registration
 
         Parameters:
             predicate (Predicate): Condition to be met, checked on the execution context
+            priority (int): Predicate priority (higher number for higher priority)
         """
         def decorator(implementation_class: ImplementationClass) -> ImplementationClass:
-            cls._variants.insert(0, (predicate, implementation_class))
+            cls._variants.insert(0, (priority, predicate, implementation_class))
+            cls._variants.sort(key = lambda x: x[0], reverse=True)
             return implementation_class
         return decorator
     
     @classmethod
-    def select(cls, ctx: Context) -> Optional[ImplementationClass]:
+    def select(cls, ctx: Context) -> ImplementationClass:
         """
         Implementation variant retrieval
         
@@ -35,10 +37,10 @@ class ImplementationRegistry:
             ctx (Context): Context of the pipeline execution
 
         Returns:
-            Optional[ImplementationClass]: Retrieved implementation variant
+            ImplementationClass: Retrieved implementation variant
         """
-        for predicate, implementation_class in cls._variants:
+        for priority, predicate, implementation_class in cls._variants:
             if predicate(ctx):
                 return implementation_class
         
-        return None
+        raise RuntimeError("No implementation variant found matching the starting context")

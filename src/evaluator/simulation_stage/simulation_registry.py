@@ -11,23 +11,25 @@ class SimulationRegistry:
         _variants (List[tuple[Predicate, SimulationClass]]): List of all variants stored in the registry
     """
 
-    _variants: List[tuple[Predicate, SimulationClass]] = []
+    _variants: List[tuple[int, Predicate, SimulationClass]] = []
     
     @classmethod
-    def register(cls, predicate: Predicate):
+    def register(cls, predicate: Predicate, priority: int = 0):
         """
         Decorator for variant registration
 
         Parameters:
             predicate (Predicate): Condition to be met, checked on the execution context
+            priority (int): Predicate priority (higher number for higher priority)
         """
         def decorator(simulation_class: SimulationClass) -> SimulationClass:
-            cls._variants.insert(0, (predicate, simulation_class))
+            cls._variants.insert(0, (priority, predicate, simulation_class))
+            cls._variants.sort(key = lambda x: x[0], reverse=True)
             return simulation_class
         return decorator
     
     @classmethod
-    def select(cls, ctx: Context) -> Optional[SimulationClass]:
+    def select(cls, ctx: Context) -> SimulationClass:
         """
         Simulation variant retrieval
         
@@ -35,10 +37,10 @@ class SimulationRegistry:
             ctx (Context): Context of the pipeline execution
 
         Returns:
-            Optional[SimulationClass]: Retrieved simulation variant
+            SimulationClass: Retrieved simulation variant
         """
-        for predicate, simulation_class in cls._variants:
+        for priority, predicate, simulation_class in cls._variants:
             if predicate(ctx):
                 return simulation_class
         
-        return None
+        raise RuntimeError("No simulation variant found matching the starting context")

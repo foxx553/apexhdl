@@ -11,23 +11,25 @@ class GenerationRegistry:
         _variants (List[tuple[Predicate, GenerationClass]]): List of all variants stored in the registry
     """
 
-    _variants: List[tuple[Predicate, GenerationClass]] = []
+    _variants: List[tuple[int, Predicate, GenerationClass]] = []
     
     @classmethod
-    def register(cls, predicate: Predicate):
+    def register(cls, predicate: Predicate, priority: int = 0):
         """
         Decorator for variant registration
 
         Parameters:
             predicate (Predicate): Condition to be met, checked on the execution context
+            priority (int): Predicate priority (higher number for higher priority)
         """
         def decorator(generation_class: GenerationClass) -> GenerationClass:
-            cls._variants.insert(0, (predicate, generation_class))
+            cls._variants.append(0, (priority, predicate, generation_class))
+            cls._variants.sort(key = lambda x: x[0], reverse=True)
             return generation_class
         return decorator
     
     @classmethod
-    def select(cls, ctx: Context) -> Optional[GenerationClass]:
+    def select(cls, ctx: Context) -> GenerationClass:
         """
         Generation variant retrieval
         
@@ -35,10 +37,10 @@ class GenerationRegistry:
             ctx (Context): Context of the pipeline execution
 
         Returns:
-            Optional[GenerationClass]: Retrieved generation variant
+            GenerationClass: Retrieved generation variant
         """
-        for predicate, generation_class in cls._variants:
+        for priority, predicate, generation_class in cls._variants:
             if predicate(ctx):
                 return generation_class
         
-        return None
+        raise RuntimeError("No generation variant found matching the starting context")

@@ -11,23 +11,25 @@ class AnalysisRegistry:
         _variants (List[tuple[Predicate, AnalysisClass]]): List of all variants stored in the registry
     """
 
-    _variants: List[tuple[Predicate, AnalysisClass]] = []
+    _variants: List[tuple[int, Predicate, AnalysisClass]] = []
     
     @classmethod
-    def register(cls, predicate: Predicate):
+    def register(cls, predicate: Predicate, priority: int = 0):
         """
         Decorator for variant registration
 
         Parameters:
             predicate (Predicate): Condition to be met, checked on the execution context
+            priority (int): Predicate priority (higher number for higher priority)
         """
         def decorator(analysis_class: AnalysisClass) -> AnalysisClass:
-            cls._variants.insert(0, (predicate, analysis_class))
+            cls._variants.insert(0, (priority, predicate, analysis_class))
+            cls._variants.sort(key = lambda x: x[0], reverse=True)
             return analysis_class
         return decorator
     
     @classmethod
-    def select(cls, ctx: Context) -> Optional[AnalysisClass]:
+    def select(cls, ctx: Context) -> AnalysisClass:
         """
         Analysis variant retrieval
         
@@ -35,10 +37,10 @@ class AnalysisRegistry:
             ctx (Context): Context of the pipeline execution
 
         Returns:
-            Optional[AnalysisClass]: Retrieved analysis variant
+            AnalysisClass: Retrieved analysis variant
         """
-        for predicate, analysis_class in cls._variants:
+        for priority, predicate, analysis_class in cls._variants:
             if predicate(ctx):
                 return analysis_class
         
-        return None
+        raise RuntimeError("No analysis variant found matching the starting context")

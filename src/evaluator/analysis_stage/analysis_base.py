@@ -10,7 +10,7 @@ class AnalysisStage(ABC):
 	@abstractmethod
 	def execute(self, ctx: Context) -> bool:
 		"""
-        Main method for the pipeline stage
+        Main method for analysis stage execution
         
         Parameters:
             ctx (Context): Context of the current approximator analysis
