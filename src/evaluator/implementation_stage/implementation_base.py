@@ -14,6 +14,9 @@ class ImplementationStage(ABC):
         
         Parameters:
             ctx (Context): Context of the current approximator implementation
+			
+        Returns:
+            bool: Whether the stage execution was successful or not
         """
 		pass
 

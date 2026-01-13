@@ -1,7 +1,117 @@
-from typing import Callable
+from typing import Callable, Any
 from context import Context
+from sympy import symbols, sympify, lambdify
+import numpy as np
 
 Predicate = Callable[[Context], bool]
 """
 Alias for a boolean check on pipeline context
 """
+
+def lambdify_function(function_str: str) -> Any:
+    """
+    Lambdifies a mathematical function from a string 
+    
+    Parameters:
+        function_str (str): String of the function to be parsed
+    
+    Returns:
+        Any: Lambda function
+    """
+
+    x: Any = symbols('x')
+    try:
+        expr: Any = sympify(function_str)
+        return lambdify(x, expr, modules=['math'])
+    except Exception as e:
+        raise RuntimeError(f"Failed mathematical function lambdification: {e}")
+
+def clamp_nearest(value: float, window_min: float, window_step: float, window_bit_width: int) -> int:
+    """
+    Clamps a real value to its discrete step count in a discrete window
+
+    Parameters:
+        value (float): Real value to be discretized
+        window_min (float): Minimum real value of the discrete window
+        window_step (float): Real value of the discrete window step
+        window_bit_width (int): Number of bits of the discrete window
+    
+    Returns:
+        int: Integer value in the discrete window
+    """
+
+    nbr_steps_from_min: float = (value - window_min) / window_step
+    float_remainder: float = nbr_steps_from_min % 1
+    nearest_int: int = int(nbr_steps_from_min) if float_remainder < 0.5 else int(nbr_steps_from_min) + 1
+    return max(0, min(nearest_int, 2 ** window_bit_width - 1))
+
+def int_to_lsb(n: int, data_width: int) -> str:
+    """
+    Gets the LSBs (Least Significant Bits) of an integer
+
+    Parameters:
+        n (int): Integer value
+        data_width (int): Number of LSBs wanted
+    
+    Returns:
+        str: LSBs extracted
+    """
+
+    masked: int = n & ((2 ** data_width) - 1)
+    return format(masked, f'0{data_width}b')
+
+def compute_discrete_output(function_str: str, x_data_width: int, x_min: float, x_max: float, y_data_width: int, y_min: float, y_max: float) -> list[int]:
+    """
+    Applies a discrete window to a mathematical function. For each value of the discrete x axis, applies the mathematical function, and clamps the output onto the discrete y axis
+
+    Parameters:
+        function_str (str): String of the function to be parsed
+        x_data_width (int): Number of bits of the discrete x axis
+        x_min (float): Minimum value of the discrete x axis
+        x_max (float): Maximum value of the discrete x axis
+        y_data_width (int): Number of bits of the discrete y axis
+        y_min (float): Minimum value of the discrete y axis
+        y_max (float): Maximum value of the discrete y axis
+    
+    Returns:
+        list[int]: Outputs of the mathematical function in the discretized space
+    """
+
+    # Function lambdify
+    f: Any = lambdify_function(function_str)
+
+    # Function space discretization
+    x_step: float = (x_max - x_min) / (2 ** x_data_width)
+    y_step: float = (y_max - y_min) / (2 ** y_data_width)
+    x_float_values: list[float] = np.arange(x_min, x_max, x_step)
+
+    # Function space computation
+    y_float_values: list[float] = [f(x) for x in x_float_values]
+    return [clamp_nearest(y, y_min, y_step, y_data_width) for y in y_float_values]
+
+def compute_relative_discrete_output(function_str: str, x_data_width: int, x_min: float, x_max: float, y_data_width: int, y_min: float, y_max: float, y_origin: float) -> list[int]:
+    """
+    Applies a discrete window to a mathematical function, and returns the signed value relative to a certain origin (e.g. '0' for computing a relative offset). For each value of the discrete x axis, applies the mathematical function, clamps the output onto the discrete y axis, and offsets it by the discrete value of the origin float
+
+    Parameters:
+        
+    Parameters:
+        function_str (str): String of the function to be parsed
+        x_data_width (int): Number of bits of the discrete x axis
+        x_min (float): Minimum value of the discrete x axis
+        x_max (float): Maximum value of the discrete x axis
+        y_data_width (int): Number of bits of the discrete y axis
+        y_min (float): Minimum value of the discrete y axis
+        y_max (float): Maximum value of the discrete y axis
+        y_origin (float): Origin float
+    
+    Returns:
+        list[int]: Outputs of the mathematical function in the relative discretized space
+    """
+
+    # Gather absolute values
+    absolute_values: list[int] = compute_discrete_output(function_str, x_data_width, x_min, x_max, y_data_width, y_min, y_max)
+    
+    # Offset it by the bias
+    return [y - clamp_nearest(y_origin, y_min, (y_max - y_min) / (2 ** y_data_width), y_data_width) for y in absolute_values]
+    

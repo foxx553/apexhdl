@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from typing import Any, Optional
+from pathlib import Path
 
 @dataclass
 class Context:
@@ -9,9 +10,9 @@ class Context:
     Attributes:
         method_name (str): Name of the circuit generation method
         circuit_name (str): Name of the circuit generated
-        output_folder_path (str): Folder where all generated files will be put 
+        output_folder_path (Path): Folder where all generated files will be put 
 
-        math_function (Any): Mathematical function to be approximated by the generated circuit
+        math_function (str): Mathematical function to be approximated by the generated circuit
         x_min (float): Minimum X value of the approximation region
         x_max (float): Maximum X value of the approximation region
         y_min (float): Minimum Y value of the approximation region
@@ -37,10 +38,10 @@ class Context:
     # General
     method_name: str
     circuit_name: str
-    output_folder_path: str
+    output_folder_path: Path
 
     # Maths
-    math_function: Any
+    math_function: str
     x_min: float
     x_max: float
     y_min: float

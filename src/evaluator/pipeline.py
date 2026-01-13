@@ -46,6 +46,9 @@ class Pipeline:
     def run(self) -> bool:
         """
         Pipeline execution
+
+        Returns:
+            bool: Whether the pipeline execution was successful or not
         """
 
         self.generation_stage.execute(self.context)

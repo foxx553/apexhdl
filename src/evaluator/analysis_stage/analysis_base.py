@@ -14,6 +14,9 @@ class AnalysisStage(ABC):
         
         Parameters:
             ctx (Context): Context of the current approximator analysis
+			
+        Returns:
+            bool: Whether the stage execution was successful or not
         """
 		pass
 

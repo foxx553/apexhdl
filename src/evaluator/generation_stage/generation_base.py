@@ -14,6 +14,9 @@ class GenerationStage(ABC):
         
         Parameters:
             ctx (Context): Context of the current approximator generation
+			
+        Returns:
+            bool: Whether the stage execution was successful or not
         """
 		pass
 
