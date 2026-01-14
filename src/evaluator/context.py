@@ -22,11 +22,11 @@ class Context:
         segment_idx_width (Optional[int]): Number of bits for indexing segments (if applicable)
         group_idx_width (Optional[int]): Number of bits for indexing groups of segments (if applicable)
 
+        simulation_tool (Optional[str]): Software used for circuit simulation
+        analysis_tool (Optional[str]): Software used for circuit analysis
+        implementation_tool (Optional[str]): Software used for circuit implementation and bitstream generation
+        
         fpga_board (Optional[str]): Part number of the target FPGA
-        analysis_contraints_file_path (Optional[str]): XDC file containing hardware constraints for the standalone analysis
-        implementation_constraints_file_path (Optional[str]): XDC file containing hardware constraints for the complete implementation
-        design_wrapper_file_path (Optional[str]): TCL file containing the TCL procedure which will wrap the generated circuit
-
         ip_address (Optional[str]): IP address for SSH connection to the target FPGA
         username (Optional[str]): Username for SSH connection to the target FPGA
         password (Optional[str]): Password for SSH connection to the target FPGA
@@ -52,13 +52,13 @@ class Context:
     segment_idx_width: Optional[int]
     group_idx_width: Optional[int]
 
+    # Software
+    simulation_tool: Optional[str]
+    analysis_tool: Optional[str]
+    implementation_tool: Optional[str]
+
     # Hardware
     fpga_board: Optional[str]
-    analysis_contraints_file_path: Optional[str]
-    implementation_constraints_file_path: Optional[str]
-    design_wrapper_file_path: Optional[str]
-
-    # SSH
     ip_address: Optional[str]
     username: Optional[str]
     password: Optional[str]

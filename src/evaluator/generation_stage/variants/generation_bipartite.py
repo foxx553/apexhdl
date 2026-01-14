@@ -15,7 +15,7 @@ class GenerationBipartite(GenerationStage):
     def execute(self, ctx: Context) -> bool:
 
         # Create folder if necessary
-        folder_path: Path = ctx.output_folder_path / ctx.circuit_name
+        folder_path: Path = ctx.output_folder_path / ctx.circuit_name / "vhdl"
         folder_path.mkdir(parents=True, exist_ok=True)
 
         # Offset table and Input table calculations
