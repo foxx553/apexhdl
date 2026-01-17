@@ -66,7 +66,7 @@ end arch_top_{ctx.circuit_name};
             "vivado",
             "-mode", "batch",
             "-source", tcl_script,
-            "-tclargs", ctx.circuit_name, ctx.analysis_mode
+            "-tclargs", ctx.fpga_board, ctx.output_folder_path, ctx.circuit_name, ctx.analysis_mode
         ]
         vivado_result: CompletedProcess[str] = subprocess.run(cmd, shell=True, text=True)
 
