@@ -10,22 +10,24 @@ from implementation_stage.implementation_registry import ImplementationRegistry
 
 class Pipeline:
     """
-    Pipeline class
-
-    Attributes:
-        context (Context): Context of pipeline execution
-        generation_stage (GenerationStage): Stage of circuit generation
-        simulation_stage (SimulationStage): Stage of circuit simulation
-        analysis_stage (AnalysisStage): Stage of circuit hardware analysis
-        implementation_stage (ImplementationStage): Stage of circuit test on target
+    Pipeline class for managing circuit generation lifecycle
     """
 
     context: Context
+    """Context of pipeline execution"""
 
     generation_stage: GenerationStage
+    """Stage of circuit generation"""
+
     simulation_stage: SimulationStage
+    """Stage of circuit simulation"""
+
     analysis_stage: AnalysisStage
+    """Stage of circuit hardware analysis"""
+
     implementation_stage: ImplementationStage
+    """Stage of circuit test on target"""
+
 
     def __init__(self, ctx: Context):
         """

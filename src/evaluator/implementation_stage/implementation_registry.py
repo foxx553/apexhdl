@@ -6,12 +6,10 @@ from implementation_base import ImplementationClass
 class ImplementationRegistry:
     """
     Registry allowing predicate-based implementation variant retrieval
-
-    Attributes:
-        _variants (List[tuple[Predicate, ImplementationClass]]): List of all variants stored in the registry
     """
 
     _variants: List[tuple[int, Predicate, ImplementationClass]] = []
+    """List of all variants stored in the registry"""
     
     @classmethod
     def register(cls, predicate: Predicate, priority: int = 0):

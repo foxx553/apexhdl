@@ -6,12 +6,10 @@ from generation_base import GenerationClass
 class GenerationRegistry:
     """
     Registry allowing predicate-based generation variant retrieval
-
-    Attributes:
-        _variants (List[tuple[Predicate, GenerationClass]]): List of all variants stored in the registry
     """
 
     _variants: List[tuple[int, Predicate, GenerationClass]] = []
+    """List of all variants stored in the registry"""
     
     @classmethod
     def register(cls, predicate: Predicate, priority: int = 0):

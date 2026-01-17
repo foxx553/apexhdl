@@ -19,7 +19,7 @@ class AnalysisVivado(AnalysisStage):
         folder_path: Path = ctx.output_folder_path / ctx.circuit_name / "vhdl"
 
         # Get TCL script path
-        tcl_script: Path = Path("../implementation/tcl/analyze_evaluator.tcl")
+        tcl_script: Path = Path("../tcl/analyze_evaluator.tcl")
 
         # Create rpt folder
         rpt_folder_path: Path = ctx.output_folder_path / ctx.circuit_name / "rpt"

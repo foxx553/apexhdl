@@ -6,12 +6,10 @@ from simulation_base import SimulationClass
 class SimulationRegistry:
     """
     Registry allowing predicate-based simulation variant retrieval
-
-    Attributes:
-        _variants (List[tuple[Predicate, SimulationClass]]): List of all variants stored in the registry
     """
 
     _variants: List[tuple[int, Predicate, SimulationClass]] = []
+    """List of all variants stored in the registry"""
     
     @classmethod
     def register(cls, predicate: Predicate, priority: int = 0):

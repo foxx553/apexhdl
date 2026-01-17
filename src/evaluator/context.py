@@ -2,69 +2,84 @@ from dataclasses import dataclass
 from typing import Optional
 from pathlib import Path
 
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Optional
+
 @dataclass
 class Context:
     """
     Context of the approximator's generation
-
-    Attributes:
-        method_name (str): Name of the circuit generation method
-        circuit_name (str): Name of the circuit generated
-        output_folder_path (Path): Folder where all generated files will be put 
-
-        math_function (str): Mathematical function to be approximated by the generated circuit
-        x_min (float): Minimum X value of the approximation region
-        x_max (float): Maximum X value of the approximation region
-        y_min (float): Minimum Y value of the approximation region
-        y_max (float): Maximum Y value of the approximation region
-
-        data_width (int): Number of bits of the approximation
-        segment_idx_width (Optional[int]): Number of bits for indexing segments (if applicable)
-        group_idx_width (Optional[int]): Number of bits for indexing groups of segments (if applicable)
-
-        simulation_tool (Optional[str]): Software used for circuit simulation
-        analysis_tool (Optional[str]): Software used for circuit analysis
-        analysis_mode (Optional[str]): Whether the analysis is done post-synthesis or post-implementation
-        implementation_tool (Optional[str]): Software used for circuit implementation and bitstream generation
-        
-        fpga_board (Optional[str]): Part number of the target FPGA
-        ip_address (Optional[str]): IP address for SSH connection to the target FPGA
-        username (Optional[str]): Username for SSH connection to the target FPGA
-        password (Optional[str]): Password for SSH connection to the target FPGA
-        fpga_working_folder_path (Optional[str]): Folder on the target FPGA in which all files will be sent and executed
-        pynq_venv_setup_script_path (Optional[str]): Shell script of the PYNQ image which activates the Python Virtual Environment
-        xilinx_runtime_script_path (Optional[str]): Shell script of the PYNQ image which sets up the necessary environment variables for the Xilinx Run Time
     """
     
-    # General
+    # --- General ---
     method_name: str
+    """Name of the circuit generation method"""
+
     circuit_name: str
+    """Name of the circuit generated"""
+
     output_folder_path: Path
+    """Folder where all generated files will be put"""
 
-    # Maths
+    # --- Maths ---
     math_function: str
+    """Mathematical function to be approximated by the generated circuit"""
+
     x_min: float
+    """Minimum X value of the approximation region"""
+
     x_max: float
+    """Maximum X value of the approximation region"""
+
     y_min: float
+    """Minimum Y value of the approximation region"""
+
     y_max: float
+    """Maximum Y value of the approximation region"""
 
-    # Generation
+    # --- Generation ---
     data_width: int
-    segment_idx_width: Optional[int]
-    group_idx_width: Optional[int]
+    """Number of bits of the approximation"""
 
-    # Software
-    simulation_tool: Optional[str]
-    analysis_tool: Optional[str]
-    analysis_mode: Optional[str]
-    implementation_tool: Optional[str]
+    segment_idx_width: Optional[int] = None
+    """Number of bits for indexing segments (if applicable)"""
 
-    # Hardware
-    fpga_board: Optional[str]
-    ip_address: Optional[str]
-    username: Optional[str]
-    password: Optional[str]
-    fpga_working_folder_path: Optional[str]
-    pynq_venv_setup_script_path: Optional[str]
-    xilinx_runtime_script_path: Optional[str]
+    group_idx_width: Optional[int] = None
+    """Number of bits for indexing groups of segments (if applicable)"""
+
+    # --- Software ---
+    simulation_tool: Optional[str] = None
+    """Software used for circuit simulation"""
+
+    analysis_tool: Optional[str] = None
+    """Software used for circuit analysis"""
+
+    analysis_mode: Optional[str] = None
+    """Whether the analysis is done post-synthesis or post-implementation"""
+
+    implementation_tool: Optional[str] = None
+    """Software used for circuit implementation and bitstream generation"""
+    
+    # --- Hardware ---
+    fpga_board: Optional[str] = None
+    """Part number of the target FPGA"""
+
+    ip_address: Optional[str] = None
+    """IP address for SSH connection to the target FPGA"""
+
+    username: Optional[str] = None
+    """Username for SSH connection to the target FPGA"""
+
+    password: Optional[str] = None
+    """Password for SSH connection to the target FPGA"""
+
+    fpga_working_folder_path: Optional[str] = None
+    """Folder on the target FPGA in which all files will be sent and executed"""
+
+    pynq_venv_setup_script_path: Optional[str] = None
+    """Shell script of the PYNQ image which activates the Python Virtual Environment"""
+
+    xilinx_runtime_script_path: Optional[str] = None
+    """Shell script of the PYNQ image which sets up environment variables for Xilinx Run Time"""
     

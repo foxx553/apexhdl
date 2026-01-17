@@ -6,12 +6,10 @@ from analysis_base import AnalysisClass
 class AnalysisRegistry:
     """
     Registry allowing predicate-based analysis variant retrieval
-
-    Attributes:
-        _variants (List[tuple[Predicate, AnalysisClass]]): List of all variants stored in the registry
     """
 
     _variants: List[tuple[int, Predicate, AnalysisClass]] = []
+    """List of all variants stored in the registry"""
     
     @classmethod
     def register(cls, predicate: Predicate, priority: int = 0):
