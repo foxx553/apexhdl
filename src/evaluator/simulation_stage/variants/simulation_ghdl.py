@@ -1,5 +1,6 @@
 from pathlib import Path
 import subprocess
+from subprocess import CompletedProcess
 import matplotlib.pyplot as plt
 import numpy as np
 from typing import Any
@@ -9,7 +10,7 @@ from simulation_registry import SimulationRegistry
 from simulation_base import SimulationStage
 import utils
 
-@SimulationRegistry.register(predicate=lambda ctx: ctx.simulation_tool == "ghdl", priority=0)
+@SimulationRegistry.register(predicate=lambda ctx: ctx.simulation_tool == "ghdl", priority=1)
 class SimulationGhdl(SimulationStage):
     """
     GHDL simulation stage
@@ -54,7 +55,7 @@ begin
 
     uut : entity work.{ctx.circuit_name}
         generic map (
-            DATA_WIDTH => {ctx.data_width}{f",\n\t\t\tSEGMENT_IDX_WIDTH => {ctx.segment_idx_width}" if ctx.method_name == "binary" or ctx.method_name == "hybrid" else ""}{f",\n\t\t\tGROUP_IDX_WIDTH => {ctx.group_idx_width}" if ctx.method_name == "binary" else ""}
+            DATA_WIDTH => {ctx.data_width}{f",\n\t\t\tSEGMENT_IDX_WIDTH => {ctx.segment_idx_width}" if ctx.method_name == "bipartite" or ctx.method_name == "hybrid" else ""}{f",\n\t\t\tGROUP_IDX_WIDTH => {ctx.group_idx_width}" if ctx.method_name == "bipartite" else ""}
         )
         port map (
             input_a => input_a,
@@ -87,45 +88,54 @@ end arch_tb_{ctx.circuit_name};
         tb_file: Path = folder_path / f"tb_{ctx.circuit_name}.vhd"
         tb_file.write_text(vhdl_code)
 
-        # Run GHDL simulation
+        # Run GHDL simulation, with error handling
         Path("./work-obj08.cf").unlink(missing_ok=True) # Note = Delete GHDL work directory to trigger full simulation
-        subprocess.run(["ghdl", "-a", "--std=08", module_file, tb_file], capture_output=False, check=True)
-        subprocess.run(["ghdl", "-e", "--std=08", f"tb_{ctx.circuit_name}"], capture_output=False, check=True)
-        subprocess.run(["ghdl", "-r", "--std=08", f"tb_{ctx.circuit_name}"], capture_output=False, check=True)
+        analysis_result: CompletedProcess[str] = subprocess.run(["ghdl", "-a", "--std=08", module_file, tb_file], capture_output=False, check=True)
+        if analysis_result.returncode != 0:
+            print(f"[ERROR] GHDL analysis unsuccessful for circuit {ctx.circuit_name}: {analysis_result.stderr}")
+            return False
+        elaboration_result: CompletedProcess[str] = subprocess.run(["ghdl", "-e", "--std=08", f"tb_{ctx.circuit_name}"], capture_output=False, check=True)
+        if elaboration_result.returncode != 0:
+            print(f"[ERROR] GHDL elaboration unsuccessful for circuit {ctx.circuit_name}: {elaboration_result.stderr}")
+            return False
+        execution_result: CompletedProcess[str] = subprocess.run(["ghdl", "-r", "--std=08", f"tb_{ctx.circuit_name}"], capture_output=False, check=True)
+        if execution_result.returncode != 0:
+            print(f"[ERROR] GHDL execution unsuccessful for circuit {ctx.circuit_name}: {execution_result.stderr}")
+            return False
 
         # Validation parameters
         lambda_function: Any = utils.lambdify_function(ctx.math_function)
-        x_step = (ctx.x_max - ctx.x_min) / (2 ** ctx.data_width)
-        y_step = (ctx.y_max - ctx.y_min) / (2 ** ctx.data_width)
-        theoretical_step = 0.001
+        x_step: float = (ctx.x_max - ctx.x_min) / (2 ** ctx.data_width)
+        y_step: float = (ctx.y_max - ctx.y_min) / (2 ** ctx.data_width)
+        theoretical_step: float = 0.001
 
         # Read results file
-        raw_y_values = []
+        raw_y_values: list[int] = []
         with results_file.open('r') as file:
             for line in file:
-                parts = line.strip().split(',')
+                parts: list[str] = line.strip().split(',')
                 if len(parts) == 2:
                     raw_y_values.append(int(parts[1]))
 
         # Computing theoretical and experimental values
-        x_values = np.arange(ctx.x_min, ctx.x_max, theoretical_step)
-        y_evaluator = []
-        y_theoretical = []
-        absolute_errors = []
-        relative_errors = []
+        x_values: list[float] = np.arange(ctx.x_min, ctx.x_max, theoretical_step)
+        y_evaluator: list[float] = []
+        y_theoretical: list[float] = []
+        absolute_errors: list[float] = []
+        relative_errors: list[float] = []
         for x_value in x_values:
-            theoretical = lambda_function(x_value)
-            evaluator = ctx.y_min + raw_y_values[utils.clamp_nearest(x_value, ctx.x_min, x_step, ctx.data_width)] * y_step
+            theoretical: float = lambda_function(x_value)
+            evaluator: float = ctx.y_min + raw_y_values[utils.clamp_nearest(x_value, ctx.x_min, x_step, ctx.data_width)] * y_step
             y_theoretical.append(theoretical)
             y_evaluator.append(evaluator)
             absolute_errors.append(abs(theoretical - evaluator))
             relative_errors.append(0 if theoretical == 0 else abs((theoretical - evaluator) / theoretical))
 
         # Computing errors, and appending it to the results file
-        mean_error = np.mean(absolute_errors)
-        max_error = np.max(absolute_errors)
-        mean_relative_error = np.mean(relative_errors)
-        max_relative_error = np.max(relative_errors)
+        mean_error: float = np.mean(absolute_errors)
+        max_error: float = np.max(absolute_errors)
+        mean_relative_error: float = np.mean(relative_errors)
+        max_relative_error: float = np.max(relative_errors)
         with results_file.open('a') as file:
             file.write(f"\n{"{:.3g}".format(max_error)},{"{:.3g}".format(mean_error)}")
             file.write(f"\n{"{:.3g}".format(max_relative_error)},{"{:.3g}".format(mean_relative_error)}")

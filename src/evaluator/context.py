@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Optional
 from pathlib import Path
 
 @dataclass
@@ -24,6 +24,7 @@ class Context:
 
         simulation_tool (Optional[str]): Software used for circuit simulation
         analysis_tool (Optional[str]): Software used for circuit analysis
+        analysis_mode (Optional[str]): Whether the analysis is done post-synthesis or post-implementation
         implementation_tool (Optional[str]): Software used for circuit implementation and bitstream generation
         
         fpga_board (Optional[str]): Part number of the target FPGA
@@ -55,6 +56,7 @@ class Context:
     # Software
     simulation_tool: Optional[str]
     analysis_tool: Optional[str]
+    analysis_mode: Optional[str]
     implementation_tool: Optional[str]
 
     # Hardware
