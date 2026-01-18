@@ -1,16 +1,17 @@
-# Get command line arguments for module name
-set module_name [lindex $argv 0]
+# Get command line arguments
+set output_folder [lindex $argv 0]
+set module_name [lindex $argv 1]
 
 # Create in-memory project for faster processing
 create_project -in_memory -part xc7z020clg400-1
 
 # Add VHDL source and constraints files
-add_files ../output/${module_name}/vhdl/${module_name}.vhd
-add_files ../output/${module_name}/vhdl/stream_top_${module_name}.vhd
-add_files ../implementation/xdc/pynq-z2-template.xdc
+add_files ${output_folder}/${module_name}/vhdl/${module_name}.vhd
+add_files ${output_folder}/${module_name}/vhdl/stream_top_${module_name}.vhd
+add_files ../xdc/pynq-z2-template.xdc
 
 # Set-up VHDL-2008 for evaluator module
-set_property FILE_TYPE {VHDL 2008} [get_files ../output/${module_name}/vhdl/${module_name}.vhd]
+set_property FILE_TYPE {VHDL 2008} [get_files ${output_folder}/${module_name}/vhdl/${module_name}.vhd]
 
 # Set top module and update compilation order
 set_property TOP stream_top_${module_name} [current_fileset]
@@ -18,7 +19,7 @@ set_property source_mgmt_mode All [current_project]
 update_compile_order -fileset sources_1
 
 # Create block design using custom wrapper script
-source ../implementation/tcl/wrap_evaluator.tcl
+source ../tcl/wrap_evaluator.tcl
 update_compile_order -fileset sources_1
 create_root_design "" stream_top_${module_name}
 save_bd_design
@@ -30,7 +31,7 @@ generate_target all $bd_file
 
 # Create and add wrapper for the block design
 make_wrapper -files [get_files $bd_file] -top
-add_files -norecurse ../generation/.gen/sources_1/bd/evaluator/hdl/evaluator_wrapper.v
+add_files -norecurse ../src/.gen/sources_1/bd/evaluator/hdl/evaluator_wrapper.v
 update_compile_order -fileset sources_1
 
 # Set wrapper as top module

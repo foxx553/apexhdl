@@ -1,0 +1,111 @@
+# PYNQ imports
+from pynq import Overlay
+from pynq import allocate
+from pynq import PL
+
+# Standard imports
+import numpy as np
+import matplotlib.pyplot as plt
+from sympy import symbols, sympify, lambdify
+
+# Bitstream
+PL.reset()
+overlay = Overlay("./${module_name}.bit")
+
+# AXI-Stream
+dma = overlay.axi_dma_0
+dma_send = dma.sendchannel
+dma_recv = dma.recvchannel
+
+# Function string
+function_str = "${function_str}"
+
+# Function parsing
+x = symbols('x')
+function_expr = sympify(function_str)
+numpy_function = lambdify(x, function_expr, modules=['numpy'])
+
+# Evaluator parameters
+data_width, x_min, x_max, y_min, y_max = ${data_width}, ${x_min}, ${x_max}, ${y_min}, ${y_max}
+x_step = (x_max - x_min) / (2 ** data_width)
+y_step = (x_max - x_min) / (2 ** data_width)
+
+# Conversion methods
+def convert_x_to_discrete_vectorized(x_vector):
+    float_quotient = (x_vector - x_min) / x_step
+    float_remainder = float_quotient % 1
+    nearest_int = np.where(float_remainder < 0.5, np.floor(float_quotient), np.floor(float_quotient) + 1)
+    return np.clip(nearest_int, 0, 2 ** data_width - 1).astype(np.uint16)
+def convert_y_to_real_vectorized(y_vector):
+    return y_min + y_vector * y_step
+
+# X values
+x_real_values = np.arange(x_min, x_max, 0.001)
+x_discrete_values = allocate(shape=(len(x_real_values),), dtype=np.uint16)
+discrete_result = convert_x_to_discrete_vectorized(x_real_values)
+np.copyto(x_discrete_values, discrete_result)
+
+# Y theoretical values
+y_theoretical_values = numpy_function(x_real_values).astype(np.float32)
+
+# Y experimental values
+y_discrete_values = allocate(shape=(len(x_real_values),), dtype=np.uint16)
+dma_send.transfer(x_discrete_values)
+dma_recv.transfer(y_discrete_values)
+dma_recv.wait()
+y_experimental_values = convert_y_to_real_vectorized(y_discrete_values)
+
+# Absolute error computation
+y_absolute_errors = np.abs(y_theoretical_values - y_experimental_values)
+max_absolute_error = np.max(y_absolute_errors)
+mean_absolute_error = np.mean(y_absolute_errors)
+
+# Relative error computation
+y_relative_errors = np.where(
+    y_theoretical_values == 0,
+    0.0,
+    np.abs((y_theoretical_values - y_experimental_values) / y_theoretical_values)
+)
+max_relative_error = np.max(y_relative_errors)
+mean_relative_error = np.mean(y_relative_errors)
+
+# Computing and saving comparison plot
+plt.figure(figsize=(20, 10))
+plt.plot(x_real_values, y_theoretical_values, color='blue', linewidth=5, label='Theoretical values')
+plt.plot(x_real_values, y_experimental_values, color='red', linewidth=5, label='Experimental values')
+plt.title('Theoretical values vs. experimental values', fontsize=40)
+plt.xlabel('x', fontsize=30)
+plt.ylabel('Values', fontsize=30)
+plt.grid(True)
+plt.xticks(fontsize=30)
+plt.yticks(fontsize=30)
+plt.legend(loc='upper center', bbox_to_anchor=(0.95, 0.6), fontsize=25)
+plt.savefig("./curves_${module_name}.png")
+
+# Computing and saving absolute error plot
+plt.figure(figsize=(20, 10))
+plt.plot(x_real_values, y_absolute_errors, color='blue', linewidth=3, label="Absolute errors")
+plt.plot(x_real_values, [max_absolute_error for _ in range(len(x_real_values))], color='red', linewidth=5, label=f"Max error = {"{:.3g}".format(max_absolute_error)}")
+plt.plot(x_real_values, [mean_absolute_error for _ in range(len(x_real_values))], color='orange', linewidth=5, label=f"Mean error = {"{:.3g}".format(mean_absolute_error)}")
+plt.title('Absolute error of evaluator values', fontsize=30)
+plt.xlabel('x', fontsize=30)
+plt.ylabel('Absolute error', fontsize=30)
+plt.grid(True)
+plt.xticks(fontsize=30)
+plt.yticks(fontsize=30)
+plt.legend(loc='upper center', bbox_to_anchor=(0.95, 0.6), fontsize=25)
+plt.savefig("./error_absolute_${module_name}.png")
+
+# Computing and saving relative error plot
+plt.figure(figsize=(20, 10))
+plt.plot(x_real_values, y_relative_errors, color='blue', linewidth=3, label="Relative errors")
+plt.plot(x_real_values, [max_relative_error for _ in range(len(x_real_values))], color='red', linewidth=5, label=f"Max error = {"{:.3g}".format(max_relative_error)}")
+plt.plot(x_real_values, [mean_relative_error for _ in range(len(x_real_values))], color='orange', linewidth=5, label=f"Mean error = {"{:.3g}".format(mean_relative_error)}")
+plt.title('Relative error of evaluator values', fontsize=30)
+plt.xlabel('x', fontsize=30)
+plt.ylabel('Relative error', fontsize=30)
+plt.grid(True)
+plt.xticks(fontsize=30)
+plt.yticks(fontsize=30)
+plt.legend(loc='upper center', bbox_to_anchor=(0.95, 0.6), fontsize=25)
+plt.savefig("./error_relative_${module_name}.png")

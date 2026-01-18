@@ -29,13 +29,27 @@ class GenerationSymmetric(GenerationStage):
             delta_y_group: float = lambda_function((group_idx + 1) * delta_x_group + ctx.x_min) - lambda_function(group_idx * delta_x_group + ctx.x_min)
             group_slope: float = delta_y_group / delta_x_group
             segment_y_offset: float = group_slope * (delta_x_segment / 2)
-            offset_table += utils.compute_relative_discrete_output(f"{group_slope}*x", ctx.data_width - ctx.segment_idx_width - 1, 0, delta_x_segment / 2, ctx.data_width, (ctx.y_min - ctx.y_max) / 2, (ctx.y_max - ctx.y_min) / 2, segment_y_offset)
+            offset_table += utils.compute_relative_discrete_output(
+                function_str=f"{group_slope}*x", 
+                x_data_width=ctx.data_width - ctx.segment_idx_width - 1, 
+                x_min=0, 
+                x_max=delta_x_segment / 2, 
+                y_data_width=ctx.data_width, 
+                y_min=(ctx.y_min - ctx.y_max) / 2, 
+                y_max=(ctx.y_max - ctx.y_min) / 2, 
+                y_origin=segment_y_offset
+            )
 
             for segment_idx in range(2**(ctx.segment_idx_width-ctx.group_idx_width)):
                 x_start_segment: float = group_idx * delta_x_group + segment_idx * delta_x_segment + ctx.x_min
                 x_middle_segment: float = x_start_segment + delta_x_segment / 2
                 y_middle_segment: float = lambda_function(x_middle_segment)
-                input_table.append(utils.clamp_nearest(y_middle_segment, ctx.y_min, y_step, ctx.data_width))
+                input_table.append(utils.clamp_nearest(
+                    value=y_middle_segment, 
+                    window_min=ctx.y_min, 
+                    window_step=y_step, 
+                    window_bit_width=ctx.data_width
+                ))
 
         # VHDL behavioral code generation
         offset_code: str = ""

@@ -1,4 +1,4 @@
-# Get command line arguments for module name
+# Get command line arguments
 set fpga_board [lindex $argv 0]
 set output_folder [lindex $argv 1]
 set module_name [lindex $argv 2]

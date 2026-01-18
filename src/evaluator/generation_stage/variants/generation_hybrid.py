@@ -19,7 +19,15 @@ class GenerationHybrid(GenerationStage):
         folder_path.mkdir(parents=True, exist_ok=True)
 
         # Discrete output calculation
-        y_discrete_values: list[int] = utils.compute_discrete_output(ctx.math_function, ctx.data_width, ctx.x_min, ctx.x_max, ctx.data_width, ctx.y_min, ctx.y_max)
+        y_discrete_values: list[int] = utils.compute_discrete_output(
+            function_str=ctx.math_function, 
+            x_data_width=ctx.data_width, 
+            x_min=ctx.x_min, 
+            x_max=ctx.x_max, 
+            y_data_width=ctx.data_width, 
+            y_min=ctx.y_min, 
+            y_max=ctx.y_max
+        )
 
         # Division in subfunctions
         segment_width: int = ctx.data_width - ctx.segment_idx_width
