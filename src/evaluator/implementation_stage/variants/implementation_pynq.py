@@ -7,12 +7,13 @@ from string import Template
 import paramiko
 from paramiko import SSHClient
 from scp import SCPClient
+from typing import Any
 
 from evaluator.context import Context
 from evaluator.implementation_stage.implementation_registry import ImplementationRegistry
 from evaluator.implementation_stage.implementation_base import ImplementationStage
 
-@ImplementationRegistry.register(predicate=lambda ctx: ctx.fpga_board == "xc7z020clg400-1", priority=1)
+@ImplementationRegistry.register(predicate=lambda ctx: ctx.implementation_tool == "vivado" and ctx.fpga_board == "xc7z020clg400-1", priority=1)
 class ImplementationPynq(ImplementationStage):
     """
     PYNQ implementation stage
@@ -160,6 +161,20 @@ end arch_stream_top_{ctx.circuit_name};
         )
         target_file.write_text(target_script)
 
+        # IMPORTANT - Ask before establishing SSH connection
+        print("------------------------------------")
+        print("--- WARNING: SENSITIVE OPERATION ---")
+        print("------------------------------------")
+        print(f"FPGAEvaluator is about to interact with your target {ctx.fpga_board}:")
+        print(f"    > it will connect to {ctx.username}@{ctx.ip_address} with password {ctx.password},")
+        print(f"    > it will send/execute/download files to/from the directory {ctx.fpga_working_folder_path}.")
+        choice: str = input(">>> Do you want to continue? [y/N]: ").strip().lower()
+        if choice not in ['y', 'yes']:
+            print("---------------------------")
+            print("--- OPERATION CANCELLED ---")
+            print("---------------------------")
+            return False
+
         # Establishing SSH connection to the board
         ssh: SSHClient = paramiko.SSHClient()
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -172,22 +187,32 @@ end arch_stream_top_{ctx.circuit_name};
             scp.put(f"{str(bit_folder_path)}/target.py", f"{ctx.fpga_working_folder_path}/target.py")
         
         # Command for target script execution (needs PYNQ setup via specific bash scripts)
-        cmd: str = '''
-cd /home/xilinx/sandbox && echo "xilinx" | sudo -S su -c '
+        cmd: str = f'''
+cd {ctx.fpga_working_folder_path} && echo "xilinx" | sudo -S su -c '
 source /etc/profile.d/pynq_venv.sh
 source /etc/profile.d/xrt_setup.sh
 python3 target.py
 '
         '''
-        ssh.exec_command(cmd, get_pty=True, timeout=120)
+        stdin, stdout, stderr = ssh.exec_command(cmd, get_pty=True, timeout=120)
+        exit_status: int = stdout.channel.recv_exit_status() 
 
-        # Downloading output files with SCP
-        scp.get(f"{ctx.fpga_working_folder_path}/curves_${ctx.circuit_name}.png", f"{str(bit_folder_path)}/curves_${ctx.circuit_name}.png")
-        scp.get(f"{ctx.fpga_working_folder_path}/error_absolute_${ctx.circuit_name}.png", f"{str(bit_folder_path)}/error_absolute_${ctx.circuit_name}.png")
-        scp.get(f"{ctx.fpga_working_folder_path}/error_relative_${ctx.circuit_name}.png", f"{str(bit_folder_path)}/error_relative_${ctx.circuit_name}.png")
-
-        # Closing connection 
-        scp.close()
-        ssh.close()
-
-        return True
+        if exit_status == 0:  
+            
+            # Downloading output files with SCP
+            scp.get(f"{ctx.fpga_working_folder_path}/curves_{ctx.circuit_name}.png", f"{str(bit_folder_path)}/curves_{ctx.circuit_name}.png")
+            scp.get(f"{ctx.fpga_working_folder_path}/error_absolute_{ctx.circuit_name}.png", f"{str(bit_folder_path)}/error_absolute_{ctx.circuit_name}.png")
+            scp.get(f"{ctx.fpga_working_folder_path}/error_relative_{ctx.circuit_name}.png", f"{str(bit_folder_path)}/error_relative_{ctx.circuit_name}.png")
+            
+            # Closing connection 
+            scp.close()
+            ssh.close()
+            return True
+        
+        else:
+            
+            # Error handling and closing connection
+            print(f"[ERROR] Target script execution unsuccessful for circuit {ctx.circuit_name}: {stderr.read().decode()}")
+            scp.close()
+            ssh.close()
+            return False
