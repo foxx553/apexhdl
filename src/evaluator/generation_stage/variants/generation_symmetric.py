@@ -1,10 +1,10 @@
 from pathlib import Path
 from typing import Any
 
-from context import Context
-from generation_registry import GenerationRegistry
-from generation_base import GenerationStage
-import utils
+from evaluator.context import Context
+from evaluator.generation_stage.generation_registry import GenerationRegistry
+from evaluator.generation_stage.generation_base import GenerationStage
+import evaluator.utils as utils
 
 @GenerationRegistry.register(predicate=lambda ctx: ctx.method_name == "symmetric", priority=1)
 class GenerationSymmetric(GenerationStage):
@@ -66,7 +66,7 @@ class GenerationSymmetric(GenerationStage):
 -------------------------------------
 -- Generated with FPGAEvaluator, a tool created by Florian Delhon and Kevin Peymani
 -- Target: {ctx.fpga_board}
--- Module Name: {ctx.evaluator_name}
+-- Module Name: {ctx.circuit_name}
 -- Function: f(x) = {ctx.math_function}
 -- Evaluator method: Symmetric
 -- Data width: {ctx.data_width} bits
@@ -79,7 +79,7 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 
-entity {ctx.evaluator_name} is
+entity {ctx.circuit_name} is
     generic (
         DATA_WIDTH : positive := {ctx.data_width};
         GROUP_IDX_WIDTH : positive := {ctx.group_idx_width};
@@ -89,9 +89,9 @@ entity {ctx.evaluator_name} is
         input_a : in STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0);
         result : out STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0)
     );
-end {ctx.evaluator_name};
+end {ctx.circuit_name};
 
-architecture arch_{ctx.evaluator_name} of {ctx.evaluator_name} is
+architecture arch_{ctx.circuit_name} of {ctx.circuit_name} is
     
     attribute rom_style : string;
     signal offset_entry_lower : STD_LOGIC_VECTOR(DATA_WIDTH - SEGMENT_IDX_WIDTH - 2 downto 0);
@@ -147,7 +147,7 @@ begin
         end if;
     end process adder;
 
-end arch_{ctx.evaluator_name};
+end arch_{ctx.circuit_name};
         """
 
         # VHDL file writing

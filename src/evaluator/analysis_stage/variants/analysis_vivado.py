@@ -3,9 +3,9 @@ import subprocess
 from subprocess import CompletedProcess
 import shutil
 
-from context import Context
-from analysis_registry import AnalysisRegistry
-from analysis_base import AnalysisStage
+from evaluator.context import Context
+from evaluator.analysis_stage.analysis_registry import AnalysisRegistry
+from evaluator.analysis_stage.analysis_base import AnalysisStage
 
 @AnalysisRegistry.register(predicate=lambda ctx: ctx.analysis_tool == "vivado", priority=1)
 class AnalysisVivado(AnalysisStage):
@@ -59,7 +59,7 @@ end arch_top_{ctx.circuit_name};
 
         # VHDL file writing
         top_file: Path = folder_path / f"top_{ctx.circuit_name}.vhd"
-        top_file.write(vhdl_code)
+        top_file.write_text(vhdl_code)
 
         # Vivado execution in batch mode
         cmd = [

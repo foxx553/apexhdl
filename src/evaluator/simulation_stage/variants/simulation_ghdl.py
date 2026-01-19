@@ -5,10 +5,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 from typing import Any
 
-from context import Context
-from simulation_registry import SimulationRegistry
-from simulation_base import SimulationStage
-import utils
+from evaluator.context import Context
+from evaluator.simulation_stage.simulation_registry import SimulationRegistry
+from evaluator.simulation_stage.simulation_base import SimulationStage
+import evaluator.utils as utils
 
 @SimulationRegistry.register(predicate=lambda ctx: ctx.simulation_tool == "ghdl", priority=1)
 class SimulationGhdl(SimulationStage):

@@ -1,10 +1,10 @@
 from pathlib import Path
 from typing import Any
 
-from context import Context
-from generation_registry import GenerationRegistry
-from generation_base import GenerationStage
-import utils
+from evaluator.context import Context
+from evaluator.generation_stage.generation_registry import GenerationRegistry
+from evaluator.generation_stage.generation_base import GenerationStage
+import evaluator.utils as utils
 
 @GenerationRegistry.register(predicate=lambda ctx: ctx.method_name == "bipartite", priority=1)
 class GenerationBipartite(GenerationStage):

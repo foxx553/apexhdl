@@ -8,9 +8,9 @@ import paramiko
 from paramiko import SSHClient
 from scp import SCPClient
 
-from context import Context
-from implementation_registry import ImplementationRegistry
-from implementation_base import ImplementationStage
+from evaluator.context import Context
+from evaluator.implementation_stage.implementation_registry import ImplementationRegistry
+from evaluator.implementation_stage.implementation_base import ImplementationStage
 
 @ImplementationRegistry.register(predicate=lambda ctx: ctx.fpga_board == "xc7z020clg400-1", priority=1)
 class ImplementationPynq(ImplementationStage):
@@ -117,7 +117,7 @@ end arch_stream_top_{ctx.circuit_name};
 
         # VHDL file writing
         stream_top_file: Path = folder_path / f"stream_top_{ctx.circuit_name}.vhd"
-        stream_top_file.write(vhdl_code)
+        stream_top_file.write_text(vhdl_code)
 
         # Vivado execution in batch mode
         cmd = [

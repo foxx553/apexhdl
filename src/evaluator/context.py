@@ -2,10 +2,6 @@ from dataclasses import dataclass
 from typing import Optional
 from pathlib import Path
 
-from dataclasses import dataclass
-from pathlib import Path
-from typing import Optional
-
 @dataclass
 class Context:
     """
@@ -76,10 +72,4 @@ class Context:
 
     fpga_working_folder_path: Optional[str] = None
     """Folder on the target FPGA in which all files will be sent and executed"""
-
-    pynq_venv_setup_script_path: Optional[str] = None
-    """Shell script of the PYNQ image which activates the Python Virtual Environment"""
-
-    xilinx_runtime_script_path: Optional[str] = None
-    """Shell script of the PYNQ image which sets up environment variables for Xilinx Run Time"""
     

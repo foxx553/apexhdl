@@ -1,7 +1,9 @@
 from typing import List, Optional
+import pkgutil
+import importlib
 from evaluator.context import Context
 from evaluator.utils import Predicate
-from simulation_base import SimulationClass
+from evaluator.simulation_stage.simulation_base import SimulationClass
 
 class SimulationRegistry:
     """
@@ -42,3 +44,15 @@ class SimulationRegistry:
                 return simulation_class
         
         raise RuntimeError("No simulation variant found matching the starting context")
+    
+    @classmethod
+    def load_variants(cls):
+        """
+        Dynamic import of all variants in ./variants subfolder
+        """
+        import evaluator.simulation_stage.variants as variants_pkg
+        for loader, module_name, is_pkg in pkgutil.walk_packages(
+            variants_pkg.__path__, 
+            variants_pkg.__name__ + "."
+        ):
+            importlib.import_module(module_name)

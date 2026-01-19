@@ -2,7 +2,7 @@
 set output_folder [lindex $argv 0]
 set module_name [lindex $argv 1]
 
-# Create in-memory project for faster processing
+# Create in-memory project
 create_project -in_memory -part xc7z020clg400-1
 
 # Add VHDL source and constraints files
@@ -48,4 +48,5 @@ route_design
 write_bitstream -force ../output/${module_name}/bit/${module_name}.bit
 write_hw_platform -fixed -force -file ../output/${module_name}/bit/${module_name}.xsa
 
+# Close project
 close_project

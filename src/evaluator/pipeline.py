@@ -1,12 +1,16 @@
-from context import Context
-from generation_stage.generation_base import GenerationStage
-from simulation_stage.simulation_base import SimulationStage
-from analysis_stage.analysis_base import AnalysisStage
-from implementation_stage.implementation_base import ImplementationStage
-from generation_stage.generation_registry import GenerationRegistry
-from simulation_stage.simulation_registry import SimulationRegistry
-from analysis_stage.analysis_registry import AnalysisRegistry
-from implementation_stage.implementation_registry import ImplementationRegistry
+from evaluator.context import Context
+from evaluator.generation_stage.generation_base import GenerationStage
+from evaluator.simulation_stage.simulation_base import SimulationStage
+from evaluator.analysis_stage.analysis_base import AnalysisStage
+from evaluator.implementation_stage.implementation_base import ImplementationStage
+from evaluator.generation_stage.generation_registry import GenerationRegistry
+from evaluator.simulation_stage.simulation_registry import SimulationRegistry
+from evaluator.analysis_stage.analysis_registry import AnalysisRegistry
+from evaluator.implementation_stage.implementation_registry import ImplementationRegistry
+from evaluator.generation_stage.generation_base import GenerationClass
+from evaluator.simulation_stage.simulation_base import SimulationClass
+from evaluator.analysis_stage.analysis_base import AnalysisClass
+from evaluator.implementation_stage.implementation_base import ImplementationClass
 
 class Pipeline:
     """
@@ -37,12 +41,26 @@ class Pipeline:
             ctx (Context): Context of the new pipeline
         """
 
+        # Init the context
         self.context = ctx
 
-        self.generation_stage = GenerationRegistry.select(ctx)
-        self.simulation_stage = SimulationRegistry.select(ctx)
-        self.analysis_stage = AnalysisRegistry.select(ctx)
-        self.implementation_stage = ImplementationRegistry.select(ctx)
+        # Loading all variants in registries
+        GenerationRegistry.load_variants()
+        SimulationRegistry.load_variants()
+        AnalysisRegistry.load_variants()
+        ImplementationRegistry.load_variants()
+
+        # Selecting the correct variants
+        generation_variant: GenerationClass = GenerationRegistry.select(ctx)
+        simulation_variant: SimulationClass = SimulationRegistry.select(ctx)
+        analysis_variant: AnalysisClass = AnalysisRegistry.select(ctx)
+        implementation_variant: ImplementationClass = ImplementationRegistry.select(ctx)
+
+        # Instanciating these variants
+        self.generation_stage = generation_variant()
+        self.simulation_stage = simulation_variant()
+        self.analysis_stage = analysis_variant()
+        self.implementation_stage = implementation_variant()
 
 
     def run(self) -> bool:

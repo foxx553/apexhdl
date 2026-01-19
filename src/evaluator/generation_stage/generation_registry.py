@@ -1,7 +1,9 @@
 from typing import List, Optional
+import pkgutil
+import importlib
 from evaluator.context import Context
 from evaluator.utils import Predicate
-from generation_base import GenerationClass
+from evaluator.generation_stage.generation_base import GenerationClass
 
 class GenerationRegistry:
     """
@@ -21,7 +23,7 @@ class GenerationRegistry:
             priority (int): Predicate priority (higher number for higher priority)
         """
         def decorator(generation_class: GenerationClass) -> GenerationClass:
-            cls._variants.append(0, (priority, predicate, generation_class))
+            cls._variants.insert(0, (priority, predicate, generation_class))
             cls._variants.sort(key = lambda x: x[0], reverse=True)
             return generation_class
         return decorator
@@ -42,3 +44,15 @@ class GenerationRegistry:
                 return generation_class
         
         raise RuntimeError("No generation variant found matching the starting context")
+    
+    @classmethod
+    def load_variants(cls):
+        """
+        Dynamic import of all variants in ./variants subfolder
+        """
+        import evaluator.generation_stage.variants as variants_pkg
+        for loader, module_name, is_pkg in pkgutil.walk_packages(
+            variants_pkg.__path__, 
+            variants_pkg.__name__ + "."
+        ):
+            importlib.import_module(module_name)

@@ -1,5 +1,5 @@
 from typing import Callable, Any
-from context import Context
+from evaluator.context import Context
 from sympy import symbols, sympify, lambdify
 import numpy as np
 

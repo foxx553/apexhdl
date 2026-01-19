@@ -1,6 +1,6 @@
-from context import Context
-from analysis_registry import AnalysisRegistry
-from analysis_base import AnalysisStage
+from evaluator.context import Context
+from evaluator.analysis_stage.analysis_registry import AnalysisRegistry
+from evaluator.analysis_stage.analysis_base import AnalysisStage
 
 @AnalysisRegistry.register(predicate=lambda ctx: True, priority=0)
 class AnalysisDefault(AnalysisStage):

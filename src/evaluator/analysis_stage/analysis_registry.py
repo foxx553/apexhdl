@@ -1,7 +1,9 @@
 from typing import List, Optional
+import pkgutil
+import importlib
 from evaluator.context import Context
 from evaluator.utils import Predicate
-from analysis_base import AnalysisClass
+from evaluator.analysis_stage.analysis_base import AnalysisClass
 
 class AnalysisRegistry:
     """
@@ -42,3 +44,15 @@ class AnalysisRegistry:
                 return analysis_class
         
         raise RuntimeError("No analysis variant found matching the starting context")
+    
+    @classmethod
+    def load_variants(cls):
+        """
+        Dynamic import of all variants in ./variants subfolder
+        """
+        import evaluator.analysis_stage.variants as variants_pkg
+        for loader, module_name, is_pkg in pkgutil.walk_packages(
+            variants_pkg.__path__, 
+            variants_pkg.__name__ + "."
+        ):
+            importlib.import_module(module_name)

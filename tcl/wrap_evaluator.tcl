@@ -5,8 +5,7 @@
 # -
 # Features:
 #       FPGA board xc7z020clg400-1
-#       DMA interface between PL and PS
-#       AXI-Stream protocol
+#       AXI-Stream protocol, w/ DMA
 ################################################################
 ################################################################
 
