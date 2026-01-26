@@ -1,10 +1,6 @@
-import argparse
-from argparse import ArgumentParser, _ArgumentGroup, Namespace
-from pathlib import Path
-
 from evaluator.context import Context
 from evaluator.pipeline import Pipeline
-from args_parser import ArgsParser
+from evaluator.context_builder import ContextBuilder
 
 # Main function
 def main():
@@ -13,8 +9,8 @@ def main():
     """
 
     # Parsing and mapping to Context dataclass
-    parser: ArgsParser = ArgsParser()
-    ctx: Context = parser.parse()
+    builder: ContextBuilder = ContextBuilder()
+    ctx: Context = builder.build()
 
     # Building the corresponding pipeline
     pipeline: Pipeline = Pipeline(ctx)

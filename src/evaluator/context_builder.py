@@ -4,14 +4,14 @@ from pathlib import Path
 
 from evaluator.context import Context
 
-class ArgsParser:
+class ContextBuilder:
     """
-    Class for parsing and validating FPGAEvaluator args
+    Class for building Context based on args
     """
 
     def __init__(self):
         """
-        Parser initialization
+        Context builder initialization
         """
 
         # Init parser
@@ -52,7 +52,7 @@ class ArgsParser:
         hw.add_argument("--password", help="Password for SSH connection to the target FPGA")
         hw.add_argument("--fpga-working-folder-path", help="Folder on the target FPGA in which all files will be sent and executed")
 
-    def parse(self) -> Context:
+    def build(self) -> Context:
         """
         Parsing args to build Context object
 
