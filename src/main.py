@@ -1,6 +1,8 @@
+from typing import Any, Dict
+
 from evaluator.context import Context
 from evaluator.pipeline import Pipeline
-from evaluator.context_builder import ContextBuilder
+from evaluator.initializer import Initializer
 
 # Main function
 def main():
@@ -8,15 +10,12 @@ def main():
     Main function, entry point of the FPGAEvaluator code
     """
 
-    # Parsing and mapping to Context dataclass
-    builder: ContextBuilder = ContextBuilder()
-    ctx: Context = builder.build()
+    # Parsing args
+    initializer: Initializer = Initializer()
+    args_dict: Dict[str, Any] = initializer.build_dict()
 
-    # Building the corresponding pipeline
-    pipeline: Pipeline = Pipeline(ctx)
-
-    # Running the pipeline
-    pipeline.run()
+    # Running pipeline(s)
+    initializer.run(args_dict)
 
 # Entry point
 if __name__ == "__main__":

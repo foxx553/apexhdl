@@ -44,12 +44,6 @@ class Pipeline:
         # Init the context
         self.context = ctx
 
-        # Loading all variants in registries
-        GenerationRegistry.load_variants()
-        SimulationRegistry.load_variants()
-        AnalysisRegistry.load_variants()
-        ImplementationRegistry.load_variants()
-
         # Selecting the correct variants
         generation_variant: GenerationClass = GenerationRegistry.select(ctx)
         simulation_variant: SimulationClass = SimulationRegistry.select(ctx)

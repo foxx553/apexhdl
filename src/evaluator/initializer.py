@@ -3,23 +3,35 @@ import json
 from argparse import ArgumentParser, _ArgumentGroup, Namespace
 from pathlib import Path
 from typing import Any, Dict
+import itertools
 
 from evaluator.context import Context
+from evaluator.pipeline import Pipeline
+from evaluator.generation_stage.generation_registry import GenerationRegistry
+from evaluator.simulation_stage.simulation_registry import SimulationRegistry
+from evaluator.analysis_stage.analysis_registry import AnalysisRegistry
+from evaluator.implementation_stage.implementation_registry import ImplementationRegistry
 
-class ContextBuilder:
+class Initializer:
     """
-    Class for building Context based on args or a JSON configuration file.
+    Class to parse args and init execution, eventually managing benchmarking mode
     """
 
     parser: ArgumentParser
-    """Parser used for Context building"""
+    """Parser used for dictionary building"""
 
     def __init__(self):
         """
-        Context builder initialization
+        Execution initialization
         """
 
-        # Parser init
+        # Loading all variants in registries
+        GenerationRegistry.load_variants()
+        SimulationRegistry.load_variants()
+        AnalysisRegistry.load_variants()
+        ImplementationRegistry.load_variants()
+
+        # Init parser
         self.parser = argparse.ArgumentParser(description="FPGAEvaluator - A CLI Tool for Generating and Validating Unary and Binary Function Evaluators")
 
         # Config
@@ -28,14 +40,14 @@ class ContextBuilder:
 
         # General
         gen: _ArgumentGroup = self.parser.add_argument_group("General")
-        gen.add_argument("--method-name", choices=["rom", "bipartite", "symmetric", "hybrid", "unary"], help="Name of the circuit generation method")
+        gen.add_argument("--method-name", nargs="+", choices=["rom", "bipartite", "symmetric", "hybrid", "unary"], help="Name of the circuit generation method")
         gen.add_argument("--circuit-name", help="Name of the circuit generated")
         gen.add_argument("--output-folder-path", type=Path, help="Folder where all generated files will be put")
         gen.add_argument("--step", choices=["sim", "rpt", "rpt-impl", "impl"], help="Steps done for the generation")
 
         # Maths
         maths: _ArgumentGroup = self.parser.add_argument_group("Maths")
-        maths.add_argument("--math-function", help="Mathematical function to be approximated")
+        maths.add_argument("--math-function", nargs="+", help="Mathematical function to be approximated")
         maths.add_argument("--x-min", type=float, help="Minimum X value")
         maths.add_argument("--x-max", type=float, help="Maximum X value")
         maths.add_argument("--y-min", type=float, help="Minimum Y value")
@@ -43,7 +55,7 @@ class ContextBuilder:
 
         # Generation
         build: _ArgumentGroup = self.parser.add_argument_group("Generation")
-        build.add_argument("--data-width", type=int, help="Number of bits of the approximation")
+        build.add_argument("--data-width", nargs="+", type=int, help="Number of bits of the approximation")
         build.add_argument("--segment-idx-width", type=int, help="Number of bits for indexing segments")
         build.add_argument("--group-idx-width", type=int, help="Number of bits for indexing groups")
 
@@ -51,7 +63,6 @@ class ContextBuilder:
         sw: _ArgumentGroup = self.parser.add_argument_group("Software")
         sw.add_argument("--simulation-tool", choices=["ghdl"], help="Software used for circuit simulation")
         sw.add_argument("--analysis-tool", choices=["vivado"], help="Software used for circuit analysis")
-        sw.add_argument("--analysis-mode", choices=["synth", "impl"], help="Post-synthesis or post-implementation")
         sw.add_argument("--implementation-tool", choices=["vivado"], help="Software used for implementation")
 
         # Hardware
@@ -62,12 +73,12 @@ class ContextBuilder:
         hw.add_argument("--password", help="Password for SSH connection")
         hw.add_argument("--fpga-working-folder-path", help="Folder on the target FPGA")
 
-    def build(self) -> Context:
+    def build_dict(self) -> dict:
         """
-        Parsing args to build Context object, with CLI args overriding JSON configuration values
+        Parsing args to create args dictionary, with CLI overwriting JSON default config
 
         Returns:
-            Context: Resulting context for pipeline execution
+            dict: Dictionary with all args and their value(s)
         """
 
         # If there's a JSON config file, defining default values
@@ -84,7 +95,53 @@ class ContextBuilder:
         args: Namespace = self.parser.parse_args()
 
         # Removing the "json" key before building the context
-        context_dict = vars(args).copy()
-        context_dict.pop('config', None)
+        args_dict: Dict[str, Any] = vars(args).copy()
+        args_dict.pop('config', None)
+        
+        return args_dict
+    
+    def run(self, args_dict: Dict[str, Any]) -> bool:
+        """
+        Running the pipeline(s), eventually managing benchmarking mode
 
-        return Context(**context_dict)
+        Parameters:
+            args_dict (Dict[str, Any]): Dictionary with all args and their value(s)
+        
+        Returns:
+            bool: Whether the overall execution was successful or not
+        """
+
+        # Generating all possible configurations
+        keys: list[str] = args_dict.keys()
+        values: list[list[Any]] = [value if isinstance(value, list) else [value] for value in args_dict.values()]
+        configurations: list[Any] = list(itertools.product(*values))
+
+        # Normal mode
+        if len(configurations) == 1:
+
+            # Just running the only configuration
+            ctx: Context = Context(**args_dict)
+            pipeline: Pipeline = Pipeline(ctx)
+            pipeline.run()
+
+        # Benchmarking mode
+        elif len(configurations) > 1:
+
+            # Running all possible configurations
+            counter: int = 1
+            for config in configurations:
+
+                # Building the current configuration
+                current_args_dict: Dict[str, Any] = dict(zip(keys, config))
+                current_ctx: Context = Context(**current_args_dict)
+
+                # Adding ID to circuit_name for uniqueness
+                current_ctx.circuit_name = current_ctx.circuit_name + f"{counter:03}"
+                counter = counter + 1
+
+                # Running the current configuration
+                current_pipeline: Pipeline = Pipeline(current_ctx)
+                current_pipeline.run()
+
+        return True
+    

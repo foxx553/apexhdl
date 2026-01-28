@@ -17,6 +17,9 @@ class GenerationHybrid(GenerationStage):
         # Create folder if necessary
         folder_path: Path = ctx.output_folder_path / ctx.circuit_name / "vhdl"
         folder_path.mkdir(parents=True, exist_ok=True)
+        
+        # If necessary, putting default values for group and segment indexes
+        ctx.segment_idx_width = ctx.segment_idx_width if ctx.segment_idx_width is not None else math.ceil(ctx.data_width / 2)
 
         # Discrete output calculation
         y_discrete_values: list[int] = utils.compute_discrete_output(

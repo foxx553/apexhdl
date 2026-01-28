@@ -1,5 +1,6 @@
 from pathlib import Path
 from typing import Any
+import math
 
 from evaluator.context import Context
 from evaluator.generation_stage.generation_registry import GenerationRegistry
@@ -17,6 +18,10 @@ class GenerationSymmetric(GenerationStage):
         # Create folder if necessary
         folder_path: Path = ctx.output_folder_path / ctx.circuit_name / "vhdl"
         folder_path.mkdir(parents=True, exist_ok=True)
+
+        # If necessary, putting default values for group and segment indexes
+        ctx.segment_idx_width = ctx.segment_idx_width if ctx.segment_idx_width is not None else math.ceil(ctx.data_width / 2)
+        ctx.group_idx_width = ctx.group_idx_width if ctx.group_idx_width is not None else math.ceil(ctx.data_width / 4)
 
         # Offset table and Input table calculations
         lambda_function: Any = utils.lambdify_function(ctx.math_function)
