@@ -8,7 +8,7 @@ class Context:
     Context of the approximator's generation
     """
     
-    # --- General ---
+    # General
     method_name: str
     """Name of the circuit generation method"""
 
@@ -18,7 +18,10 @@ class Context:
     output_folder_path: Path
     """Folder where all generated files will be put"""
 
-    # --- Maths ---
+    step: str
+    """Steps done for the generation"""
+
+    # Maths
     math_function: str
     """Mathematical function to be approximated by the generated circuit"""
 
@@ -34,7 +37,7 @@ class Context:
     y_max: float
     """Maximum Y value of the approximation region"""
 
-    # --- Generation ---
+    # Generation
     data_width: int
     """Number of bits of the approximation"""
 
@@ -44,20 +47,17 @@ class Context:
     group_idx_width: Optional[int] = None
     """Number of bits for indexing groups of segments (if applicable)"""
 
-    # --- Software ---
+    # Software
     simulation_tool: Optional[str] = None
     """Software used for circuit simulation"""
 
     analysis_tool: Optional[str] = None
     """Software used for circuit analysis"""
 
-    analysis_mode: Optional[str] = None
-    """Whether the analysis is done post-synthesis or post-implementation"""
-
     implementation_tool: Optional[str] = None
     """Software used for circuit implementation and bitstream generation"""
     
-    # --- Hardware ---
+    # Hardware
     fpga_board: Optional[str] = None
     """Part number of the target FPGA"""
 

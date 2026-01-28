@@ -13,7 +13,7 @@ from evaluator.context import Context
 from evaluator.implementation_stage.implementation_registry import ImplementationRegistry
 from evaluator.implementation_stage.implementation_base import ImplementationStage
 
-@ImplementationRegistry.register(predicate=lambda ctx: ctx.implementation_tool == "vivado" and ctx.fpga_board == "xc7z020clg400-1", priority=1)
+@ImplementationRegistry.register(predicate=lambda ctx: ctx.step == "impl" and ctx.implementation_tool == "vivado" and ctx.fpga_board == "xc7z020clg400-1", priority=1)
 class ImplementationPynq(ImplementationStage):
     """
     PYNQ implementation stage

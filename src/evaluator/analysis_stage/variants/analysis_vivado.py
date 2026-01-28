@@ -7,7 +7,7 @@ from evaluator.context import Context
 from evaluator.analysis_stage.analysis_registry import AnalysisRegistry
 from evaluator.analysis_stage.analysis_base import AnalysisStage
 
-@AnalysisRegistry.register(predicate=lambda ctx: ctx.analysis_tool == "vivado", priority=1)
+@AnalysisRegistry.register(predicate=lambda ctx: "rpt" in ctx.step and ctx.analysis_tool == "vivado", priority=1)
 class AnalysisVivado(AnalysisStage):
     """
     Vivado analysis stage
@@ -66,7 +66,7 @@ end arch_top_{ctx.circuit_name};
             "vivado",
             "-mode", "batch",
             "-source", tcl_script,
-            "-tclargs", ctx.fpga_board, ctx.output_folder_path, ctx.circuit_name, ctx.analysis_mode
+            "-tclargs", ctx.fpga_board, ctx.output_folder_path, ctx.circuit_name, ctx.step
         ]
         vivado_result: CompletedProcess[str] = subprocess.run(cmd, shell=True, text=True)
 
