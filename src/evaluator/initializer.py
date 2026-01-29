@@ -43,7 +43,7 @@ class Initializer:
         gen.add_argument("--method-name", nargs="+", choices=["rom", "bipartite", "symmetric", "hybrid", "unary"], help="Name of the circuit generation method")
         gen.add_argument("--circuit-name", help="Name of the circuit generated")
         gen.add_argument("--output-folder-path", type=Path, help="Folder where all generated files will be put")
-        gen.add_argument("--step", choices=["sim", "rpt", "rpt-impl", "impl"], help="Steps done for the generation")
+        gen.add_argument("--step", choices=["sim", "rpt", "rpt-impl", "impl"], help="Steps done for the generation (sim = simulation-only, rpt = analysis after synthesis, rpt = analysis after place/route, impl = implementation)")
 
         # Maths
         maths: _ArgumentGroup = self.parser.add_argument_group("Maths")

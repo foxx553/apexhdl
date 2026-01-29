@@ -716,7 +716,7 @@ proc create_root_design { parentCell rtl_module_name } {
     # Double-check compile order
     update_compile_order -fileset sources_1
 
-    # Create the module reference - this should now work with automatic hierarchy update
+    # Create the module reference
     create_bd_cell -type module -reference $rtl_module_name rtl_module
 
     # Create instance: ps7_0_axi_periph, and set properties

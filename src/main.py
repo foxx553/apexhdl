@@ -1,7 +1,5 @@
 from typing import Any, Dict
 
-from evaluator.context import Context
-from evaluator.pipeline import Pipeline
 from evaluator.initializer import Initializer
 
 # Main function

@@ -19,7 +19,7 @@ class Context:
     """Folder where all generated files will be put"""
 
     step: str
-    """Steps done for the generation"""
+    """Steps done for the generation (sim = simulation-only, rpt = analysis after synthesis, rpt = analysis after place/route, impl = implementation)"""
 
     # Maths
     math_function: str
