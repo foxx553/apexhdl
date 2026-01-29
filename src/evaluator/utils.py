@@ -130,7 +130,7 @@ def create_benchmark_csv(output_folder: Path, benchmark_name: str):
     output_folder.mkdir(parents=True, exist_ok=True)
 
     # Create header
-    header: str = "method_name;circuit_name;math_function;data_width;x_min;x_max;y_min;y_max;segment_idx_width;group_idx_width;max_absolute_error;mean_absolute_error;max_relative_error;mean_relative_error;lut;latency;\n"
+    header: str = "method_name,circuit_name,math_function,data_width,x_min,x_max,y_min,y_max,segment_idx_width,group_idx_width,max_absolute_error,mean_absolute_error,max_relative_error,mean_relative_error,lut,latency,\n"
 
     # Create benchmark CSV file
     file_path: Path = output_folder / f"{benchmark_name}.csv"
@@ -179,7 +179,7 @@ def append_benchmark_csv(output_folder: Path, benchmark_name: str, ctx: Context)
                 latency = float(match.group(1))
 
     # Create current line
-    current_line: str = f"{ctx.method_name};{ctx.circuit_name};{ctx.math_function};{ctx.data_width};{ctx.x_min};{ctx.x_max};{ctx.y_min};{ctx.y_max};{ctx.segment_idx_width};{ctx.group_idx_width};{max_absolute_error};{mean_absolute_error};{max_relative_error};{mean_relative_error};{lut};{latency};\n"
+    current_line: str = f"{ctx.method_name},{ctx.circuit_name},{ctx.math_function},{ctx.data_width},{ctx.x_min},{ctx.x_max},{ctx.y_min},{ctx.y_max},{ctx.segment_idx_width},{ctx.group_idx_width},{max_absolute_error},{mean_absolute_error},{max_relative_error},{mean_relative_error},{lut},{latency},\n"
 
     # Append current line to benchmark CSV file
     with file_path.open('a') as file:
