@@ -1,7 +1,7 @@
 {
 
     "method_name": "hybrid",
-    "circuit_name": "my_circuit",
+    "circuit_name": "my_circuit_rpt_synth",
     "output_folder_path": "../output",
     "step": "sim",
 

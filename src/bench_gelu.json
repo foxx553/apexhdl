@@ -1,0 +1,19 @@
+{
+
+    "method_name": ["rom", "unary", "hybrid", "bipartite", "symmetric"],
+    "circuit_name": "bench_gelu",
+    "output_folder_path": "../output/bench_gelu",
+    "step": "rpt",
+
+    "math_function": "0.5*x*(1+tanh(sqrt(2/pi)*(x+0.044715*x**3)))",
+    "x_min": -3,
+    "x_max": 5,
+    "y_min": -0.5,
+    "y_max": 5,
+    
+    "data_width": [8, 10, 12, 14, 16],
+
+    "simulation_tool": "ghdl",
+    "analysis_tool": "vivado"
+
+}

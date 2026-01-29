@@ -65,9 +65,14 @@ class Pipeline:
             bool: Whether the pipeline execution was successful or not
         """
 
+        print("[INFO] Generation stage...")
         self.generation_stage.execute(self.context)
+        print("[INFO] Simulation stage...")
         self.simulation_stage.execute(self.context)
+        print("[INFO] Analysis stage...")
         self.analysis_stage.execute(self.context)
+        print("[INFO] Implementation stage...")
         self.implementation_stage.execute(self.context)
+        print("[INFO] Pipeline run is over!")
 
         return True
