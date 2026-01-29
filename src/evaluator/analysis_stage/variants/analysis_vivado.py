@@ -68,11 +68,15 @@ end arch_top_{ctx.circuit_name};
             "-source", tcl_script,
             "-tclargs", ctx.fpga_board, ctx.output_folder_path, ctx.circuit_name, ctx.step
         ]
-        vivado_result: CompletedProcess[str] = subprocess.run(cmd, shell=True, text=True)
 
         # Error handling
-        if vivado_result.returncode != 0:
-            print(f"[ERROR] Vivado analysis unsuccessful for circuit {ctx.circuit_name}: {vivado_result.stderr}")
+        try:
+            subprocess.run(cmd, timeout=1800, shell=True, text=True)
+        except subprocess.TimeoutExpired:
+            print(f"[ERROR] Vivado analysis unsuccessful for circuit {ctx.circuit_name}: 1800 seconds timeout")
+            return False
+        except subprocess.CalledProcessError as e:
+            print(f"[ERROR] Vivado analysis unsuccessful for circuit {ctx.circuit_name}: {e}")
             return False
         
         # Removing old logs and putting in new Vivado logs
