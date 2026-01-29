@@ -11,6 +11,7 @@ from evaluator.generation_stage.generation_registry import GenerationRegistry
 from evaluator.simulation_stage.simulation_registry import SimulationRegistry
 from evaluator.analysis_stage.analysis_registry import AnalysisRegistry
 from evaluator.implementation_stage.implementation_registry import ImplementationRegistry
+import evaluator.utils as utils
 
 class Initializer:
     """
@@ -127,8 +128,13 @@ class Initializer:
         # Benchmarking mode
         elif len(configurations) > 1:
 
-            # Running all possible configurations
+            # Initializing necessary variables/files
             counter: int = 1
+            benchmark_name: str = args_dict["circuit_name"]
+            output_folder: Path = args_dict["output_folder_path"]
+            utils.create_benchmark_csv(output_folder, benchmark_name)
+
+            # Running all possible configurations
             for config in configurations:
 
                 # Building the current configuration
@@ -142,6 +148,9 @@ class Initializer:
                 # Running the current configuration
                 current_pipeline: Pipeline = Pipeline(current_ctx)
                 current_pipeline.run()
+
+                # Appending the results in the CSV
+                utils.append_benchmark_csv(output_folder, benchmark_name, current_ctx)
 
         return True
     

@@ -2,6 +2,8 @@ from typing import Callable, Any
 from evaluator.context import Context
 from sympy import symbols, sympify, lambdify
 import numpy as np
+from pathlib import Path
+import re
 
 Predicate = Callable[[Context], bool]
 """
@@ -115,3 +117,70 @@ def compute_relative_discrete_output(function_str: str, x_data_width: int, x_min
     # Offset it by the bias
     return [y - clamp_nearest(y_origin, y_min, (y_max - y_min) / (2 ** y_data_width), y_data_width) for y in absolute_values]
     
+def create_benchmark_csv(output_folder: Path, benchmark_name: str):
+    """
+    Creates the benchmark CSV file, and writes the header in it
+
+    Parameters:
+        output_folder (Path): Path to the folder in which all benchmarks modules are put
+        benchmark_name (str): Name of the benchmark
+    """
+
+    # Create folder if necessary
+    output_folder.mkdir(parents=True, exist_ok=True)
+
+    # Create header
+    header: str = "method_name;circuit_name;math_function;data_width;x_min;x_max;y_min;y_max;segment_idx_width;group_idx_width;max_absolute_error;mean_absolute_error;max_relative_error;mean_relative_error;lut;latency;\n"
+
+    # Create benchmark CSV file
+    file_path: Path = output_folder / f"{benchmark_name}.csv"
+    file_path.write_text(header)
+
+def append_benchmark_csv(output_folder: Path, benchmark_name: str, ctx: Context):
+    """
+    Appends the benchmark CSV file with the results of the current circuit
+
+    Parameters:
+        output_folder (Path): Path to the folder in which all benchmarks modules are put
+        benchmark_name (str): Name of the benchmark
+        ctx (Context): Context of the current circuit
+    """
+
+    # Get path to CSV file
+    file_path: Path = output_folder / f"{benchmark_name}.csv"
+
+    # Parse simulation results, if the file exists
+    simulation_file_path: Path = output_folder / ctx.circuit_name / "sim" / f"results_{ctx.circuit_name}.txt"
+    max_absolute_error, mean_absolute_error, max_relative_error, mean_relative_error = None, None, None, None
+    if simulation_file_path.exists():
+        with simulation_file_path.open('r') as file:
+            lines: list[str] = [line.strip() for line in file if line.strip()]
+            max_absolute_error, mean_absolute_error = map(float, lines[-2].split(','))
+            max_relative_error, mean_relative_error = map(float, lines[-1].split(','))
+
+    # Parse utilization report, if the file exists
+    utilization_file_path: Path = output_folder / ctx.circuit_name / "rpt" / f"{ctx.circuit_name}_utilization.rpt"
+    lut = None
+    if utilization_file_path.exists():
+        with utilization_file_path.open('r') as file:
+            for line in file:
+                if line.strip().startswith('| top'):
+                    parts = [p.strip() for p in line.split('|')]
+                    lut = int(parts[3])
+    
+    # Parse timing report, if the file exists
+    timing_file_path: Path = output_folder / ctx.circuit_name / "rpt" / f"{ctx.circuit_name}_timing.rpt"
+    latency = None
+    if timing_file_path.exists():
+        with timing_file_path.open('r') as file:
+            content = file.read()
+            match = re.search(r"Data Path Delay:\s+([\d.]+)ns", content)
+            if match:
+                latency = float(match.group(1))
+
+    # Create current line
+    current_line: str = f"{ctx.method_name};{ctx.circuit_name};{ctx.math_function};{ctx.data_width};{ctx.x_min};{ctx.x_max};{ctx.y_min};{ctx.y_max};{ctx.segment_idx_width};{ctx.group_idx_width};{max_absolute_error};{mean_absolute_error};{max_relative_error};{mean_relative_error};{lut};{latency};\n"
+
+    # Append current line to benchmark CSV file
+    with file_path.open('a') as file:
+        file.write(current_line)

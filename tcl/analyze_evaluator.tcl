@@ -26,7 +26,7 @@ synth_design
 if {$run_mode == "rpt"} {
 	
 	# Generate post-synthesis utilization report
-	report_utilization -hierarchical -file ${output_folder}/${module_name}/rpt/${module_name}_synth_utilization.rpt
+	report_utilization -hierarchical -file ${output_folder}/${module_name}/rpt/${module_name}_utilization.rpt
 
 } else {
 	
