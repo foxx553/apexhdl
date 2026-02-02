@@ -67,9 +67,6 @@ architecture arch_stream_top_{ctx.circuit_name} of stream_top_{ctx.circuit_name}
 begin
 
     uut : entity work.{ctx.circuit_name}
-        generic map (
-            DATA_WIDTH => {ctx.data_width}{f",\n\t\t\tSEGMENT_IDX_WIDTH => {ctx.segment_idx_width}" if ctx.method_name == "binary" or ctx.method_name == "hybrid" else ""}{f",\n\t\t\tGROUP_IDX_WIDTH => {ctx.group_idx_width}" if ctx.method_name == "binary" else ""}
-        )
         port map (
             input_a => din_tdata({ctx.data_width - 1} downto 0),
             result  => reg_tdata_in

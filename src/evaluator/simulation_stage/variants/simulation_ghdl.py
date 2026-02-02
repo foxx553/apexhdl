@@ -10,7 +10,7 @@ from evaluator.simulation_stage.simulation_registry import SimulationRegistry
 from evaluator.simulation_stage.simulation_base import SimulationStage
 import evaluator.utils as utils
 
-@SimulationRegistry.register(predicate=lambda ctx: ctx.simulation_tool == "ghdl", priority=1)
+@SimulationRegistry.register(predicate=lambda ctx: ctx.step == "sim" and ctx.simulation_tool == "ghdl", priority=1)
 class SimulationGhdl(SimulationStage):
     """
     GHDL simulation stage
@@ -54,9 +54,6 @@ architecture arch_tb_{ctx.circuit_name} of tb_{ctx.circuit_name} is
 begin
 
     uut : entity work.{ctx.circuit_name}
-        generic map (
-            DATA_WIDTH => {ctx.data_width}{f",\n\t\t\tSEGMENT_IDX_WIDTH => {ctx.segment_idx_width}" if ctx.method_name == "bipartite" or ctx.method_name == "hybrid" else ""}{f",\n\t\t\tGROUP_IDX_WIDTH => {ctx.group_idx_width}" if ctx.method_name == "bipartite" else ""}
-        )
         port map (
             input_a => input_a,
             result  => result

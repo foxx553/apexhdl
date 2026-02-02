@@ -47,9 +47,6 @@ end top_{ctx.circuit_name};
 architecture arch_top_{ctx.circuit_name} of top_{ctx.circuit_name} is
 begin
     uut : entity work.{ctx.circuit_name}
-        generic map (
-            DATA_WIDTH => {ctx.data_width}{f",\n\t\t\tSEGMENT_IDX_WIDTH => {ctx.segment_idx_width}" if ctx.method_name == "bipartite" or ctx.method_name == "hybrid" else ""}{f",\n\t\t\tGROUP_IDX_WIDTH => {ctx.group_idx_width}" if ctx.method_name == "bipartite" else ""}
-        )
         port map (
             input_a => input_a,
             result  => result
@@ -71,9 +68,10 @@ end arch_top_{ctx.circuit_name};
 
         # Error handling
         try:
-            subprocess.run(cmd, timeout=1800, shell=True, text=True)
+            subprocess.run(cmd, timeout=900, shell=True, text=True)
         except subprocess.TimeoutExpired:
-            print(f"[ERROR] Vivado analysis unsuccessful for circuit {ctx.circuit_name}: 1800 seconds timeout")
+            print(f"[ERROR] Vivado analysis unsuccessful for circuit {ctx.circuit_name}: 15 minutes timeout")
+            subprocess.run(["taskkill", "/F", "/T", "/IM", "vivado.exe"], capture_output=True)
             return False
         except subprocess.CalledProcessError as e:
             print(f"[ERROR] Vivado analysis unsuccessful for circuit {ctx.circuit_name}: {e}")

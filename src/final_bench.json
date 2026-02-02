@@ -12,8 +12,8 @@
     "step": "rpt",
 
     "math_function": [
-        "0.5*sin(2*pi*x)+0.5", 
-        "0.5*sin(10*pi*x)+0.5",
+        "0.5*sin(4*pi*x)+0.5", 
+        "sqrt(x)",
         "0.5*tanh(8*(x-0.5))+0.5"
     ],
     "x_min": 0,
@@ -28,8 +28,15 @@
         14, 
         16
     ],
-
+    
     "simulation_tool": "ghdl",
-    "analysis_tool": "vivado"
+    "analysis_tool": "vivado",
+    "implementation_tool": "vivado",
+
+    "fpga_board": "xc7z020clg400-1",
+    "ip_address": "192.168.2.99",
+    "username": "xilinx",
+    "password": "xilinx",
+    "fpga_working_folder_path": "/home/xilinx/sandbox"
 
 }
