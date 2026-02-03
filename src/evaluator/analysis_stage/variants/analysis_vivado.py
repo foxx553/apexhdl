@@ -58,11 +58,17 @@ end arch_top_{ctx.circuit_name};
         top_file: Path = folder_path / f"top_{ctx.circuit_name}.vhd"
         top_file.write_text(vhdl_code)
 
+        # Vivado logs target path
+        log_file: Path = rpt_folder_path / "vivado.log"
+        jou_file: Path = rpt_folder_path / "vivado.jou"
+
         # Vivado execution in batch mode
         cmd = [
             "vivado",
             "-mode", "batch",
             "-source", tcl_script,
+            "-log", log_file,
+            "-journal", jou_file,
             "-tclargs", ctx.fpga_board, ctx.output_folder_path, ctx.circuit_name, ctx.step
         ]
 
@@ -76,9 +82,5 @@ end arch_top_{ctx.circuit_name};
         except subprocess.CalledProcessError as e:
             print(f"[ERROR] Vivado analysis unsuccessful for circuit {ctx.circuit_name}: {e}")
             return False
-        
-        # Removing old logs and putting in new Vivado logs
-        Path(rpt_folder_path / "vivado.log").unlink(missing_ok=True)
-        shutil.move("vivado.log", rpt_folder_path)
 
         return True

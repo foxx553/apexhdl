@@ -87,17 +87,16 @@ end arch_tb_{ctx.circuit_name};
 
         # Run GHDL simulation, with error handling
         Path("./work-obj08.cf").unlink(missing_ok=True) # Note = Delete GHDL work directory to trigger full simulation
-        analysis_result: CompletedProcess[str] = subprocess.run(["ghdl", "-a", "--std=08", module_file, tb_file], capture_output=False, check=True)
-        if analysis_result.returncode != 0:
-            print(f"[ERROR] GHDL analysis unsuccessful for circuit {ctx.circuit_name}: {analysis_result.stderr}")
+        try:
+            subprocess.run(["ghdl", "-a", "--std=08", module_file, tb_file], timeout=300, shell=True, capture_output=True, check=True)
+            subprocess.run(["ghdl", "-e", "--std=08", f"tb_{ctx.circuit_name}"], timeout=300, shell=True, capture_output=True, check=True)
+            subprocess.run(["ghdl", "-r", "--std=08", f"tb_{ctx.circuit_name}"], timeout=300, shell=True, capture_output=True, text=True)
+        except subprocess.TimeoutExpired as e:
+            print(f"[ERROR] GHDL execution unsuccessful for circuit {ctx.circuit_name}: 5 minutes timeout")
+            subprocess.run(["taskkill", "/F", "/T", "/PID", str(e.pid)], capture_output=True)
             return False
-        elaboration_result: CompletedProcess[str] = subprocess.run(["ghdl", "-e", "--std=08", f"tb_{ctx.circuit_name}"], capture_output=False, check=True)
-        if elaboration_result.returncode != 0:
-            print(f"[ERROR] GHDL elaboration unsuccessful for circuit {ctx.circuit_name}: {elaboration_result.stderr}")
-            return False
-        execution_result: CompletedProcess[str] = subprocess.run(["ghdl", "-r", "--std=08", f"tb_{ctx.circuit_name}"], capture_output=False, check=True)
-        if execution_result.returncode != 0:
-            print(f"[ERROR] GHDL execution unsuccessful for circuit {ctx.circuit_name}: {execution_result.stderr}")
+        except subprocess.CalledProcessError as e:
+            print(f"[ERROR] GHDL execution unsuccessful for circuit {ctx.circuit_name}: {e}")
             return False
 
         # Validation parameters
