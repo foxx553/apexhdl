@@ -89,31 +89,30 @@ ApexHDL offers an easy-to-use benchmarking mode. All you need is to specify an a
 ### Overview
 ApexHDL pipeline is fundamentally built around the following four steps: generation, simulation, analysis and implementation.
 
-#### Generation step (`evaluator.generation_stage.*`)
+#### Generation step (`apex.generation_stage.*`)
 Consists in generating the VHDL circuit for hardware function evaluation.
 
-#### Simulation step (`evaluator.simulation_stage.*`)
+#### Simulation step (`apex.simulation_stage.*`)
 Consists in generating the VHDL exhaustive testbench for the generated circuit, running the simulation using GHDL, and plotting with Python the results and how our circuit compares to the theoretical mathematical function.
 
-#### Analysis step (`evaluator.analysis_stage.*`)
+#### Analysis step (`apex.analysis_stage.*`)
 Consists in running Vivado synthesis and implementation of the circuit alone, and saving hardware reports (timing, resources, power) produced by Vivado.
 
-#### Implementation step (`evaluator.implementation_stage.*`)
-Consists in wrapping the circuit into a complete block design allowing AXI-stream communication, generating the bitstream, 
+#### Implementation step (`apex.implementation_stage.*`)
+Consists in wrapping the circuit into a complete block design allowing AXI-stream communication, generating the bitstream, and process to a hardware-in-the-loop process programming the target and running the evaluator on physical silicon.
 
-### Pipeline initialization/execution (`evaluator.{initializer, pipeline}`)
+### Pipeline initialization/execution (`apex.{initializer, pipeline}`)
 The `Initializer` class contains the parser used to get all args passed by the user and to start execution (managed by the `Pipeline` class). Note that the parser must be compatible with the definition of the `Context` class (see the next paragraph). To allow the definition of multiple values (for the benchmark mode), the following option must be specified when adding the argument to the parser.
 ```python
 nargs="+"
 ```
 
-
-### Pipeline parametrization (`evaluator.context`)
+### Pipeline parametrization (`apex.context`)
 `Context` is the core data class containing all arguments passed by the user. It is used throughout the pipeline execution for the following uses.
 - Selection of the correct variant for each step, thanks to the "Registry" design pattern (see next paragraph).
 - Parametrization of the chosen algorithms in order to produce the correct outputs, thanks to the `ctx` arg in the `execute()` method of each variant.
 
-### Variants selection (`evaluator.*_stage.variants.*`)
+### Variants selection (`apex.*_stage.variants.*`)
 
 The "Registry" design pattern is used to register all possible variants, and then select the correct ones (done in the constructor of `Pipeline`). As mentioned above, the `Context` instance contains all necessary informations for the selection. Thus, for each variant, a decorator is defined to specify the conditions that have to be met to select it. For instance, the variant `GenerationHybrid` is called for the generation step if the `method_name` is `hybrid`, as shown below. With the priority mechanism (checking first higher priorities), there's a lot of flexibility for variants selection.
 
