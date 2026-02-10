@@ -1,4 +1,4 @@
-# FPGAEvaluator
+# ApexHDL
 
 ## Credits
 - Authors: **Florian DELHON, Kevin PEYMANI, Tarek OULD-BACHIR**
@@ -22,19 +22,19 @@
 ## Getting started
 
 ### Prerequisite: GHDL
-FPGAEvaluator currently supports GHDL for module simulation, as it is a lightweight open-source VHDL simulator, supported on Linux, Windows and macOS. All necessary informations can be found on its [GitHub page](https://github.com/ghdl/ghdl).
+ApexHDL currently supports GHDL for module simulation, as it is a lightweight open-source VHDL simulator, supported on Linux, Windows and macOS. All necessary informations can be found on its [GitHub page](https://github.com/ghdl/ghdl).
 
 - Install GHDL on your computer.
 - Add it to your `PATH` so that the `ghdl` command is known to your console.
 
 ### Prerequisite: Vivado
-FPGAEvaluator currently supports PYNQ-Z2 board (see [TUL product specification](https://www.tulembedded.com/fpga/ProductsPYNQ-Z2.html)). Thus, it uses the official Vivado software for both designing, synthesizing and implementing (see [Vivado official documentation](https://docs.amd.com/r/en-US/ug896-vivado-ip/Vivado-Design-Suite-Documentation)).
+ApexHDL currently supports PYNQ-Z2 board (see [TUL product specification](https://www.tulembedded.com/fpga/ProductsPYNQ-Z2.html)). Thus, it uses the official Vivado software for both designing, synthesizing and implementing (see [Vivado official documentation](https://docs.amd.com/r/en-US/ug896-vivado-ip/Vivado-Design-Suite-Documentation)).
 
 - Install Vivado Design Suite (see [Vivado downloads page](https://www.xilinx.com/support/download/index.html/content/xilinx/en/downloadNav/vivado-design-tools.html)), version 2024.1 or later should be working.
 - Add it to your `PATH` so that the `vivado` command is known to your console.
 
 ### Python setup
-FPGAEvaluator is written in Python. Source code is in `./src` folder.
+ApexHDL is written in Python. Source code is in `./src` folder.
 
 - If necessary, install Python (see [Python downloads page](https://www.python.org/downloads/)) and add it to your `PATH` so that the `python` command is known to your console.
 - Go into `./src` folder.
@@ -47,31 +47,31 @@ pip install -r requirements.txt
 ## User guide
 
 ### General
-FPGAEvaluator allows you to run the automated toolchain to generate and validate hardware function evaluator with just one command.
+ApexHDL allows you to run the automated toolchain to generate and validate hardware function evaluator with just one command.
 
 #### Help
 For help, the following command will show you all customization options.
 ```bash
-python ./main.py --help
+python ./apex_hdl.py --help
 ```
 
 #### JSON config file (`--config`)
 Since it is not handy to specify all options in one long command, you may use the `--config` flag to specify a JSON file which will contain all your options. The `config.json` file is an example of a complete JSON file. Here's an example usage.
 ```bash
-python ./main.py --config ./config.json
+python ./apex_hdl.py --config ./config.json
 ```
 
 - Note 1: All keys in the JSON file use `_` as separators, instead of `-`. For instance, `--method-name` CLI flag corresponds to `method_name` key in the JSON file.
 - Note 2: Values specified in the JSON file are default values. Thus, subsequent CLI args can be specified, and will override JSON values.
 
 #### Mathematical expression parsing (`--math-function`)
-Internally, FPGAEvaluator uses SymPy for mathematical expression parsing (see [SymPy official documentation](https://docs.sympy.org/latest/index.html)).
+Internally, ApexHDL uses SymPy for mathematical expression parsing (see [SymPy official documentation](https://docs.sympy.org/latest/index.html)).
 
-- Note 1: FPGAEvaluator currently supports only single-variable functions of $x$.
+- Note 1: ApexHDL currently supports only single-variable functions of $x$.
 - Note 2: SymPy has its own conventions for mathematical expressions. For instance, $200 \times \exp(-\frac{(x-128)^2}{2 \times 30^2})$ will be written `200*exp(-(x-128)**2/(2*30**2))` for SymPy parsing.
 
 ### Normal vs. Benchmarking mode
-FPGAEvaluator offers an easy-to-use benchmarking mode. All you need is to specify an array of values for one (or more) option(s). When FPGAEvaluator detects this, it will compute all possible combinations, launch the whole toolchain for each combination, and finally gather all data into a single CSV file to let you compare these different combinations. The `bench.json` file is an example of a JSON file specifying a benchmark.
+ApexHDL offers an easy-to-use benchmarking mode. All you need is to specify an array of values for one (or more) option(s). When ApexHDL detects this, it will compute all possible combinations, launch the whole toolchain for each combination, and finally gather all data into a single CSV file to let you compare these different combinations. The `bench.json` file is an example of a JSON file specifying a benchmark.
 
 - Note 1: That benchmarking mode is supported for options `method_name`, `math_function` and `data_width`.
 - Note 2: Resulting file will be produced as follows. In the `output_folder`, each combination will be named `<circuit_name><ID>` (e.g. `eval005`), and a file `<circuit_name>.csv` (e.g. `eval.csv`) will contain all data.
@@ -87,7 +87,7 @@ FPGAEvaluator offers an easy-to-use benchmarking mode. All you need is to specif
 ## Developer guide
 
 ### Overview
-FPGAEvaluator pipeline is fundamentally built around the following four steps: generation, simulation, analysis and implementation.
+ApexHDL pipeline is fundamentally built around the following four steps: generation, simulation, analysis and implementation.
 
 #### Generation step (`evaluator.generation_stage.*`)
 Consists in generating the VHDL circuit for hardware function evaluation.

@@ -1,7 +1,7 @@
 ################################################################
 ################################################################
 # -
-# Script initially generated with Vivado, and adapted for FPGAEvaluator
+# Script initially generated with Vivado, and adapted for ApexHDL
 # -
 # Features:
 #       FPGA board xc7z020clg400-1
