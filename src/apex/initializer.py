@@ -1,9 +1,10 @@
 import argparse
 import json
+import itertools
+from dataclasses import fields
 from argparse import ArgumentParser, _ArgumentGroup, Namespace
 from pathlib import Path
-from typing import Any, Dict
-import itertools
+from typing import Any, Dict, get_args, get_origin, Literal, Union
 
 from apex.context import Context
 from apex.pipeline import Pipeline
@@ -33,46 +34,57 @@ class Initializer:
         ImplementationRegistry.load_variants()
 
         # Init parser
-        self.parser = argparse.ArgumentParser(description="ApexHDL - A CLI Tool for Generating and Validating Unary and Binary Function Evaluators")
+        self.parser = argparse.ArgumentParser(description="ApexHDL: A Tool for Generating/Benchmarking Unary and Binary Function Evaluators on FPGA")
 
-        # Config
+        # "Meta" arguments
         conf: _ArgumentGroup = self.parser.add_argument_group("Config")
         conf.add_argument("--config", type=Path, help="Path to a JSON file containing configuration")
 
-        # General
-        gen: _ArgumentGroup = self.parser.add_argument_group("General")
-        gen.add_argument("--method-name", nargs="+", choices=["rom", "bipartite", "symmetric", "hybrid", "unary"], help="Name of the circuit generation method")
-        gen.add_argument("--circuit-name", help="Name of the circuit generated")
-        gen.add_argument("--output-folder-path", type=Path, help="Folder where all generated files will be put")
-        gen.add_argument("--step", choices=["sim", "rpt", "rpt-impl", "impl"], help="Steps done for the generation (sim = simulation-only, rpt = analysis after synthesis, rpt-impl = analysis after place/route, impl = implementation)")
+        # Context-related arguments, deduced from Context definition
+        groups = {}
+        for field in fields(Context):
 
-        # Maths
-        maths: _ArgumentGroup = self.parser.add_argument_group("Maths")
-        maths.add_argument("--math-function", nargs="+", help="Mathematical function to be approximated")
-        maths.add_argument("--x-min", type=float, help="Minimum X value")
-        maths.add_argument("--x-max", type=float, help="Maximum X value")
-        maths.add_argument("--y-min", type=float, help="Minimum Y value")
-        maths.add_argument("--y-max", type=float, help="Maximum Y value")
+            # Extract metadata and create group
+            group_name = field.metadata.get("group", "General")
+            help_text = field.metadata.get("help", "")
+            if group_name not in groups:
+                groups[group_name] = self.parser.add_argument_group(group_name)
+            current_group = groups[group_name]
+            kwargs = {
+                "help": help_text,
+                "dest": field.name
+            }
+            origin = get_origin(field.type)
+            args = get_args(field.type)
 
-        # Generation
-        build: _ArgumentGroup = self.parser.add_argument_group("Generation")
-        build.add_argument("--data-width", nargs="+", type=int, help="Number of bits of the approximation")
-        build.add_argument("--segment-idx-width", type=int, help="Number of bits for indexing segments")
-        build.add_argument("--group-idx-width", type=int, help="Number of bits for indexing groups")
+            # Extract actual type of Union/Optional field
+            if origin is Union:
+                actual_types = [a for a in args if a is not type(None)]
+                inner_type = actual_types[0]
+                origin = get_origin(inner_type)
+                args = get_args(inner_type)
+            else:
+                inner_type = field.type
 
-        # Software
-        sw: _ArgumentGroup = self.parser.add_argument_group("Software")
-        sw.add_argument("--simulation-tool", choices=["ghdl"], help="Software used for circuit simulation")
-        sw.add_argument("--analysis-tool", choices=["vivado"], help="Software used for circuit analysis")
-        sw.add_argument("--implementation-tool", choices=["vivado"], help="Software used for implementation")
+            # Allow multiple values for list field
+            if origin is list or inner_type is list:
+                kwargs["nargs"] = "+"
+                if args:
+                    inner_type = args[0]
+                    origin = get_origin(inner_type)
+                    args = get_args(inner_type)
 
-        # Hardware
-        hw: _ArgumentGroup = self.parser.add_argument_group("Hardware")
-        hw.add_argument("--fpga-board", help="Part number of the target FPGA")
-        hw.add_argument("--ip-address", help="IP address for SSH connection")
-        hw.add_argument("--username", help="Username for SSH connection")
-        hw.add_argument("--password", help="Password for SSH connection")
-        hw.add_argument("--fpga-working-folder-path", help="Folder on the target FPGA")
+            # Allow a specific set of choices for Literal field
+            if origin is Literal:
+                kwargs["choices"] = args
+                kwargs["type"] = type(args[0])
+            else:
+                kwargs["type"] = inner_type
+
+            # Build and add the flag to the parser
+            flag = f"--{field.name.replace('_', '-')}"
+            current_group.add_argument(flag, **kwargs)
+        
 
     def build_dict(self) -> dict:
         """

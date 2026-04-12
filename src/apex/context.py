@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Optional, Literal, List 
+from typing import Optional, Literal 
 from pathlib import Path
 
 @dataclass
@@ -9,7 +9,7 @@ class Context:
     """
     
     # General
-    method_name: List[Literal["rom", "unary", "hybrid", "bipartite", "symmetric"]] = field(
+    method_name: list[Literal["rom", "unary", "hybrid", "bipartite", "symmetric"]] = field(
         metadata={"help": "Name of the circuit generation method(s): rom = Single ROM, unary = Purely Unary, hybrid = Hybrid Binary/Unary, bipartite = Bipartite, symmetric = Symmetric Bipartite", "group": "General"}
     )
     """Name of the circuit generation method(s): rom = Single ROM, unary = Purely Unary, hybrid = Hybrid Binary/Unary, bipartite = Bipartite, symmetric = Symmetric Bipartite"""
@@ -24,13 +24,13 @@ class Context:
     )
     """Folder containing all generated artifacts"""
 
-    step: Literal["sim", "rpt-synth", "rpt", "impl", "all"] = field(
-        metadata={"help": "Executed stages: sim = simulation, rpt-synth = reporting after synthesis, rpt = reporting after place-and-route, impl = on-chip validation, all = all stages", "group": "General"}
+    step: Literal["sim", "rpt-synth", "rpt", "impl"] = field(
+        metadata={"help": "Executed stages: sim = simulation, rpt-synth = reporting after synthesis, rpt = reporting after place-and-route, impl = on-chip validation", "group": "General"}
     )
-    """Executed stages: sim = simulation, rpt-synth = reporting after synthesis, rpt = reporting after place-and-route, impl = on-chip validation, all = all stages"""
+    """Executed stages: sim = simulation, rpt-synth = reporting after synthesis, rpt = reporting after place-and-route, impl = on-chip validation"""
 
     # Maths
-    math_function: List[str] = field(
+    math_function: list[str] = field(
         metadata={"help": "Mathematical function(s) to be approximated", "group": "Maths"}
     )
     """Mathematical function(s) to be approximated"""
@@ -56,7 +56,7 @@ class Context:
     """Maximum Y value"""
 
     # Bit-precision
-    data_width: List[int] = field(
+    data_width: list[int] = field(
         metadata={"help": "Word length(s) of input/output values", "group": "Bit-precision"}
     )
     """Word length(s) of input/output values"""

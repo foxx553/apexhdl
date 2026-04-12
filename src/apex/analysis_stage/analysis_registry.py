@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Optional
 import pkgutil
 import importlib
 from apex.context import Context
@@ -10,8 +10,8 @@ class AnalysisRegistry:
     Registry allowing predicate-based analysis variant retrieval
     """
 
-    _variants: List[tuple[int, Predicate, AnalysisClass]] = []
-    """List of all variants stored in the registry"""
+    _variants: list[tuple[int, Predicate, AnalysisClass]] = []
+    """list of all variants stored in the registry"""
     
     @classmethod
     def register(cls, predicate: Predicate, priority: int = 0):
