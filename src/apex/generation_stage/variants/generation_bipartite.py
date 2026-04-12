@@ -70,7 +70,7 @@ class GenerationBipartite(GenerationStage):
         # VHDL complete code generation
         vhdl_code: str = f"""
 -------------------------------------
--- Generated with ApexHDL, a tool created by Florian Delhon and Kevin Peymani
+-- Generated with ApexHDL
 -- Target: {ctx.fpga_board}
 -- Module Name: {ctx.circuit_name}
 -- Function: f(x) = {ctx.math_function}

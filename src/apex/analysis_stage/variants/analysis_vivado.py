@@ -28,7 +28,7 @@ class AnalysisVivado(AnalysisStage):
         # Top file generation
         vhdl_code: str = f"""
 -------------------------------------
--- Generated with ApexHDL, a tool created by Florian Delhon and Kevin Peymani
+-- Generated with ApexHDL
 -- Target: {ctx.fpga_board}
 -- Module Name: top_{ctx.circuit_name}
 -- Description: Top module for {ctx.circuit_name}

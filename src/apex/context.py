@@ -1,75 +1,115 @@
-from dataclasses import dataclass
-from typing import Optional
+from dataclasses import dataclass, field
+from typing import Optional, Literal, List 
 from pathlib import Path
 
 @dataclass
 class Context:
     """
-    Context of the approximator's generation
+    Context of the ApexHDL execution
     """
     
     # General
-    method_name: str
-    """Name of the circuit generation method"""
+    method_name: List[Literal["rom", "unary", "hybrid", "bipartite", "symmetric"]] = field(
+        metadata={"help": "Name of the circuit generation method(s): rom = Single ROM, unary = Purely Unary, hybrid = Hybrid Binary/Unary, bipartite = Bipartite, symmetric = Symmetric Bipartite", "group": "General"}
+    )
+    """Name of the circuit generation method(s): rom = Single ROM, unary = Purely Unary, hybrid = Hybrid Binary/Unary, bipartite = Bipartite, symmetric = Symmetric Bipartite"""
 
-    circuit_name: str
-    """Name of the circuit generated"""
+    circuit_name: str = field(
+        metadata={"help": "Name of the generated circuit(s)", "group": "General"}
+    )
+    """Name of the generated circuit(s)"""
 
-    output_folder_path: Path
-    """Folder where all generated files will be put"""
+    output_folder_path: Path = field(
+        metadata={"help": "Folder containing all generated artifacts", "group": "General"}
+    )
+    """Folder containing all generated artifacts"""
 
-    step: str
-    """Steps done for the generation (sim = simulation-only, rpt = analysis after synthesis, rpt = analysis after place/route, impl = implementation)"""
+    step: Literal["sim", "rpt-synth", "rpt", "impl", "all"] = field(
+        metadata={"help": "Executed stages: sim = simulation, rpt-synth = reporting after synthesis, rpt = reporting after place-and-route, impl = on-chip validation, all = all stages", "group": "General"}
+    )
+    """Executed stages: sim = simulation, rpt-synth = reporting after synthesis, rpt = reporting after place-and-route, impl = on-chip validation, all = all stages"""
 
     # Maths
-    math_function: str
-    """Mathematical function to be approximated by the generated circuit"""
+    math_function: List[str] = field(
+        metadata={"help": "Mathematical function(s) to be approximated", "group": "Maths"}
+    )
+    """Mathematical function(s) to be approximated"""
 
-    x_min: float
-    """Minimum X value of the approximation region"""
+    x_min: float = field(
+        metadata={"help": "Minimum X value", "group": "Maths"}
+    )
+    """Minimum X value"""
 
-    x_max: float
-    """Maximum X value of the approximation region"""
+    x_max: float = field(
+        metadata={"help": "Maximum X value", "group": "Maths"}
+    )
+    """Maximum X value"""
 
-    y_min: float
-    """Minimum Y value of the approximation region"""
+    y_min: float = field(
+        metadata={"help": "Minimum Y value", "group": "Maths"}
+    )
+    """Minimum Y value"""
 
-    y_max: float
-    """Maximum Y value of the approximation region"""
+    y_max: float = field(
+        metadata={"help": "Maximum Y value", "group": "Maths"}
+    )
+    """Maximum Y value"""
 
-    # Generation
-    data_width: int
-    """Number of bits of the approximation"""
+    # Bit-precision
+    data_width: List[int] = field(
+        metadata={"help": "Word length(s) of input/output values", "group": "Bit-precision"}
+    )
+    """Word length(s) of input/output values"""
 
-    segment_idx_width: Optional[int] = None
-    """Number of bits for indexing segments (if applicable)"""
+    segment_idx_width: Optional[int] = field(
+        metadata={"help": "Bits indexing segments", "group": "Bit-precision"}
+    )
+    """Bits indexing segments (for hybrid, bipartite, and symmetric)"""
 
-    group_idx_width: Optional[int] = None
-    """Number of bits for indexing groups of segments (if applicable)"""
+    group_idx_width: Optional[int] = field(
+        metadata={"help": "Bits indexing group of segments", "group": "Bit-precision"}
+    )
+    """Bits indexing group of segments (for bipartite, and symmetric)"""
 
-    # Software
-    simulation_tool: Optional[str] = None
-    """Software used for circuit simulation"""
+    # Tools
+    simulation_tool: Optional[Literal["ghdl"]] = field(
+        metadata={"help": "Tool used for behavorial simulation: ghdl = GHDL", "group": "Tools"}
+    )
+    """Tool used for behavorial simulation: ghdl = GHDL"""
 
-    analysis_tool: Optional[str] = None
-    """Software used for circuit analysis"""
+    analysis_tool: Optional[Literal["vivado"]] = field(
+        metadata={"help": "Tool used for the analysis: vivado = Vivado", "group": "Tools"}
+    )
+    """Tool used for the analysis: vivado = Vivado"""
 
-    implementation_tool: Optional[str] = None
-    """Software used for circuit implementation and bitstream generation"""
+    implementation_tool: Optional[Literal["vivado"]] = field(
+        metadata={"help": "Tool used for the wrapping and bitstream generation: vivado = Vivado", "group": "Tools"}
+    )
+    """Tool used for the wrapping and bitstream generation: vivado = Vivado"""
     
-    # Hardware
-    fpga_board: Optional[str] = None
-    """Part number of the target FPGA"""
+    # Target FPGA
+    fpga_board: Optional[Literal["xc7z020clg400-1"]] = field(
+        metadata={"help": "Target FPGA part number: xc7z020clg400-1 = PYNQ-Z2", "group": "Target FPGA"}
+    )
+    """Target FPGA part number: xc7z020clg400-1 = PYNQ-Z2"""
 
-    ip_address: Optional[str] = None
-    """IP address for SSH connection to the target FPGA"""
+    ip_address: Optional[str] = field(
+        metadata={"help": "Target FPGA IP address", "group": "Target FPGA"}
+    )
+    """Target FPGA IP address"""
 
-    username: Optional[str] = None
-    """Username for SSH connection to the target FPGA"""
+    username: Optional[str] = field(
+        metadata={"help": "Target FPGA SSH username", "group": "Target FPGA"}
+    )
+    """Target FPGA SSH username"""
 
-    password: Optional[str] = None
-    """Password for SSH connection to the target FPGA"""
+    password: Optional[str] = field(
+        metadata={"help": "Target FPGA SSH password", "group": "Target FPGA"}
+    )
+    """Target FPGA SSH password"""
 
-    fpga_working_folder_path: Optional[str] = None
-    """Folder on the target FPGA in which all files will be sent and executed"""
+    fpga_working_folder_path: Optional[str] = field(
+        metadata={"help": "Target FPGA working directory (WARNING: Files will be transferred and executed in this folder)", "group": "Target FPGA"}
+    )
+    """Target FPGA working directory (WARNING: Files will be transferred and executed in this folder)"""
     

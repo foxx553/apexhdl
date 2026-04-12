@@ -1,8 +1,8 @@
 # ApexHDL
 
 ## Credits
+- Developer/maintainer: **Florian DELHON**
 - Authors: **Florian DELHON, Kevin PEYMANI, Tarek OULD-BACHIR**
-- Main developer/maintainer: **Florian DELHON**
 
 ## Features
 **Automated toolchain** for quick **prototyping**, **validation** and **benchmarking** of **unary and binary hardware function evaluators**. Handles everything for the user, **from the VHDL module generation to the on-chip validation**.

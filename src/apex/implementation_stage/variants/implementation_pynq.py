@@ -34,7 +34,7 @@ class ImplementationPynq(ImplementationStage):
         # AXI-Stream top file generation
         vhdl_code: str = f"""
 -------------------------------------
--- Generated with ApexHDL, a tool created by Florian Delhon and Kevin Peymani
+-- Generated with ApexHDL
 -- Target: {ctx.fpga_board}
 -- Module Name: stream_top_{ctx.circuit_name}
 -- Description: AXI-Stream top module for {ctx.circuit_name}

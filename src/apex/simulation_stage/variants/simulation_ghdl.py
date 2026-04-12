@@ -30,7 +30,7 @@ class SimulationGhdl(SimulationStage):
         # Testbench generation
         vhdl_code: str = f"""
 -------------------------------------
--- Generated with ApexHDL, a tool created by Florian Delhon and Kevin Peymani
+-- Generated with ApexHDL
 -- Target: {ctx.fpga_board}
 -- Module Name: tb_{ctx.circuit_name}
 -- Description: Testbench for module {ctx.circuit_name}
