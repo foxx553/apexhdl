@@ -162,20 +162,6 @@ end arch_stream_top_{ctx.circuit_name};
         )
         target_file.write_text(target_script)
 
-        # IMPORTANT - Ask before establishing SSH connection
-        print("------------------------------------")
-        print("--- WARNING: SENSITIVE OPERATION ---")
-        print("------------------------------------")
-        print(f"ApexHDL is about to interact with your target {ctx.fpga_board}:")
-        print(f"    > it will connect to {ctx.username}@{ctx.ip_address} with password {ctx.password},")
-        print(f"    > it will send/execute/download files to/from the directory {ctx.fpga_working_folder_path}.")
-        choice: str = input(">>> Do you want to continue? [y/N]: ").strip().lower()
-        if choice not in ['y', 'yes']:
-            print("---------------------------")
-            print("--- OPERATION CANCELLED ---")
-            print("---------------------------")
-            return False
-
         # Establishing SSH connection to the board
         ssh: SSHClient = paramiko.SSHClient()
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())

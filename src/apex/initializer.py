@@ -135,7 +135,6 @@ class Initializer:
             utils.create_benchmark_csv(output_folder, benchmark_name)
 
             # Running all possible configurations
-            print(f"[INFO] Starting benchmark of {len(configurations)} circuits...")
             for config in configurations:
 
                 # Building the current configuration
@@ -145,7 +144,6 @@ class Initializer:
                 # Adding ID to circuit_name for uniqueness
                 current_ctx.circuit_name = current_ctx.circuit_name + f"{counter:03}"
                 counter = counter + 1
-                print(f"[INFO] Dealing with circuit {current_ctx.circuit_name}...")
 
                 # Running the current configuration
                 current_pipeline: Pipeline = Pipeline(current_ctx)
