@@ -1,9 +1,32 @@
-from typing import Optional
+from typing import Type
+from abc import ABC, abstractmethod
 import pkgutil
 import importlib
 from apex.context import Context
 from apex.utils import Predicate
-from apex.simulation_stage.simulation_base import SimulationClass
+
+class SimulationStage(ABC):
+	"""
+    Abstract base class for simulation stage definition
+    """
+
+	@abstractmethod
+	def execute(self, ctx: Context) -> bool:
+		"""
+        Main method for simulation stage execution
+        
+        Parameters:
+            ctx (Context): Context of the current approximator simulation
+			
+        Returns:
+            bool: Whether the stage execution was successful or not
+        """
+		pass
+
+SimulationClass = Type[SimulationStage]
+"""
+Alias for a boolean check on pipeline context
+"""
 
 class SimulationRegistry:
     """
@@ -39,7 +62,7 @@ class SimulationRegistry:
         Returns:
             SimulationClass: Retrieved simulation variant
         """
-        for priority, predicate, simulation_class in cls._variants:
+        for _, predicate, simulation_class in cls._variants:
             if predicate(ctx):
                 return simulation_class
         
@@ -51,7 +74,7 @@ class SimulationRegistry:
         Dynamic import of all variants in ./variants subfolder
         """
         import apex.simulation_stage.variants as variants_pkg
-        for loader, module_name, is_pkg in pkgutil.walk_packages(
+        for _, module_name, _ in pkgutil.walk_packages(
             variants_pkg.__path__, 
             variants_pkg.__name__ + "."
         ):

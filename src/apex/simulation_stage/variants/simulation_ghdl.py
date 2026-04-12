@@ -6,8 +6,7 @@ import numpy as np
 from typing import Any
 
 from apex.context import Context
-from apex.simulation_stage.simulation_registry import SimulationRegistry
-from apex.simulation_stage.simulation_base import SimulationStage
+from apex.simulation_stage.simulation_registry import SimulationRegistry, SimulationStage
 import apex.utils as utils
 
 @SimulationRegistry.register(predicate=lambda ctx: ctx.step == "sim" and ctx.simulation_tool == "ghdl", priority=1)

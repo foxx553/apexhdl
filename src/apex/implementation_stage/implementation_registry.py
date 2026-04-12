@@ -1,9 +1,32 @@
-from typing import Optional
+from typing import Type
+from abc import ABC, abstractmethod
 import pkgutil
 import importlib
 from apex.context import Context
 from apex.utils import Predicate
-from apex.implementation_stage.implementation_base import ImplementationClass
+
+class ImplementationStage(ABC):
+	"""
+    Abstract base class for implementation stage definition
+    """
+
+	@abstractmethod
+	def execute(self, ctx: Context) -> bool:
+		"""
+        Main method for implementation stage execution
+        
+        Parameters:
+            ctx (Context): Context of the current approximator implementation
+			
+        Returns:
+            bool: Whether the stage execution was successful or not
+        """
+		pass
+
+ImplementationClass = Type[ImplementationStage]
+"""
+Alias for a boolean check on pipeline context
+"""
 
 class ImplementationRegistry:
     """
@@ -39,7 +62,7 @@ class ImplementationRegistry:
         Returns:
             ImplementationClass: Retrieved implementation variant
         """
-        for priority, predicate, implementation_class in cls._variants:
+        for _, predicate, implementation_class in cls._variants:
             if predicate(ctx):
                 return implementation_class
         
@@ -51,7 +74,7 @@ class ImplementationRegistry:
         Dynamic import of all variants in ./variants subfolder
         """
         import apex.implementation_stage.variants as variants_pkg
-        for loader, module_name, is_pkg in pkgutil.walk_packages(
+        for _, module_name, _ in pkgutil.walk_packages(
             variants_pkg.__path__, 
             variants_pkg.__name__ + "."
         ):

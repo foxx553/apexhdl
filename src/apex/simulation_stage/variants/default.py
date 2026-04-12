@@ -1,6 +1,5 @@
 from apex.context import Context
-from apex.simulation_stage.simulation_registry import SimulationRegistry
-from apex.simulation_stage.simulation_base import SimulationStage
+from apex.simulation_stage.simulation_registry import SimulationRegistry, SimulationStage
 
 @SimulationRegistry.register(predicate=lambda ctx: True, priority=0)
 class SimulationDefault(SimulationStage):

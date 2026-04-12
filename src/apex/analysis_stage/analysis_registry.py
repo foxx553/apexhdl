@@ -1,9 +1,32 @@
-from typing import Optional
+from typing import Type
+from abc import ABC, abstractmethod
 import pkgutil
 import importlib
 from apex.context import Context
 from apex.utils import Predicate
-from apex.analysis_stage.analysis_base import AnalysisClass
+
+class AnalysisStage(ABC):
+	"""
+    Abstract base class for analysis stage definition
+    """
+
+	@abstractmethod
+	def execute(self, ctx: Context) -> bool:
+		"""
+        Main method for analysis stage execution
+        
+        Parameters:
+            ctx (Context): Context of the current approximator analysis
+			
+        Returns:
+            bool: Whether the stage execution was successful or not
+        """
+		pass
+
+AnalysisClass = Type[AnalysisStage]
+"""
+Alias for a boolean check on pipeline context
+"""
 
 class AnalysisRegistry:
     """
@@ -39,7 +62,7 @@ class AnalysisRegistry:
         Returns:
             AnalysisClass: Retrieved analysis variant
         """
-        for priority, predicate, analysis_class in cls._variants:
+        for _, predicate, analysis_class in cls._variants:
             if predicate(ctx):
                 return analysis_class
         
@@ -51,7 +74,7 @@ class AnalysisRegistry:
         Dynamic import of all variants in ./variants subfolder
         """
         import apex.analysis_stage.variants as variants_pkg
-        for loader, module_name, is_pkg in pkgutil.walk_packages(
+        for _, module_name, _ in pkgutil.walk_packages(
             variants_pkg.__path__, 
             variants_pkg.__name__ + "."
         ):

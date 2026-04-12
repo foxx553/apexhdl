@@ -1,16 +1,8 @@
 from apex.context import Context
-from apex.generation_stage.generation_base import GenerationStage
-from apex.simulation_stage.simulation_base import SimulationStage
-from apex.analysis_stage.analysis_base import AnalysisStage
-from apex.implementation_stage.implementation_base import ImplementationStage
-from apex.generation_stage.generation_registry import GenerationRegistry
-from apex.simulation_stage.simulation_registry import SimulationRegistry
-from apex.analysis_stage.analysis_registry import AnalysisRegistry
-from apex.implementation_stage.implementation_registry import ImplementationRegistry
-from apex.generation_stage.generation_base import GenerationClass
-from apex.simulation_stage.simulation_base import SimulationClass
-from apex.analysis_stage.analysis_base import AnalysisClass
-from apex.implementation_stage.implementation_base import ImplementationClass
+from apex.generation_stage.generation_registry import GenerationRegistry, GenerationClass, GenerationStage
+from apex.simulation_stage.simulation_registry import SimulationRegistry, SimulationClass, SimulationStage
+from apex.analysis_stage.analysis_registry import AnalysisRegistry, AnalysisClass, AnalysisStage
+from apex.implementation_stage.implementation_registry import ImplementationRegistry, ImplementationClass, ImplementationStage
 
 class Pipeline:
     """

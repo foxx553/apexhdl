@@ -10,8 +10,7 @@ from scp import SCPClient
 from typing import Any
 
 from apex.context import Context
-from apex.implementation_stage.implementation_registry import ImplementationRegistry
-from apex.implementation_stage.implementation_base import ImplementationStage
+from apex.implementation_stage.implementation_registry import ImplementationRegistry, ImplementationStage
 
 @ImplementationRegistry.register(predicate=lambda ctx: ctx.step == "impl" and ctx.implementation_tool == "vivado" and ctx.fpga_board == "xc7z020clg400-1", priority=1)
 class ImplementationPynq(ImplementationStage):

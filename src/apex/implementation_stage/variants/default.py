@@ -1,6 +1,5 @@
 from apex.context import Context
-from apex.implementation_stage.implementation_registry import ImplementationRegistry
-from apex.implementation_stage.implementation_base import ImplementationStage
+from apex.implementation_stage.implementation_registry import ImplementationRegistry, ImplementationStage
 
 @ImplementationRegistry.register(predicate=lambda ctx: True, priority=0)
 class ImplementationDefault(ImplementationStage):

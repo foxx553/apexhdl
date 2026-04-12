@@ -1,8 +1,7 @@
 from pathlib import Path
 
 from apex.context import Context
-from apex.generation_stage.generation_registry import GenerationRegistry
-from apex.generation_stage.generation_base import GenerationStage
+from apex.generation_stage.generation_registry import GenerationRegistry, GenerationStage
 import apex.utils as utils
 
 @GenerationRegistry.register(predicate=lambda ctx: ctx.method_name == "rom", priority=1)

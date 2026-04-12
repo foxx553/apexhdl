@@ -1,6 +1,5 @@
 from apex.context import Context
-from apex.generation_stage.generation_registry import GenerationRegistry
-from apex.generation_stage.generation_base import GenerationStage
+from apex.generation_stage.generation_registry import GenerationRegistry, GenerationStage
 
 @GenerationRegistry.register(predicate=lambda ctx: True, priority=0)
 class GenerationDefault(GenerationStage):

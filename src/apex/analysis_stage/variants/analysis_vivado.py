@@ -4,8 +4,7 @@ from subprocess import CompletedProcess
 import shutil
 
 from apex.context import Context
-from apex.analysis_stage.analysis_registry import AnalysisRegistry
-from apex.analysis_stage.analysis_base import AnalysisStage
+from apex.analysis_stage.analysis_registry import AnalysisRegistry, AnalysisStage
 
 @AnalysisRegistry.register(predicate=lambda ctx: "rpt" in ctx.step and ctx.analysis_tool == "vivado", priority=1)
 class AnalysisVivado(AnalysisStage):

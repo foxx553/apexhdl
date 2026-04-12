@@ -1,9 +1,32 @@
-from typing import Optional
+from typing import Type
+from abc import ABC, abstractmethod
 import pkgutil
 import importlib
 from apex.context import Context
 from apex.utils import Predicate
-from apex.generation_stage.generation_base import GenerationClass
+
+class GenerationStage(ABC):
+	"""
+    Abstract base class for generation stage definition
+    """
+
+	@abstractmethod
+	def execute(self, ctx: Context) -> bool:
+		"""
+        Main method for generation stage execution
+        
+        Parameters:
+            ctx (Context): Context of the current approximator generation
+			
+        Returns:
+            bool: Whether the stage execution was successful or not
+        """
+		pass
+
+GenerationClass = Type[GenerationStage]
+"""
+Alias for a boolean check on pipeline context
+"""
 
 class GenerationRegistry:
     """
@@ -39,7 +62,7 @@ class GenerationRegistry:
         Returns:
             GenerationClass: Retrieved generation variant
         """
-        for priority, predicate, generation_class in cls._variants:
+        for _, predicate, generation_class in cls._variants:
             if predicate(ctx):
                 return generation_class
         
@@ -51,7 +74,7 @@ class GenerationRegistry:
         Dynamic import of all variants in ./variants subfolder
         """
         import apex.generation_stage.variants as variants_pkg
-        for loader, module_name, is_pkg in pkgutil.walk_packages(
+        for _, module_name, _ in pkgutil.walk_packages(
             variants_pkg.__path__, 
             variants_pkg.__name__ + "."
         ):
