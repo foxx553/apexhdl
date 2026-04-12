@@ -148,7 +148,7 @@ end arch_stream_top_{ctx.circuit_name};
         xsa_archive.unlink(missing_ok=True)
 
         # Generating target Python code from template
-        template_file: Path = Path("../res/target.py.tmpl")
+        template_file: Path = Path("./apex/implementation_stage/variants/res/target.py.tmpl")
         target_file: Path = bit_folder_path / "target.py"
         template: Template = Template(template_file.read_text())
         target_script: str = template.substitute(
