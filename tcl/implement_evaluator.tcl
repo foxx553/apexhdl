@@ -8,7 +8,7 @@ create_project -in_memory -part xc7z020clg400-1
 # Add VHDL source and constraints files
 add_files ${output_folder}/${module_name}/vhdl/${module_name}.vhd
 add_files ${output_folder}/${module_name}/vhdl/stream_top_${module_name}.vhd
-add_files ../xdc/pynq-z2-template.xdc
+add_files ../xdc/pynq_z2.xdc
 
 # Set-up VHDL-2008 for evaluator module
 set_property FILE_TYPE {VHDL 2008} [get_files ${output_folder}/${module_name}/vhdl/${module_name}.vhd]

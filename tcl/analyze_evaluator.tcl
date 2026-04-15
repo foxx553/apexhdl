@@ -12,7 +12,7 @@ add_files ${output_folder}/${module_name}/vhdl/${module_name}.vhd
 add_files ${output_folder}/${module_name}/vhdl/top_${module_name}.vhd
 
 # Add virtual clock constraint file
-add_files ../xdc/timing_constraints.xdc
+add_files ../xdc/virtual_clk.xdc
 
 # Set-up VHDL-2008
 set_property FILE_TYPE {VHDL 2008} [get_files -filter {FILE_TYPE == VHDL}]
