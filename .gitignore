@@ -6,6 +6,7 @@
 **/.srcs/**
 **/NA/**
 **/local/**
+**/apex_venv/**
 
 # Extensions
 *.log
