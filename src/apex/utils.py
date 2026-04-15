@@ -186,7 +186,7 @@ def append_benchmark_csv(output_folder: Path, benchmark_name: str, ctx: Context)
     with file_path.open('a') as file:
         file.write(current_line)
 
-def generate_apex_plot(x_values: list[float], y_data: dict[str, (list[float], str)], path: Path, title: str, ylabel: str, xlabel: str = "Input"):
+def generate_apex_plot(x_values: list[float], y_data: dict[str, (list[float], str)], path: Path, title: str, subtitle: str, ylabel: str, xlabel: str = "Input"):
     """
     Generates a plot following ApexHDL format
 
@@ -195,6 +195,7 @@ def generate_apex_plot(x_values: list[float], y_data: dict[str, (list[float], st
         y_data (dict[str, (list[float], str)]): Data to be plotted, with its associated color
         path (Path): File path for the plot
         title (str): Title of the plot
+        subtitle (str): Subtitle of the plot
         ylabel (str): Title of the Y axis
         xlabel (str): Title of the X axis
     """
@@ -202,34 +203,35 @@ def generate_apex_plot(x_values: list[float], y_data: dict[str, (list[float], st
     # Display parameters
     PLOT_WIDTH = 30
     PLOT_HEIGHT = 20
-    LINE_WIDTH = 8
-    GRID_WIDTH = 3.0
-    FRAME_WIDTH = 5.0
-    FONT_SIZE = 60
+    LINE_WIDTH = 9
+    GRID_WIDTH = 4.0
+    FRAME_WIDTH = 7.0
+    NOMINAL_FONT_SIZE = 60
 
     # Defining plot overall structure
     plt.figure(figsize=(PLOT_WIDTH, PLOT_HEIGHT))
+    plt.suptitle(title, fontsize=NOMINAL_FONT_SIZE + 20, fontweight='bold')
+    plt.title(subtitle, fontsize=NOMINAL_FONT_SIZE - 10, pad=20)
+    plt.grid(True, linewidth=GRID_WIDTH, color='gray', alpha=0.5)
+    plt.xlabel(xlabel, fontsize=NOMINAL_FONT_SIZE + 10)
+    plt.ylabel(ylabel, fontsize=NOMINAL_FONT_SIZE + 10, labelpad=10)
+    plt.xticks(fontsize=NOMINAL_FONT_SIZE)
+    plt.yticks(fontsize=NOMINAL_FONT_SIZE)
+
+    # Using axes to perform more precise customizations
     ax = plt.gca()
     for spine in ax.spines.values():
         spine.set_linewidth(FRAME_WIDTH)
         spine.set_edgecolor('black')
     ax.tick_params(width=FRAME_WIDTH)
-    plt.title(title, fontsize=FONT_SIZE, fontweight='bold', pad=20)
-    plt.grid(True, linewidth=GRID_WIDTH, color='gray', alpha=0.5)
-    plt.xlabel(xlabel, fontsize=FONT_SIZE)
-    plt.ylabel(ylabel, fontsize=FONT_SIZE)
-    plt.xticks(fontsize=FONT_SIZE)
-    plt.yticks(fontsize=FONT_SIZE)
-
-    # Add ApexHDL signature
-    ax.text(1.05, 0.5, "Generated with ApexHDL", transform=ax.transAxes, rotation=270, va='center', ha='left', fontsize=FONT_SIZE, color='gray', alpha=0.6)
+    ax.text(1.07, 0.5, "Generated with ApexHDL", transform=ax.transAxes, rotation=270, va='center', ha='left', fontsize=NOMINAL_FONT_SIZE, color='gray', alpha=0.6)
 
     # Plotting the data
     for name, (data_values, color) in y_data.items():
         plt.plot(x_values, data_values, color=color, linewidth=LINE_WIDTH, label=name)
     
     # Putting the legend
-    plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.10), ncol=len(y_data), prop={'weight': 'bold', 'size': FONT_SIZE - 10}, frameon=False)
+    plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.10), ncol=len(y_data), prop={'weight': 'bold', 'size': NOMINAL_FONT_SIZE}, frameon=False)
 
     # Saving the plot
     plt.savefig(path, format='svg', facecolor='white', transparent=False, bbox_inches='tight')

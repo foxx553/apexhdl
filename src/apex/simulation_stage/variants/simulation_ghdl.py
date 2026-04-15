@@ -143,7 +143,8 @@ end arch_tb_{ctx.circuit_name};
                 "Experimental": (y_evaluator, "red")
             },
             sim_folder_path / f"curves_{ctx.circuit_name}.svg",
-            "Theoretical vs. experimental values",
+            "Theoretical vs. experimental",
+            "during simulation",
             "Output"
         )
 
@@ -151,12 +152,13 @@ end arch_tb_{ctx.circuit_name};
         utils.generate_apex_plot(
             x_values, 
             {
-                "Absolute errors": (absolute_errors, "blue"),
-                f"Max error = {"{:.3g}".format(max_error)}": ([max_error for _ in range(len(x_values))], "red"),
-                f"Mean error = {"{:.3g}".format(mean_error)}": ([mean_error for _ in range(len(x_values))], "orange")
+                "Errors": (absolute_errors, "blue"),
+                f"Max = {"{:.3g}".format(max_error)}": ([max_error for _ in range(len(x_values))], "red"),
+                f"Mean = {"{:.3g}".format(mean_error)}": ([mean_error for _ in range(len(x_values))], "orange")
             },
             sim_folder_path / f"error_absolute_{ctx.circuit_name}.svg",
             "Absolute errors",
+            "during simulation",
             "Error"
         )
 
@@ -164,12 +166,13 @@ end arch_tb_{ctx.circuit_name};
         utils.generate_apex_plot(
             x_values, 
             {
-                "Relative errors": (relative_errors, "blue"),
-                f"Max error = {"{:.3g}".format(max_relative_error)}": ([max_relative_error for _ in range(len(x_values))], "red"),
-                f"Mean error = {"{:.3g}".format(mean_relative_error)}": ([mean_relative_error for _ in range(len(x_values))], "orange")
+                "Errors": (relative_errors, "blue"),
+                f"Max = {"{:.3g}".format(max_relative_error)}": ([max_relative_error for _ in range(len(x_values))], "red"),
+                f"Mean = {"{:.3g}".format(mean_relative_error)}": ([mean_relative_error for _ in range(len(x_values))], "orange")
             },
             sim_folder_path / f"error_relative_{ctx.circuit_name}.svg",
             "Relative errors",
+            "during simulation",
             "Error"
         )
 
