@@ -136,44 +136,41 @@ end arch_tb_{ctx.circuit_name};
             file.write(f"\n{"{:.3g}".format(max_relative_error)},{"{:.3g}".format(mean_relative_error)}")
 
         # Computing and saving comparison plot
-        plt.figure(figsize=(20, 10))
-        plt.plot(x_values, y_theoretical, color='blue', linewidth=5, label='Theoretical values')
-        plt.plot(x_values, y_evaluator, color='red', linewidth=5, label='Experimental values')
-        plt.title('Theoretical values vs. experimental values', fontsize=40)
-        plt.xlabel('x', fontsize=30)
-        plt.ylabel('Values', fontsize=30)
-        plt.grid(True)
-        plt.xticks(fontsize=30)
-        plt.yticks(fontsize=30)
-        plt.legend(loc='upper center', bbox_to_anchor=(0.95, 0.6), fontsize=25)
-        plt.savefig(sim_folder_path / f"curves_{ctx.circuit_name}.png")
+        utils.generate_apex_plot(
+            x_values, 
+            {
+                "Theoretical": (y_theoretical, "blue"),
+                "Experimental": (y_evaluator, "red")
+            },
+            sim_folder_path / f"curves_{ctx.circuit_name}.svg",
+            "Theoretical vs. experimental values",
+            "Output"
+        )
 
         # Computing and saving absolute error plot
-        plt.figure(figsize=(20, 10))
-        plt.plot(x_values, absolute_errors, color='blue', linewidth=3, label="Absolute errors")
-        plt.plot(x_values, [max_error for _ in range(len(x_values))], color='red', linewidth=5, label=f"Max error = {"{:.3g}".format(max_error)}")
-        plt.plot(x_values, [mean_error for _ in range(len(x_values))], color='orange', linewidth=5, label=f"Mean error = {"{:.3g}".format(mean_error)}")
-        plt.title('Absolute error of evaluator values', fontsize=30)
-        plt.xlabel('x', fontsize=30)
-        plt.ylabel('Absolute error', fontsize=30)
-        plt.grid(True)
-        plt.xticks(fontsize=30)
-        plt.yticks(fontsize=30)
-        plt.legend(loc='upper center', bbox_to_anchor=(0.95, 0.6), fontsize=25)
-        plt.savefig(sim_folder_path / f"error_absolute_{ctx.circuit_name}.png")
+        utils.generate_apex_plot(
+            x_values, 
+            {
+                "Absolute errors": (absolute_errors, "blue"),
+                f"Max error = {"{:.3g}".format(max_error)}": ([max_error for _ in range(len(x_values))], "red"),
+                f"Mean error = {"{:.3g}".format(mean_error)}": ([mean_error for _ in range(len(x_values))], "orange")
+            },
+            sim_folder_path / f"error_absolute_{ctx.circuit_name}.svg",
+            "Absolute errors",
+            "Error"
+        )
 
         # Computing and saving relative error plot
-        plt.figure(figsize=(20, 10))
-        plt.plot(x_values, relative_errors, color='blue', linewidth=3, label="Relative errors")
-        plt.plot(x_values, [max_relative_error for _ in range(len(x_values))], color='red', linewidth=5, label=f"Max error = {"{:.3g}".format(max_relative_error)}")
-        plt.plot(x_values, [mean_relative_error for _ in range(len(x_values))], color='orange', linewidth=5, label=f"Mean error = {"{:.3g}".format(mean_relative_error)}")
-        plt.title('Relative error of evaluator values', fontsize=30)
-        plt.xlabel('x', fontsize=30)
-        plt.ylabel('Relative error', fontsize=30)
-        plt.grid(True)
-        plt.xticks(fontsize=30)
-        plt.yticks(fontsize=30)
-        plt.legend(loc='upper center', bbox_to_anchor=(0.95, 0.6), fontsize=25)
-        plt.savefig(sim_folder_path / f"error_relative_{ctx.circuit_name}.png")
+        utils.generate_apex_plot(
+            x_values, 
+            {
+                "Relative errors": (relative_errors, "blue"),
+                f"Max error = {"{:.3g}".format(max_relative_error)}": ([max_relative_error for _ in range(len(x_values))], "red"),
+                f"Mean error = {"{:.3g}".format(mean_relative_error)}": ([mean_relative_error for _ in range(len(x_values))], "orange")
+            },
+            sim_folder_path / f"error_relative_{ctx.circuit_name}.svg",
+            "Relative errors",
+            "Error"
+        )
 
         return True
