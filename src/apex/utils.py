@@ -235,3 +235,15 @@ def generate_apex_plot(x_values: list[float], y_data: dict[str, (list[float], st
 
     # Saving the plot
     plt.savefig(path, format='svg', facecolor='white', transparent=False, bbox_inches='tight')
+
+def insert_header(path: Path, header: str):
+    """
+    Insert header in file
+
+    Parameters:
+        path (Path): Path of the target file
+        header (str): Header to be inserted at the beginning
+    """
+
+    content = path.read_text()
+    path.write_text(header + content)

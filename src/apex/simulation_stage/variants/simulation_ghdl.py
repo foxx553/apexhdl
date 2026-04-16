@@ -24,7 +24,7 @@ class SimulationGhdl(SimulationStage):
         # Create sim folder
         sim_folder_path: Path = ctx.output_folder_path / ctx.circuit_name / "sim"
         sim_folder_path.mkdir(parents=True, exist_ok=True)
-        results_file: Path = sim_folder_path / f"results_{ctx.circuit_name}.txt"
+        results_file: Path = sim_folder_path / f"results_{ctx.circuit_name}.csv"
 
         # Testbench generation
         vhdl_code: str = f"""
@@ -48,7 +48,7 @@ architecture arch_tb_{ctx.circuit_name} of tb_{ctx.circuit_name} is
     signal input_a : STD_LOGIC_VECTOR({ctx.data_width - 1} downto 0);
     signal result  : STD_LOGIC_VECTOR({ctx.data_width - 1} downto 0);
 
-    file output_file : TEXT open WRITE_MODE is "{str(results_file)}";
+    file result_file : TEXT open WRITE_MODE is "{str(results_file)}";
 
 begin
 
@@ -60,18 +60,15 @@ begin
 
     tb_proc: process
         variable line_out : line;
-        variable input_str, result_str : string(1 to {ctx.data_width});
     begin
         for i in 0 to 2**{ctx.data_width} - 1 loop
             input_a <= std_logic_vector(to_unsigned(i, {ctx.data_width}));
 
             wait for 10 ns;
 
-            write(line_out, integer'image(i));
-            write(line_out, string'(","));
-            write(line_out, integer'image(to_integer(unsigned(result))));
-            writeline(output_file, line_out);
-
+            write(line_out, to_string(i) & "," & to_string(to_integer(unsigned(result))) & ",");
+            writeline(result_file, line_out);
+        
         end loop;
         
         std.env.stop(0);
@@ -84,16 +81,14 @@ end arch_tb_{ctx.circuit_name};
         tb_file: Path = folder_path / f"tb_{ctx.circuit_name}.vhd"
         tb_file.write_text(vhdl_code)
 
+        # Delete GHDL work directory to trigger full simulation
+        Path("./work-obj08.cf").unlink(missing_ok=True) 
+
         # Run GHDL simulation, with error handling
-        Path("./work-obj08.cf").unlink(missing_ok=True) # Note = Delete GHDL work directory to trigger full simulation
         try:
-            subprocess.run(["ghdl", "-a", "--std=08", module_file, tb_file], timeout=300, shell=True, capture_output=True, check=True)
-            subprocess.run(["ghdl", "-e", "--std=08", f"tb_{ctx.circuit_name}"], timeout=300, shell=True, capture_output=True, check=True)
-            subprocess.run(["ghdl", "-r", "--std=08", f"tb_{ctx.circuit_name}"], timeout=300, shell=True, capture_output=True, text=True)
-        except subprocess.TimeoutExpired as e:
-            print(f"[ERROR] GHDL execution unsuccessful for circuit {ctx.circuit_name}: 5 minutes timeout")
-            subprocess.run(["taskkill", "/F", "/T", "/PID", str(e.pid)], capture_output=True)
-            return False
+            subprocess.run(["ghdl", "-a", "--std=08", module_file, tb_file], shell=True, capture_output=True, check=True)
+            subprocess.run(["ghdl", "-e", "--std=08", f"tb_{ctx.circuit_name}"], shell=True, capture_output=True, check=True)
+            subprocess.run(["ghdl", "-r", "--std=08", f"tb_{ctx.circuit_name}"], shell=True, capture_output=True, text=True)
         except subprocess.CalledProcessError as e:
             print(f"[ERROR] GHDL execution unsuccessful for circuit {ctx.circuit_name}: {e}")
             return False
@@ -104,12 +99,12 @@ end arch_tb_{ctx.circuit_name};
         y_step: float = (ctx.y_max - ctx.y_min) / (2 ** ctx.data_width)
         theoretical_step: float = 0.001
 
-        # Read results file
+        # Read outputs file, and put header
         raw_y_values: list[int] = []
         with results_file.open('r') as file:
             for line in file:
                 parts: list[str] = line.strip().split(',')
-                if len(parts) == 2:
+                if len(parts) >= 2:
                     raw_y_values.append(int(parts[1]))
 
         # Computing theoretical and experimental values
@@ -126,14 +121,20 @@ end arch_tb_{ctx.circuit_name};
             absolute_errors.append(abs(theoretical - evaluator))
             relative_errors.append(0 if theoretical == 0 else abs((theoretical - evaluator) / theoretical))
 
-        # Computing errors, and appending it to the results file
+        # Computing errors
         mean_error: float = np.mean(absolute_errors)
         max_error: float = np.max(absolute_errors)
         mean_relative_error: float = np.mean(relative_errors)
         max_relative_error: float = np.max(relative_errors)
-        with results_file.open('a') as file:
-            file.write(f"\n{"{:.3g}".format(max_error)},{"{:.3g}".format(mean_error)}")
-            file.write(f"\n{"{:.3g}".format(max_relative_error)},{"{:.3g}".format(mean_relative_error)}")
+
+        # Inserting results file header
+        header = "Results during simulation,,\nGenerated with ApexHDL,,\n,,\n"
+        header += f"MaxAbsError,{"{:.3g}".format(max_error)},\n"
+        header += f"MeanAbsError,{"{:.3g}".format(mean_error)},\n"
+        header += f"MaxRelError,{"{:.3g}".format(max_relative_error)},\n"
+        header += f"MeanRelError,{"{:.3g}".format(mean_relative_error)},\n"
+        header += ",,\nInput,Output,\n"
+        utils.insert_header(results_file, header)
 
         # Computing and saving comparison plot
         utils.generate_apex_plot(
