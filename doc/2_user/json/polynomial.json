@@ -14,7 +14,7 @@
     "data_width": 8,
     
     "simulation_tool": "ghdl",
-    "analysis_tool": "vivado",
+    "synthesis_tool": "vivado",
     "implementation_tool": "vivado",
 
     "fpga_board": "xc7z020clg400-1",

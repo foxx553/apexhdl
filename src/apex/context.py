@@ -77,10 +77,10 @@ class Context:
     )
     """Tool used for behavorial simulation: ghdl = GHDL"""
 
-    analysis_tool: Optional[Literal["vivado"]] = field(
-        metadata={"help": "Tool used for the analysis: vivado = Vivado", "group": "Tools"}
+    synthesis_tool: Optional[Literal["vivado"]] = field(
+        metadata={"help": "Tool used for the synthesis: vivado = Vivado", "group": "Tools"}
     )
-    """Tool used for the analysis: vivado = Vivado"""
+    """Tool used for the synthesis: vivado = Vivado"""
 
     implementation_tool: Optional[Literal["vivado"]] = field(
         metadata={"help": "Tool used for the wrapping and bitstream generation: vivado = Vivado", "group": "Tools"}

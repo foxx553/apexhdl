@@ -4,30 +4,30 @@ import importlib
 from apex.context import Context
 from apex.utils import Predicate
 
-class AnalysisStage(ABC):
+class SynthesisStage(ABC):
 	"""
-    Abstract base class for analysis stage definition
+    Abstract base class for synthesis stage definition
     """
 
 	@abstractmethod
 	def execute(self, ctx: Context) -> bool:
 		"""
-        Main method for analysis stage execution
+        Main method for synthesis stage execution
         
         Parameters:
-            ctx (Context): Context of the current approximator analysis
+            ctx (Context): Context of the current approximator synthesis
 			
         Returns:
             bool: Whether the stage execution was successful or not
         """
 		pass
 
-class AnalysisRegistry:
+class SynthesisRegistry:
     """
-    Registry allowing predicate-based analysis variant retrieval
+    Registry allowing predicate-based synthesis variant retrieval
     """
 
-    _variants: list[tuple[int, Predicate, AnalysisStage]] = []
+    _variants: list[tuple[int, Predicate, SynthesisStage]] = []
     """list of all variants stored in the registry"""
     
     @classmethod
@@ -39,35 +39,35 @@ class AnalysisRegistry:
             predicate (Predicate): Condition to be met, checked on the execution context
             priority (int): Predicate priority (higher number for higher priority)
         """
-        def decorator(analysis_class: AnalysisStage) -> AnalysisStage:
-            cls._variants.insert(0, (priority, predicate, analysis_class))
+        def decorator(synthesis_class: SynthesisStage) -> SynthesisStage:
+            cls._variants.insert(0, (priority, predicate, synthesis_class))
             cls._variants.sort(key = lambda x: x[0], reverse=True)
-            return analysis_class
+            return synthesis_class
         return decorator
     
     @classmethod
-    def select(cls, ctx: Context) -> AnalysisStage:
+    def select(cls, ctx: Context) -> SynthesisStage:
         """
-        Analysis variant retrieval
+        Synthesis variant retrieval
         
         Parameters:
             ctx (Context): Context of the pipeline execution
 
         Returns:
-            AnalysisStage: Retrieved analysis variant
+            SynthesisStage: Retrieved synthesis variant
         """
-        for _, predicate, analysis_class in cls._variants:
+        for _, predicate, synthesis_class in cls._variants:
             if predicate(ctx):
-                return analysis_class
+                return synthesis_class
         
-        raise RuntimeError("No analysis variant found matching the starting context")
+        raise RuntimeError("No synthesis variant found matching the starting context")
     
     @classmethod
     def load_variants(cls):
         """
         Dynamic import of all variants in ./variants subfolder
         """
-        import apex.analysis_stage.variants as variants_pkg
+        import apex.synthesis_stage.variants as variants_pkg
         for _, module_name, _ in pkgutil.walk_packages(
             variants_pkg.__path__, 
             variants_pkg.__name__ + "."

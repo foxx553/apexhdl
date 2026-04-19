@@ -4,12 +4,12 @@ from subprocess import CompletedProcess
 import shutil
 
 from apex.context import Context
-from apex.analysis_stage.analysis_registry import AnalysisRegistry, AnalysisStage
+from apex.synthesis_stage.synthesis_registry import SynthesisRegistry, SynthesisStage
 
-@AnalysisRegistry.register(predicate=lambda ctx: "rpt" in ctx.step and ctx.analysis_tool == "vivado", priority=1)
-class AnalysisVivado(AnalysisStage):
+@SynthesisRegistry.register(predicate=lambda ctx: "rpt" in ctx.step and ctx.synthesis_tool == "vivado", priority=1)
+class SynthesisVivado(SynthesisStage):
     """
-    Vivado analysis stage
+    Vivado synthesis stage
     """
     
     def execute(self, ctx: Context) -> bool:
@@ -75,11 +75,11 @@ end arch_top_{ctx.circuit_name};
         try:
             subprocess.run(cmd, timeout=900, shell=True, text=True)
         except subprocess.TimeoutExpired:
-            print(f"[ERROR] Vivado analysis unsuccessful for circuit {ctx.circuit_name}: 15 minutes timeout")
+            print(f"[ERROR] Vivado synthesis unsuccessful for circuit {ctx.circuit_name}: 15 minutes timeout")
             subprocess.run(["taskkill", "/F", "/T", "/IM", "vivado.exe"], capture_output=True)
             return False
         except subprocess.CalledProcessError as e:
-            print(f"[ERROR] Vivado analysis unsuccessful for circuit {ctx.circuit_name}: {e}")
+            print(f"[ERROR] Vivado synthesis unsuccessful for circuit {ctx.circuit_name}: {e}")
             return False
 
         return True

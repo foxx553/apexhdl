@@ -1,7 +1,7 @@
 from apex.context import Context
 from apex.generation_stage.generation_registry import GenerationRegistry, GenerationStage
 from apex.simulation_stage.simulation_registry import SimulationRegistry, SimulationStage
-from apex.analysis_stage.analysis_registry import AnalysisRegistry, AnalysisStage
+from apex.synthesis_stage.synthesis_registry import SynthesisRegistry, SynthesisStage
 from apex.implementation_stage.implementation_registry import ImplementationRegistry, ImplementationStage
 
 class Pipeline:
@@ -18,8 +18,8 @@ class Pipeline:
     simulation_stage: SimulationStage
     """Stage of circuit simulation"""
 
-    analysis_stage: AnalysisStage
-    """Stage of circuit hardware analysis"""
+    synthesis_stage: SynthesisStage
+    """Stage of circuit hardware synthesis"""
 
     implementation_stage: ImplementationStage
     """Stage of circuit test on target"""
@@ -39,13 +39,13 @@ class Pipeline:
         # Selecting the correct variants
         generation_variant: GenerationStage = GenerationRegistry.select(ctx)
         simulation_variant: SimulationStage = SimulationRegistry.select(ctx)
-        analysis_variant: AnalysisStage = AnalysisRegistry.select(ctx)
+        synthesis_variant: SynthesisStage = SynthesisRegistry.select(ctx)
         implementation_variant: ImplementationStage = ImplementationRegistry.select(ctx)
 
         # Instanciating these variants
         self.generation_stage = generation_variant()
         self.simulation_stage = simulation_variant()
-        self.analysis_stage = analysis_variant()
+        self.synthesis_stage = synthesis_variant()
         self.implementation_stage = implementation_variant()
 
 
@@ -59,7 +59,7 @@ class Pipeline:
 
         self.generation_stage.execute(self.context)
         self.simulation_stage.execute(self.context)
-        self.analysis_stage.execute(self.context)
+        self.synthesis_stage.execute(self.context)
         self.implementation_stage.execute(self.context)
 
         return True

@@ -10,7 +10,7 @@ from apex.context import Context
 from apex.pipeline import Pipeline
 from apex.generation_stage.generation_registry import GenerationRegistry
 from apex.simulation_stage.simulation_registry import SimulationRegistry
-from apex.analysis_stage.analysis_registry import AnalysisRegistry
+from apex.synthesis_stage.synthesis_registry import SynthesisRegistry
 from apex.implementation_stage.implementation_registry import ImplementationRegistry
 import apex.utils as utils
 
@@ -30,7 +30,7 @@ class Initializer:
         # Loading all variants in registries
         GenerationRegistry.load_variants()
         SimulationRegistry.load_variants()
-        AnalysisRegistry.load_variants()
+        SynthesisRegistry.load_variants()
         ImplementationRegistry.load_variants()
 
         # Init parser
