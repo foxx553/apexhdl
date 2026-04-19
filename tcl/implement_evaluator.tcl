@@ -45,8 +45,8 @@ place_design
 route_design
 
 # Generate output files
-write_bitstream -force ../output/${module_name}/bit/${module_name}.bit
-write_hw_platform -fixed -force -file ../output/${module_name}/bit/${module_name}.xsa
+write_bitstream -force ../output/${module_name}/impl/${module_name}.bit
+write_hw_platform -fixed -force -file ../output/${module_name}/impl/${module_name}.xsa
 
 # Close project
 close_project

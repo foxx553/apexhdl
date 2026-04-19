@@ -160,7 +160,7 @@ def append_benchmark_csv(output_folder: Path, benchmark_name: str, ctx: Context)
             max_relative_error, mean_relative_error = map(float, lines[-1].split(','))
 
     # Parse utilization report, if the file exists
-    utilization_file_path: Path = output_folder / ctx.circuit_name / "rpt" / f"{ctx.circuit_name}_utilization.rpt"
+    utilization_file_path: Path = output_folder / ctx.circuit_name / "syn" / f"{ctx.circuit_name}_utilization.rpt"
     lut = None
     if utilization_file_path.exists():
         with utilization_file_path.open('r') as file:
@@ -170,7 +170,7 @@ def append_benchmark_csv(output_folder: Path, benchmark_name: str, ctx: Context)
                     lut = int(parts[3])
     
     # Parse timing report, if the file exists
-    timing_file_path: Path = output_folder / ctx.circuit_name / "rpt" / f"{ctx.circuit_name}_timing.rpt"
+    timing_file_path: Path = output_folder / ctx.circuit_name / "syn" / f"{ctx.circuit_name}_timing.rpt"
     latency = None
     if timing_file_path.exists():
         with timing_file_path.open('r') as file:

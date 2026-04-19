@@ -23,22 +23,22 @@ set_property TOP top_${module_name} [current_fileset]
 # Run synthesis
 synth_design
 
-if {$run_mode == "rpt-synth"} {
+if {$run_mode == "syn"} {
 	
 	# Generate post-synthesis utilization report
-	report_utilization -hierarchical -file ${output_folder}/${module_name}/rpt/${module_name}_utilization.rpt
+	report_utilization -hierarchical -file ${output_folder}/${module_name}/syn/${module_name}_utilization.rpt
 
 } else {
 	
-	# Run implementation
+	# Run place-and-route
 	opt_design
 	place_design
 	route_design
 
-	# Generate all post-implementation reports
-	report_utilization -hierarchical -file ${output_folder}/${module_name}/rpt/${module_name}_utilization.rpt
-	report_timing -max_paths 10 -delay_type min_max -sort_by group -file ${output_folder}/${module_name}/rpt/${module_name}_timing.rpt
-	report_power -file ${output_folder}/${module_name}/rpt/${module_name}_power.rpt
+	# Generate all post-place-and-route reports
+	report_utilization -hierarchical -file ${output_folder}/${module_name}/syn/${module_name}_utilization.rpt
+	report_timing -max_paths 10 -delay_type min_max -sort_by group -file ${output_folder}/${module_name}/syn/${module_name}_timing.rpt
+	report_power -file ${output_folder}/${module_name}/syn/${module_name}_power.rpt
 	
 }
 

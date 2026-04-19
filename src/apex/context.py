@@ -24,10 +24,10 @@ class Context:
     )
     """Folder containing all generated artifacts"""
 
-    step: Literal["sim", "rpt-synth", "rpt", "impl"] = field(
-        metadata={"help": "Executed stages: sim = simulation, rpt-synth = reporting after synthesis, rpt = reporting after place-and-route, impl = on-chip validation", "group": "General"}
+    step: Literal["sim", "syn", "syn-pnr", "impl"] = field(
+        metadata={"help": "Executed stages: sim = simulation, syn = reporting after synthesis, syn-pnr = reporting after place-and-route, impl = on-chip validation", "group": "General"}
     )
-    """Executed stages: sim = simulation, rpt-synth = reporting after synthesis, rpt = reporting after place-and-route, impl = on-chip validation"""
+    """Executed stages: sim = simulation, syn-synth = reporting after synthesis, syn = reporting after place-and-route, impl = on-chip validation"""
 
     # Maths
     math_function: list[str] = field(

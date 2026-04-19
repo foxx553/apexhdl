@@ -9,7 +9,7 @@
     ],
     "circuit_name": "bench_latency",
     "output_folder_path": "../output/bench_latency",
-    "step": "rpt-impl",
+    "step": "syn-impl",
 
     "math_function": [
         "0.4*sin(2*pi*x)+0.5", 

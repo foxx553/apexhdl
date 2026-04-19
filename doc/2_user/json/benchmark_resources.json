@@ -9,7 +9,7 @@
     ],
     "circuit_name": "bench_resources",
     "output_folder_path": "../output/bench_resources",
-    "step": "rpt",
+    "step": "syn",
 
     "math_function": [
         "0.4*sin(2*pi*x)+0.5", 

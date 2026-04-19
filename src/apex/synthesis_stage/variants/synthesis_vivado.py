@@ -6,7 +6,7 @@ import shutil
 from apex.context import Context
 from apex.synthesis_stage.synthesis_registry import SynthesisRegistry, SynthesisStage
 
-@SynthesisRegistry.register(predicate=lambda ctx: "rpt" in ctx.step and ctx.synthesis_tool == "vivado", priority=1)
+@SynthesisRegistry.register(predicate=lambda ctx: "syn" in ctx.step and ctx.synthesis_tool == "vivado", priority=1)
 class SynthesisVivado(SynthesisStage):
     """
     Vivado synthesis stage
@@ -20,9 +20,9 @@ class SynthesisVivado(SynthesisStage):
         # Get TCL script path
         tcl_script: Path = Path("../tcl/analyze_evaluator.tcl")
 
-        # Create rpt folder
-        rpt_folder_path: Path = ctx.output_folder_path / ctx.circuit_name / "rpt"
-        rpt_folder_path.mkdir(parents=True, exist_ok=True)
+        # Create syn folder
+        syn_folder_path: Path = ctx.output_folder_path / ctx.circuit_name / "syn"
+        syn_folder_path.mkdir(parents=True, exist_ok=True)
 
         # Top file generation
         vhdl_code: str = f"""
@@ -58,8 +58,8 @@ end arch_top_{ctx.circuit_name};
         top_file.write_text(vhdl_code)
 
         # Vivado logs target path
-        log_file: Path = rpt_folder_path / "vivado.log"
-        jou_file: Path = rpt_folder_path / "vivado.jou"
+        log_file: Path = syn_folder_path / "vivado.log"
+        jou_file: Path = syn_folder_path / "vivado.jou"
 
         # Vivado execution in batch mode
         cmd = [

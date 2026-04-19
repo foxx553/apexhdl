@@ -26,9 +26,9 @@ class ImplementationPynq(ImplementationStage):
         # Get TCL script path
         tcl_script: Path = Path("../tcl/implement_evaluator.tcl")
 
-        # Create bit folder
-        bit_folder_path: Path = ctx.output_folder_path / ctx.circuit_name / "bit"
-        bit_folder_path.mkdir(parents=True, exist_ok=True)
+        # Create impl folder
+        impl_folder_path: Path = ctx.output_folder_path / ctx.circuit_name / "impl"
+        impl_folder_path.mkdir(parents=True, exist_ok=True)
 
         # AXI-Stream top file generation
         vhdl_code: str = f"""
@@ -135,20 +135,20 @@ end arch_stream_top_{ctx.circuit_name};
             return False
         
         # Removing old logs and putting in new Vivado logs
-        Path(bit_folder_path / "vivado.log").unlink(missing_ok=True)
-        shutil.move("vivado.log", bit_folder_path)
+        Path(impl_folder_path / "vivado.log").unlink(missing_ok=True)
+        shutil.move("vivado.log", impl_folder_path)
 
         # Extracting HWH from XSA archive
-        xsa_archive: Path = bit_folder_path / f"{ctx.circuit_name}.xsa"
+        xsa_archive: Path = impl_folder_path / f"{ctx.circuit_name}.xsa"
         with zipfile.ZipFile(xsa_archive, 'r') as xsa_zip:
             hwh_internal_name: str = next(f for f in xsa_zip.namelist() if f.endswith('.hwh'))
-            extracted_path: Path = Path(xsa_zip.extract(hwh_internal_name, bit_folder_path))
-            extracted_path.replace(bit_folder_path / f"{ctx.circuit_name}.hwh")
+            extracted_path: Path = Path(xsa_zip.extract(hwh_internal_name, impl_folder_path))
+            extracted_path.replace(impl_folder_path / f"{ctx.circuit_name}.hwh")
         xsa_archive.unlink(missing_ok=True)
 
         # Generating target Python code from template
         template_file: Path = Path("./apex/implementation_stage/variants/res/target.py.tmpl")
-        target_file: Path = bit_folder_path / "target.py"
+        target_file: Path = impl_folder_path / "target.py"
         template: Template = Template(template_file.read_text())
         target_script: str = template.substitute(
             module_name=ctx.circuit_name,
@@ -168,9 +168,9 @@ end arch_stream_top_{ctx.circuit_name};
 
         # Transferring files with SCP
         with SCPClient(ssh.get_transport()) as scp:
-            scp.put(f"{str(bit_folder_path)}/{ctx.circuit_name}.bit", f"{ctx.fpga_working_folder_path}/{ctx.circuit_name}.bit")
-            scp.put(f"{str(bit_folder_path)}/{ctx.circuit_name}.hwh", f"{ctx.fpga_working_folder_path}/{ctx.circuit_name}.hwh")
-            scp.put(f"{str(bit_folder_path)}/target.py", f"{ctx.fpga_working_folder_path}/target.py")
+            scp.put(f"{str(impl_folder_path)}/{ctx.circuit_name}.bit", f"{ctx.fpga_working_folder_path}/{ctx.circuit_name}.bit")
+            scp.put(f"{str(impl_folder_path)}/{ctx.circuit_name}.hwh", f"{ctx.fpga_working_folder_path}/{ctx.circuit_name}.hwh")
+            scp.put(f"{str(impl_folder_path)}/target.py", f"{ctx.fpga_working_folder_path}/target.py")
         
         # Command for target script execution (needs PYNQ setup via specific bash scripts)
         cmd: str = f'''
@@ -186,9 +186,9 @@ python3 target.py
         if exit_status == 0:  
             
             # Downloading output files with SCP
-            scp.get(f"{ctx.fpga_working_folder_path}/curves_{ctx.circuit_name}.png", f"{str(bit_folder_path)}/curves_{ctx.circuit_name}.png")
-            scp.get(f"{ctx.fpga_working_folder_path}/error_absolute_{ctx.circuit_name}.png", f"{str(bit_folder_path)}/error_absolute_{ctx.circuit_name}.png")
-            scp.get(f"{ctx.fpga_working_folder_path}/error_relative_{ctx.circuit_name}.png", f"{str(bit_folder_path)}/error_relative_{ctx.circuit_name}.png")
+            scp.get(f"{ctx.fpga_working_folder_path}/curves_{ctx.circuit_name}.png", f"{str(impl_folder_path)}/curves_{ctx.circuit_name}.png")
+            scp.get(f"{ctx.fpga_working_folder_path}/error_absolute_{ctx.circuit_name}.png", f"{str(impl_folder_path)}/error_absolute_{ctx.circuit_name}.png")
+            scp.get(f"{ctx.fpga_working_folder_path}/error_relative_{ctx.circuit_name}.png", f"{str(impl_folder_path)}/error_relative_{ctx.circuit_name}.png")
             
             # Closing connection 
             scp.close()
