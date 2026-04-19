@@ -123,16 +123,7 @@ end arch_stream_top_{ctx.circuit_name};
             "-source", tcl_script,
             "-tclargs", ctx.output_folder_path, ctx.circuit_name
         ]
-        
-        # Error handling
-        try:
-            subprocess.run(cmd, timeout=1800, shell=True, text=True)
-        except subprocess.TimeoutExpired:
-            print(f"[ERROR] Vivado implementation unsuccessful for circuit {ctx.circuit_name}: 1800 seconds timeout")
-            return False
-        except subprocess.CalledProcessError as e:
-            print(f"[ERROR] Vivado implementation unsuccessful for circuit {ctx.circuit_name}: {e}")
-            return False
+        subprocess.run(cmd, shell=True, text=True)
         
         # Removing old logs and putting in new Vivado logs
         Path(impl_folder_path / "vivado.log").unlink(missing_ok=True)
@@ -180,25 +171,14 @@ source /etc/profile.d/xrt_setup.sh
 python3 target.py
 '
         '''
-        stdin, stdout, stderr = ssh.exec_command(cmd, get_pty=True, timeout=120)
-        exit_status: int = stdout.channel.recv_exit_status() 
-
-        if exit_status == 0:  
+        ssh.exec_command(cmd, get_pty=True) 
             
-            # Downloading output files with SCP
-            scp.get(f"{ctx.fpga_working_folder_path}/curves_{ctx.circuit_name}.png", f"{str(impl_folder_path)}/curves_{ctx.circuit_name}.png")
-            scp.get(f"{ctx.fpga_working_folder_path}/error_absolute_{ctx.circuit_name}.png", f"{str(impl_folder_path)}/error_absolute_{ctx.circuit_name}.png")
-            scp.get(f"{ctx.fpga_working_folder_path}/error_relative_{ctx.circuit_name}.png", f"{str(impl_folder_path)}/error_relative_{ctx.circuit_name}.png")
-            
-            # Closing connection 
-            scp.close()
-            ssh.close()
-            return True
+        # Downloading output files with SCP
+        scp.get(f"{ctx.fpga_working_folder_path}/curves_{ctx.circuit_name}.png", f"{str(impl_folder_path)}/curves_{ctx.circuit_name}.png")
+        scp.get(f"{ctx.fpga_working_folder_path}/error_absolute_{ctx.circuit_name}.png", f"{str(impl_folder_path)}/error_absolute_{ctx.circuit_name}.png")
+        scp.get(f"{ctx.fpga_working_folder_path}/error_relative_{ctx.circuit_name}.png", f"{str(impl_folder_path)}/error_relative_{ctx.circuit_name}.png")
         
-        else:
-            
-            # Error handling and closing connection
-            print(f"[ERROR] Target script execution unsuccessful for circuit {ctx.circuit_name}: {stderr.read().decode()}")
-            scp.close()
-            ssh.close()
-            return False
+        # Closing connection 
+        scp.close()
+        ssh.close()
+        return True

@@ -85,13 +85,9 @@ end arch_tb_{ctx.circuit_name};
         Path("./work-obj08.cf").unlink(missing_ok=True) 
 
         # Run GHDL simulation, with error handling
-        try:
-            subprocess.run(["ghdl", "-a", "--std=08", module_file, tb_file], shell=True, capture_output=True, check=True)
-            subprocess.run(["ghdl", "-e", "--std=08", f"tb_{ctx.circuit_name}"], shell=True, capture_output=True, check=True)
-            subprocess.run(["ghdl", "-r", "--std=08", f"tb_{ctx.circuit_name}"], shell=True, capture_output=True, text=True)
-        except subprocess.CalledProcessError as e:
-            print(f"[ERROR] GHDL execution unsuccessful for circuit {ctx.circuit_name}: {e}")
-            return False
+        subprocess.run(["ghdl", "-a", "--std=08", module_file, tb_file], shell=True, capture_output=True, check=True)
+        subprocess.run(["ghdl", "-e", "--std=08", f"tb_{ctx.circuit_name}"], shell=True, capture_output=True, check=True)
+        subprocess.run(["ghdl", "-r", "--std=08", f"tb_{ctx.circuit_name}"], shell=True, capture_output=True, text=True)
 
         # Validation parameters
         lambda_function: Any = utils.lambdify_function(ctx.math_function)

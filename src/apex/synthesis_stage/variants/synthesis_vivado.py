@@ -70,16 +70,6 @@ end arch_top_{ctx.circuit_name};
             "-journal", jou_file,
             "-tclargs", ctx.fpga_board, ctx.output_folder_path, ctx.circuit_name, ctx.step
         ]
-
-        # Error handling
-        try:
-            subprocess.run(cmd, timeout=900, shell=True, text=True)
-        except subprocess.TimeoutExpired:
-            print(f"[ERROR] Vivado synthesis unsuccessful for circuit {ctx.circuit_name}: 15 minutes timeout")
-            subprocess.run(["taskkill", "/F", "/T", "/IM", "vivado.exe"], capture_output=True)
-            return False
-        except subprocess.CalledProcessError as e:
-            print(f"[ERROR] Vivado synthesis unsuccessful for circuit {ctx.circuit_name}: {e}")
-            return False
+        subprocess.run(cmd, shell=True, text=True)
 
         return True
