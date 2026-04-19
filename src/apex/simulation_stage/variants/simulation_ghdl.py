@@ -30,9 +30,8 @@ class SimulationGhdl(SimulationStage):
         vhdl_code: str = f"""
 -------------------------------------
 -- Generated with ApexHDL
--- Target: {ctx.fpga_board}
 -- Module Name: tb_{ctx.circuit_name}
--- Description: Testbench for module {ctx.circuit_name}
+-- Description: Testbench for circuit {ctx.circuit_name}
 -------------------------------------
 
 library IEEE;

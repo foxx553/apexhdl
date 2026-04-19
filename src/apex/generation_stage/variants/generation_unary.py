@@ -52,7 +52,6 @@ class GenerationUnary(GenerationStage):
         vhdl_code: str = f"""
 -------------------------------------
 -- Generated with ApexHDL
--- Target: {ctx.fpga_board}
 -- Module Name: {ctx.circuit_name}
 -- Function: f(x) = {ctx.math_function}
 -- Evaluator method: Unary

@@ -37,7 +37,7 @@ class ImplementationPynq(ImplementationStage):
 -- Generated with ApexHDL
 -- Target: {ctx.fpga_board}
 -- Module Name: stream_top_{ctx.circuit_name}
--- Description: AXI-Stream top module for {ctx.circuit_name}
+-- Description: AXI-Stream top module for circuit {ctx.circuit_name}
 -------------------------------------
 
 library IEEE;
