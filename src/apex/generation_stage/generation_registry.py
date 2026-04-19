@@ -27,7 +27,7 @@ class GenerationRegistry:
     Registry allowing predicate-based generation variant retrieval
     """
 
-    _variants: list[tuple[int, Predicate, GenerationStage]] = []
+    variants: list[tuple[int, Predicate, GenerationStage]] = []
     """list of all variants stored in the registry"""
     
     @classmethod
@@ -40,8 +40,8 @@ class GenerationRegistry:
             priority (int): Predicate priority (higher number for higher priority)
         """
         def decorator(generation_class: GenerationStage) -> GenerationStage:
-            cls._variants.insert(0, (priority, predicate, generation_class))
-            cls._variants.sort(key = lambda x: x[0], reverse=True)
+            cls.variants.insert(0, (priority, predicate, generation_class))
+            cls.variants.sort(key = lambda x: x[0], reverse=True)
             return generation_class
         return decorator
     
@@ -56,7 +56,7 @@ class GenerationRegistry:
         Returns:
             GenerationStage: Retrieved generation variant
         """
-        for _, predicate, generation_class in cls._variants:
+        for _, predicate, generation_class in cls.variants:
             if predicate(ctx):
                 return generation_class
         
