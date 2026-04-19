@@ -11,6 +11,11 @@ Predicate = Callable[[Context], bool]
 Alias for a boolean check on pipeline context
 """
 
+THEORETICAL_STEP: float = 0.001
+"""
+Step considered for Theoretical vs. experimental analysis
+"""
+
 def lambdify_function(function_str: str) -> Any:
     """
     Lambdifies a mathematical function from a string 
@@ -247,3 +252,99 @@ def insert_header(path: Path, header: str):
 
     content = path.read_text()
     path.write_text(header + content)
+
+def process_outputs_file(outputs_file: Path, dest_folder: Path, circuit_name: str, lambda_function: Any, data_width: int, x_min: float, x_max: float, y_min: float, y_max: float, is_simulation: bool) -> tuple[float, float, float, float]:
+    """
+    Generates the output plot and computes the approximation errors from the raw outputs CSV file
+
+    Parameters:
+        outputs_file (Path): Path of the raw CSV file
+        dest_folder (Path): Target folder for the generated plots
+        circuit_name (str): Name of the circuit
+        lambda_function (Any): Mathematical function evaluated
+        data_width (int): Number of bits of the approximation
+        x_min (float): Minimum X value
+        x_max (float): Maximum X value
+        y_min (float): Minimum Y value
+        y_max (float): Maximum Y value
+        is_simulation (bool): Whether or not we are in simulation (or in on-chip validation)
+
+    Returns:
+        tuple[float, float, float, float]: Computed approximation errors (in the order: mean absolute error, max absolute error, mean relative error, max relative error)
+    """
+
+    # Validation parameters
+    x_step: float = (x_max - x_min) / (2 ** data_width)
+    y_step: float = (y_max - y_min) / (2 ** data_width)
+
+    # Read outputs file
+    raw_y_values: list[int] = []
+    with outputs_file.open('r') as file:
+        for line in file:
+            parts: list[str] = line.strip().split(',')
+            if len(parts) >= 2:
+                raw_y_values.append(int(parts[1]))
+
+    # Computing theoretical and experimental values
+    x_values: list[float] = np.arange(x_min, x_max, THEORETICAL_STEP)
+    y_evaluator: list[float] = []
+    y_theoretical: list[float] = []
+    absolute_errors: list[float] = []
+    relative_errors: list[float] = []
+    for x_value in x_values:
+        theoretical: float = lambda_function(x_value)
+        evaluator: float = y_min + raw_y_values[clamp_nearest(x_value, x_min, x_step, data_width)] * y_step
+        y_theoretical.append(theoretical)
+        y_evaluator.append(evaluator)
+        absolute_errors.append(abs(theoretical - evaluator))
+        relative_errors.append(0 if theoretical == 0 else abs((theoretical - evaluator) / theoretical))
+
+    # Computing errors
+    mean_absolute_error: float = np.mean(absolute_errors)
+    max_absolute_error: float = np.max(absolute_errors)
+    mean_relative_error: float = np.mean(relative_errors)
+    max_relative_error: float = np.max(relative_errors)
+
+    # Computing and saving comparison plot
+    generate_apex_plot(
+        x_values, 
+        {
+            "Theoretical": (y_theoretical, "blue"),
+            "Experimental": (y_evaluator, "red")
+        },
+        dest_folder / f"curves_{circuit_name}.svg",
+        "Theoretical vs. experimental",
+        f"during {"simulation" if is_simulation else "on-chip validation"}",
+        "Output"
+    )
+
+    # Computing and saving absolute error plot
+    generate_apex_plot(
+        x_values, 
+        {
+            "Errors": (absolute_errors, "blue"),
+            f"Max = {"{:.3g}".format(max_absolute_error)}": ([max_absolute_error for _ in range(len(x_values))], "red"),
+            f"Mean = {"{:.3g}".format(mean_absolute_error)}": ([mean_absolute_error for _ in range(len(x_values))], "orange")
+        },
+        dest_folder / f"error_absolute_{circuit_name}.svg",
+        "Absolute errors",
+        f"during {"simulation" if is_simulation else "on-chip validation"}",
+        "Error"
+    )
+
+    # Computing and saving relative error plot
+    generate_apex_plot(
+        x_values, 
+        {
+            "Errors": (relative_errors, "blue"),
+            f"Max = {"{:.3g}".format(max_relative_error)}": ([max_relative_error for _ in range(len(x_values))], "red"),
+            f"Mean = {"{:.3g}".format(mean_relative_error)}": ([mean_relative_error for _ in range(len(x_values))], "orange")
+        },
+        dest_folder / f"error_relative_{circuit_name}.svg",
+        "Relative errors",
+        f"during {"simulation" if is_simulation else "on-chip validation"}",
+        "Error"
+    )
+
+    # Returning errors
+    return (mean_absolute_error, max_absolute_error, mean_relative_error, max_relative_error)

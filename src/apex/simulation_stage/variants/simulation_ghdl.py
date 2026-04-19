@@ -24,7 +24,7 @@ class SimulationGhdl(SimulationStage):
         # Create sim folder
         sim_folder_path: Path = ctx.output_folder_path / ctx.circuit_name / "sim"
         sim_folder_path.mkdir(parents=True, exist_ok=True)
-        results_file: Path = sim_folder_path / f"results_{ctx.circuit_name}.csv"
+        outputs_file: Path = sim_folder_path / f"outputs_{ctx.circuit_name}.csv"
 
         # Testbench generation
         vhdl_code: str = f"""
@@ -48,7 +48,7 @@ architecture arch_tb_{ctx.circuit_name} of tb_{ctx.circuit_name} is
     signal input_a : STD_LOGIC_VECTOR({ctx.data_width - 1} downto 0);
     signal result  : STD_LOGIC_VECTOR({ctx.data_width - 1} downto 0);
 
-    file result_file : TEXT open WRITE_MODE is "{str(results_file)}";
+    file result_file : TEXT open WRITE_MODE is "{str(outputs_file)}";
 
 begin
 
@@ -89,88 +89,27 @@ end arch_tb_{ctx.circuit_name};
         subprocess.run(["ghdl", "-e", "--std=08", f"tb_{ctx.circuit_name}"], shell=True, capture_output=True, check=True)
         subprocess.run(["ghdl", "-r", "--std=08", f"tb_{ctx.circuit_name}"], shell=True, capture_output=True, text=True)
 
-        # Validation parameters
-        lambda_function: Any = utils.lambdify_function(ctx.math_function)
-        x_step: float = (ctx.x_max - ctx.x_min) / (2 ** ctx.data_width)
-        y_step: float = (ctx.y_max - ctx.y_min) / (2 ** ctx.data_width)
-        theoretical_step: float = 0.001
+        # Perform outputs results processing
+        mean_absolute_error, max_absolute_error, mean_relative_error, max_relative_error = utils.process_outputs_file(
+            outputs_file,
+            sim_folder_path,
+            ctx.circuit_name,
+            utils.lambdify_function(ctx.math_function),
+            ctx.data_width,
+            ctx.x_min,
+            ctx.x_max,
+            ctx.y_min,
+            ctx.y_max,
+            is_simulation=True
+        )
 
-        # Read outputs file, and put header
-        raw_y_values: list[int] = []
-        with results_file.open('r') as file:
-            for line in file:
-                parts: list[str] = line.strip().split(',')
-                if len(parts) >= 2:
-                    raw_y_values.append(int(parts[1]))
-
-        # Computing theoretical and experimental values
-        x_values: list[float] = np.arange(ctx.x_min, ctx.x_max, theoretical_step)
-        y_evaluator: list[float] = []
-        y_theoretical: list[float] = []
-        absolute_errors: list[float] = []
-        relative_errors: list[float] = []
-        for x_value in x_values:
-            theoretical: float = lambda_function(x_value)
-            evaluator: float = ctx.y_min + raw_y_values[utils.clamp_nearest(x_value, ctx.x_min, x_step, ctx.data_width)] * y_step
-            y_theoretical.append(theoretical)
-            y_evaluator.append(evaluator)
-            absolute_errors.append(abs(theoretical - evaluator))
-            relative_errors.append(0 if theoretical == 0 else abs((theoretical - evaluator) / theoretical))
-
-        # Computing errors
-        mean_error: float = np.mean(absolute_errors)
-        max_error: float = np.max(absolute_errors)
-        mean_relative_error: float = np.mean(relative_errors)
-        max_relative_error: float = np.max(relative_errors)
-
-        # Inserting results file header
+        # Inserting outputs file header
         header = "Results during simulation,,\nGenerated with ApexHDL,,\n,,\n"
-        header += f"MaxAbsError,{"{:.3g}".format(max_error)},\n"
-        header += f"MeanAbsError,{"{:.3g}".format(mean_error)},\n"
+        header += f"MaxAbsError,{"{:.3g}".format(max_absolute_error)},\n"
+        header += f"MeanAbsError,{"{:.3g}".format(mean_absolute_error)},\n"
         header += f"MaxRelError,{"{:.3g}".format(max_relative_error)},\n"
         header += f"MeanRelError,{"{:.3g}".format(mean_relative_error)},\n"
         header += ",,\nInput,Output,\n"
-        utils.insert_header(results_file, header)
-
-        # Computing and saving comparison plot
-        utils.generate_apex_plot(
-            x_values, 
-            {
-                "Theoretical": (y_theoretical, "blue"),
-                "Experimental": (y_evaluator, "red")
-            },
-            sim_folder_path / f"curves_{ctx.circuit_name}.svg",
-            "Theoretical vs. experimental",
-            "during simulation",
-            "Output"
-        )
-
-        # Computing and saving absolute error plot
-        utils.generate_apex_plot(
-            x_values, 
-            {
-                "Errors": (absolute_errors, "blue"),
-                f"Max = {"{:.3g}".format(max_error)}": ([max_error for _ in range(len(x_values))], "red"),
-                f"Mean = {"{:.3g}".format(mean_error)}": ([mean_error for _ in range(len(x_values))], "orange")
-            },
-            sim_folder_path / f"error_absolute_{ctx.circuit_name}.svg",
-            "Absolute errors",
-            "during simulation",
-            "Error"
-        )
-
-        # Computing and saving relative error plot
-        utils.generate_apex_plot(
-            x_values, 
-            {
-                "Errors": (relative_errors, "blue"),
-                f"Max = {"{:.3g}".format(max_relative_error)}": ([max_relative_error for _ in range(len(x_values))], "red"),
-                f"Mean = {"{:.3g}".format(mean_relative_error)}": ([mean_relative_error for _ in range(len(x_values))], "orange")
-            },
-            sim_folder_path / f"error_relative_{ctx.circuit_name}.svg",
-            "Relative errors",
-            "during simulation",
-            "Error"
-        )
+        utils.insert_header(outputs_file, header)
 
         return True
