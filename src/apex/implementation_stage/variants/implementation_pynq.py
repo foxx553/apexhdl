@@ -11,6 +11,7 @@ from typing import Any
 
 from apex.context import Context
 from apex.implementation_stage.implementation_registry import ImplementationRegistry, ImplementationStage
+import apex.utils as utils
 
 @ImplementationRegistry.register(predicate=lambda ctx: ctx.step == "impl" and ctx.implementation_tool == "vivado" and ctx.fpga_board == "xc7z020clg400-1", priority=1)
 class ImplementationPynq(ImplementationStage):
@@ -141,15 +142,7 @@ end arch_stream_top_{ctx.circuit_name};
         template_file: Path = Path("./apex/implementation_stage/variants/res/target.py.tmpl")
         target_file: Path = impl_folder_path / "target.py"
         template: Template = Template(template_file.read_text())
-        target_script: str = template.substitute(
-            module_name=ctx.circuit_name,
-            function_str=ctx.math_function,
-            data_width=ctx.data_width,
-            x_min=ctx.x_min,
-            x_max=ctx.x_max,
-            y_min=ctx.y_min,
-            y_max=ctx.y_max
-        )
+        target_script: str = template.substitute(module_name=ctx.circuit_name, data_width=ctx.data_width)
         target_file.write_text(target_script)
 
         # Establishing SSH connection to the board
@@ -174,11 +167,33 @@ python3 target.py
         ssh.exec_command(cmd, get_pty=True) 
             
         # Downloading output files with SCP
-        scp.get(f"{ctx.fpga_working_folder_path}/curves_{ctx.circuit_name}.png", f"{str(impl_folder_path)}/curves_{ctx.circuit_name}.png")
-        scp.get(f"{ctx.fpga_working_folder_path}/error_absolute_{ctx.circuit_name}.png", f"{str(impl_folder_path)}/error_absolute_{ctx.circuit_name}.png")
-        scp.get(f"{ctx.fpga_working_folder_path}/error_relative_{ctx.circuit_name}.png", f"{str(impl_folder_path)}/error_relative_{ctx.circuit_name}.png")
+        scp.get(f"{ctx.fpga_working_folder_path}/outputs_{ctx.circuit_name}.csv", f"{str(impl_folder_path)}/outputs_{ctx.circuit_name}.csv")
         
         # Closing connection 
         scp.close()
         ssh.close()
+
+        # Perform outputs results processing
+        mean_absolute_error, max_absolute_error, mean_relative_error, max_relative_error = utils.process_outputs_file(
+            impl_folder_path / f"outputs_{ctx.circuit_name}.csv",
+            impl_folder_path,
+            ctx.circuit_name,
+            utils.lambdify_function(ctx.math_function),
+            ctx.data_width,
+            ctx.x_min,
+            ctx.x_max,
+            ctx.y_min,
+            ctx.y_max,
+            is_simulation=False
+        )
+
+        # Inserting outputs file header
+        header = "Results during simulation,,\nGenerated with ApexHDL,,\n,,\n"
+        header += f"MaxAbsError,{"{:.3g}".format(max_absolute_error)},\n"
+        header += f"MeanAbsError,{"{:.3g}".format(mean_absolute_error)},\n"
+        header += f"MaxRelError,{"{:.3g}".format(max_relative_error)},\n"
+        header += f"MeanRelError,{"{:.3g}".format(mean_relative_error)},\n"
+        header += ",,\nInput,Output,\n"
+        utils.insert_header(impl_folder_path / f"outputs_{ctx.circuit_name}.csv", header)
+
         return True
