@@ -1,8 +1,8 @@
 from apex.context import Context
-from apex.generation_stage.generation_registry import GenerationRegistry, GenerationClass, GenerationStage
-from apex.simulation_stage.simulation_registry import SimulationRegistry, SimulationClass, SimulationStage
-from apex.analysis_stage.analysis_registry import AnalysisRegistry, AnalysisClass, AnalysisStage
-from apex.implementation_stage.implementation_registry import ImplementationRegistry, ImplementationClass, ImplementationStage
+from apex.generation_stage.generation_registry import GenerationRegistry, GenerationStage
+from apex.simulation_stage.simulation_registry import SimulationRegistry, SimulationStage
+from apex.analysis_stage.analysis_registry import AnalysisRegistry, AnalysisStage
+from apex.implementation_stage.implementation_registry import ImplementationRegistry, ImplementationStage
 
 class Pipeline:
     """
@@ -37,10 +37,10 @@ class Pipeline:
         self.context = ctx
 
         # Selecting the correct variants
-        generation_variant: GenerationClass = GenerationRegistry.select(ctx)
-        simulation_variant: SimulationClass = SimulationRegistry.select(ctx)
-        analysis_variant: AnalysisClass = AnalysisRegistry.select(ctx)
-        implementation_variant: ImplementationClass = ImplementationRegistry.select(ctx)
+        generation_variant: GenerationStage = GenerationRegistry.select(ctx)
+        simulation_variant: SimulationStage = SimulationRegistry.select(ctx)
+        analysis_variant: AnalysisStage = AnalysisRegistry.select(ctx)
+        implementation_variant: ImplementationStage = ImplementationRegistry.select(ctx)
 
         # Instanciating these variants
         self.generation_stage = generation_variant()

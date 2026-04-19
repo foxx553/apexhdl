@@ -1,4 +1,3 @@
-from typing import Type
 from abc import ABC, abstractmethod
 import pkgutil
 import importlib
@@ -23,17 +22,12 @@ class SimulationStage(ABC):
         """
 		pass
 
-SimulationClass = Type[SimulationStage]
-"""
-Alias for a boolean check on pipeline context
-"""
-
 class SimulationRegistry:
     """
     Registry allowing predicate-based simulation variant retrieval
     """
 
-    _variants: list[tuple[int, Predicate, SimulationClass]] = []
+    _variants: list[tuple[int, Predicate, SimulationStage]] = []
     """list of all variants stored in the registry"""
     
     @classmethod
@@ -45,14 +39,14 @@ class SimulationRegistry:
             predicate (Predicate): Condition to be met, checked on the execution context
             priority (int): Predicate priority (higher number for higher priority)
         """
-        def decorator(simulation_class: SimulationClass) -> SimulationClass:
+        def decorator(simulation_class: SimulationStage) -> SimulationStage:
             cls._variants.insert(0, (priority, predicate, simulation_class))
             cls._variants.sort(key = lambda x: x[0], reverse=True)
             return simulation_class
         return decorator
     
     @classmethod
-    def select(cls, ctx: Context) -> SimulationClass:
+    def select(cls, ctx: Context) -> SimulationStage:
         """
         Simulation variant retrieval
         
@@ -60,7 +54,7 @@ class SimulationRegistry:
             ctx (Context): Context of the pipeline execution
 
         Returns:
-            SimulationClass: Retrieved simulation variant
+            SimulationStage: Retrieved simulation variant
         """
         for _, predicate, simulation_class in cls._variants:
             if predicate(ctx):

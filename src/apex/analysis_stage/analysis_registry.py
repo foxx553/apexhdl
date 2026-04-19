@@ -1,4 +1,3 @@
-from typing import Type
 from abc import ABC, abstractmethod
 import pkgutil
 import importlib
@@ -23,17 +22,12 @@ class AnalysisStage(ABC):
         """
 		pass
 
-AnalysisClass = Type[AnalysisStage]
-"""
-Alias for a boolean check on pipeline context
-"""
-
 class AnalysisRegistry:
     """
     Registry allowing predicate-based analysis variant retrieval
     """
 
-    _variants: list[tuple[int, Predicate, AnalysisClass]] = []
+    _variants: list[tuple[int, Predicate, AnalysisStage]] = []
     """list of all variants stored in the registry"""
     
     @classmethod
@@ -45,14 +39,14 @@ class AnalysisRegistry:
             predicate (Predicate): Condition to be met, checked on the execution context
             priority (int): Predicate priority (higher number for higher priority)
         """
-        def decorator(analysis_class: AnalysisClass) -> AnalysisClass:
+        def decorator(analysis_class: AnalysisStage) -> AnalysisStage:
             cls._variants.insert(0, (priority, predicate, analysis_class))
             cls._variants.sort(key = lambda x: x[0], reverse=True)
             return analysis_class
         return decorator
     
     @classmethod
-    def select(cls, ctx: Context) -> AnalysisClass:
+    def select(cls, ctx: Context) -> AnalysisStage:
         """
         Analysis variant retrieval
         
@@ -60,7 +54,7 @@ class AnalysisRegistry:
             ctx (Context): Context of the pipeline execution
 
         Returns:
-            AnalysisClass: Retrieved analysis variant
+            AnalysisStage: Retrieved analysis variant
         """
         for _, predicate, analysis_class in cls._variants:
             if predicate(ctx):

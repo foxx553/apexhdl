@@ -1,4 +1,3 @@
-from typing import Type
 from abc import ABC, abstractmethod
 import pkgutil
 import importlib
@@ -23,17 +22,12 @@ class GenerationStage(ABC):
         """
 		pass
 
-GenerationClass = Type[GenerationStage]
-"""
-Alias for a boolean check on pipeline context
-"""
-
 class GenerationRegistry:
     """
     Registry allowing predicate-based generation variant retrieval
     """
 
-    _variants: list[tuple[int, Predicate, GenerationClass]] = []
+    _variants: list[tuple[int, Predicate, GenerationStage]] = []
     """list of all variants stored in the registry"""
     
     @classmethod
@@ -45,14 +39,14 @@ class GenerationRegistry:
             predicate (Predicate): Condition to be met, checked on the execution context
             priority (int): Predicate priority (higher number for higher priority)
         """
-        def decorator(generation_class: GenerationClass) -> GenerationClass:
+        def decorator(generation_class: GenerationStage) -> GenerationStage:
             cls._variants.insert(0, (priority, predicate, generation_class))
             cls._variants.sort(key = lambda x: x[0], reverse=True)
             return generation_class
         return decorator
     
     @classmethod
-    def select(cls, ctx: Context) -> GenerationClass:
+    def select(cls, ctx: Context) -> GenerationStage:
         """
         Generation variant retrieval
         
@@ -60,7 +54,7 @@ class GenerationRegistry:
             ctx (Context): Context of the pipeline execution
 
         Returns:
-            GenerationClass: Retrieved generation variant
+            GenerationStage: Retrieved generation variant
         """
         for _, predicate, generation_class in cls._variants:
             if predicate(ctx):

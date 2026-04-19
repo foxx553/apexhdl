@@ -1,4 +1,3 @@
-from typing import Type
 from abc import ABC, abstractmethod
 import pkgutil
 import importlib
@@ -23,17 +22,12 @@ class ImplementationStage(ABC):
         """
 		pass
 
-ImplementationClass = Type[ImplementationStage]
-"""
-Alias for a boolean check on pipeline context
-"""
-
 class ImplementationRegistry:
     """
     Registry allowing predicate-based implementation variant retrieval
     """
 
-    _variants: list[tuple[int, Predicate, ImplementationClass]] = []
+    _variants: list[tuple[int, Predicate, ImplementationStage]] = []
     """list of all variants stored in the registry"""
     
     @classmethod
@@ -45,14 +39,14 @@ class ImplementationRegistry:
             predicate (Predicate): Condition to be met, checked on the execution context
             priority (int): Predicate priority (higher number for higher priority)
         """
-        def decorator(implementation_class: ImplementationClass) -> ImplementationClass:
+        def decorator(implementation_class: ImplementationStage) -> ImplementationStage:
             cls._variants.insert(0, (priority, predicate, implementation_class))
             cls._variants.sort(key = lambda x: x[0], reverse=True)
             return implementation_class
         return decorator
     
     @classmethod
-    def select(cls, ctx: Context) -> ImplementationClass:
+    def select(cls, ctx: Context) -> ImplementationStage:
         """
         Implementation variant retrieval
         
@@ -60,7 +54,7 @@ class ImplementationRegistry:
             ctx (Context): Context of the pipeline execution
 
         Returns:
-            ImplementationClass: Retrieved implementation variant
+            ImplementationStage: Retrieved implementation variant
         """
         for _, predicate, implementation_class in cls._variants:
             if predicate(ctx):
