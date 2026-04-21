@@ -5,9 +5,7 @@ import zipfile
 from string import Template
 import paramiko
 from paramiko import SSHClient, Transport
-
-# To prevent static analysis error, we disable type checking for that import
-from scp import SCPClient #type: ignore
+from scp import SCPClient # type: ignore
 
 from apex.context import Context
 from apex.implementation_stage.implementation_registry import ImplementationRegistry, ImplementationStage

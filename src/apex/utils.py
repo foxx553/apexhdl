@@ -1,10 +1,10 @@
-from typing import Callable, Any
+from typing import Callable, Any, cast, no_type_check
 from apex.context import Context
-from sympy import symbols, sympify, lambdify
 import numpy as np
 import matplotlib.pyplot as plt
 from pathlib import Path
 import re
+from sympy import symbols, sympify, lambdify, Expr # type: ignore
 
 Predicate = Callable[[Context], bool]
 """
@@ -29,7 +29,7 @@ def lambdify_function(function_str: str) -> Any:
 
     x: Any = symbols('x')
     try:
-        expr: Any = sympify(function_str)
+        expr: Expr = cast(Expr, sympify(function_str))
         return lambdify(x, expr, modules=['math'])
     except Exception as e:
         raise RuntimeError(f"Failed mathematical function lambdification: {e}")
@@ -91,7 +91,7 @@ def compute_discrete_output(function_str: str, x_data_width: int, x_min: float, 
     # Function space discretization
     x_step: float = (x_max - x_min) / (2 ** x_data_width)
     y_step: float = (y_max - y_min) / (2 ** y_data_width)
-    x_float_values: list[float] = np.arange(x_min, x_max, x_step)
+    x_float_values: list[float] = np.arange(x_min, x_max, x_step).tolist()
 
     # Function space computation
     y_float_values: list[float] = [f(x) for x in x_float_values]
@@ -191,13 +191,15 @@ def append_benchmark_csv(output_folder: Path, benchmark_name: str, ctx: Context)
     with file_path.open('a') as file:
         file.write(current_line)
 
-def generate_apex_plot(x_values: list[float], y_data: dict[str, (list[float], str)], path: Path, title: str, subtitle: str, ylabel: str, xlabel: str = "Input"):
+# Note: Matplotlib hasn't fully typed its arguments. We thus disable type check for that specific function which uses Matplotlib for plotting ApexHDL graphs
+@no_type_check
+def generate_apex_plot(x_values: list[float], y_data: dict[str, tuple[list[float], str]], path: Path, title: str, subtitle: str, ylabel: str, xlabel: str = "Input"):
     """
     Generates a plot following ApexHDL format
 
     Parameters:
         x_values (list[float]): X values to be considered in the plot
-        y_data (dict[str, (list[float], str)]): Data to be plotted, with its associated color
+        y_data (dict[str, tuple[list[float], str]]): Data to be plotted, with its associated color
         path (Path): File path for the plot
         title (str): Title of the plot
         subtitle (str): Subtitle of the plot
@@ -286,7 +288,7 @@ def process_outputs_file(outputs_file: Path, dest_folder: Path, circuit_name: st
                 raw_y_values.append(int(parts[1]))
 
     # Computing theoretical and experimental values
-    x_values: list[float] = np.arange(x_min, x_max, THEORETICAL_STEP)
+    x_values: list[float] = np.arange(x_min, x_max, THEORETICAL_STEP).tolist()
     y_evaluator: list[float] = []
     y_theoretical: list[float] = []
     absolute_errors: list[float] = []
@@ -300,9 +302,9 @@ def process_outputs_file(outputs_file: Path, dest_folder: Path, circuit_name: st
         relative_errors.append(0 if theoretical == 0 else abs((theoretical - evaluator) / theoretical))
 
     # Computing errors
-    mean_absolute_error: float = np.mean(absolute_errors)
+    mean_absolute_error: float = float(np.mean(absolute_errors))
     max_absolute_error: float = np.max(absolute_errors)
-    mean_relative_error: float = np.mean(relative_errors)
+    mean_relative_error: float = float(np.mean(relative_errors))
     max_relative_error: float = np.max(relative_errors)
 
     # Computing and saving comparison plot
