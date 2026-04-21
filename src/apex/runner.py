@@ -2,9 +2,9 @@ import argparse
 import json
 import itertools
 from dataclasses import fields
-from argparse import ArgumentParser, _ArgumentGroup, Namespace
+from argparse import ArgumentParser, Namespace
 from pathlib import Path
-from typing import Any, Dict, get_args, get_origin, Literal, Union
+from typing import Any, KeysView, Optional, get_args, get_origin, Literal, Union
 
 from apex.context import Context
 from apex.pipeline import Pipeline
@@ -19,7 +19,7 @@ class Runner:
     Class to parse args and init execution, eventually managing benchmarking mode
     """
 
-    parser: ArgumentParser
+    _parser: ArgumentParser
     """Parser used for dictionary building"""
 
     def __init__(self):
@@ -34,98 +34,98 @@ class Runner:
         ImplementationRegistry.load_variants()
 
         # Init parser
-        self.parser = argparse.ArgumentParser(description="ApexHDL: A Tool for Generating/Benchmarking Unary and Binary Function Evaluators on FPGA")
+        self._parser = argparse.ArgumentParser(description="ApexHDL: A Tool for Generating/Benchmarking Unary and Binary Function Evaluators on FPGA")
 
-        # "Meta" arguments
-        conf: _ArgumentGroup = self.parser.add_argument_group("Config")
+        # Config argument
+        conf: Any = self._parser.add_argument_group("Config")
         conf.add_argument("--config", type=Path, help="Path to a JSON file containing configuration")
 
         # Context-related arguments, deduced from Context definition
-        groups = {}
+        groups: dict[str, Any] = {}
         for field in fields(Context):
 
             # Extract metadata and create group
-            group_name = field.metadata.get("group", "General")
-            help_text = field.metadata.get("help", "")
-            if group_name not in groups:
-                groups[group_name] = self.parser.add_argument_group(group_name)
-            current_group = groups[group_name]
-            kwargs = {
-                "help": help_text,
+            group: str = field.metadata.get("group", "General")
+            description: str = field.metadata.get("description", "")
+            allow_multiple: bool = field.metadata.get("allow_multiple", False)
+            if group not in groups:
+                groups[group] = self._parser.add_argument_group(group)
+            current_group: Any = groups[group]
+            origin: Optional[Any] = get_origin(field.type)
+            args: tuple[Any, ...] = get_args(field.type)
+
+            # Start building field args
+            kwargs: dict[str, Any] = {
+                "help": description,
                 "dest": field.name
             }
-            origin = get_origin(field.type)
-            args = get_args(field.type)
 
             # Extract actual type of Union/Optional field
             if origin is Union:
-                actual_types = [a for a in args if a is not type(None)]
-                inner_type = actual_types[0]
-                origin = get_origin(inner_type)
-                args = get_args(inner_type)
+                actual_types: list[Any] = [a for a in args if a is not type(None)]
+                actual_type: Any = actual_types[0]
+                origin = get_origin(actual_type)
+                args = get_args(actual_type)
             else:
-                inner_type = field.type
+                actual_type = field.type
 
-            # Allow multiple values for list field
-            if origin is list or inner_type is list:
+            # Allow multiple values when metadata specify it
+            if allow_multiple:
                 kwargs["nargs"] = "+"
-                if args:
-                    inner_type = args[0]
-                    origin = get_origin(inner_type)
-                    args = get_args(inner_type)
 
             # Allow a specific set of choices for Literal field
             if origin is Literal:
                 kwargs["choices"] = args
                 kwargs["type"] = type(args[0])
             else:
-                kwargs["type"] = inner_type
+                kwargs["type"] = actual_type
 
             # Build and add the flag to the parser
-            flag = f"--{field.name.replace('_', '-')}"
+            flag: str = f"--{field.name.replace('_', '-')}"
             current_group.add_argument(flag, **kwargs)
         
 
-    def build_dict(self) -> dict:
+    def build_dict(self) -> dict[str, Any]:
         """
         Parsing args to create args dictionary, with CLI overwriting JSON default config
 
         Returns:
-            dict: Dictionary with all args and their value(s)
+            dict[str, Any]: dictionary with all args and their value(s)
         """
 
         # If there's a JSON config file, defining default values
-        initial_args, _ = self.parser.parse_known_args()
-        if initial_args.config:
-            json_file: Path = Path(initial_args.config)
+        initial_args: tuple[Namespace, list[str]] = self._parser.parse_known_args()
+        config_path: Optional[Any] = getattr(initial_args[0], 'config', None)
+        if config_path:
+            json_file: Path = Path(config_path)
             if not json_file.exists():
-                self.parser.error(f"JSON configuration file not found: {json_file}")
+                self._parser.error(f"JSON configuration file not found: {json_file}")
             with open(json_file, 'r') as f:
-                config_data: Dict[str, Any] = json.load(f)
-                self.parser.set_defaults(**config_data)
+                config_data: dict[str, Any] = json.load(f)
+                self._parser.set_defaults(**config_data)
 
         # Parsing CLI args
-        args: Namespace = self.parser.parse_args()
+        args: Namespace = self._parser.parse_args()
 
         # Removing the "json" key before building the context
-        args_dict: Dict[str, Any] = vars(args).copy()
+        args_dict: dict[str, Any] = vars(args).copy()
         args_dict.pop('config', None)
         
         return args_dict
     
-    def run(self, args_dict: Dict[str, Any]) -> bool:
+    def run(self, args_dict: dict[str, Any]) -> bool:
         """
         Running the pipeline(s), eventually managing benchmarking mode
 
         Parameters:
-            args_dict (Dict[str, Any]): Dictionary with all args and their value(s)
+            args_dict (dict[str, Any]): dictionary with all args and their value(s)
         
         Returns:
             bool: Whether the overall execution was successful or not
         """
 
         # Generating all possible configurations
-        keys: list[str] = args_dict.keys()
+        keys: KeysView[str] = args_dict.keys()
         values: list[list[Any]] = [value if isinstance(value, list) else [value] for value in args_dict.values()]
         configurations: list[Any] = list(itertools.product(*values))
 
@@ -150,7 +150,7 @@ class Runner:
             for config in configurations:
 
                 # Building the current configuration
-                current_args_dict: Dict[str, Any] = dict(zip(keys, config))
+                current_args_dict: dict[str, Any] = dict(zip(keys, config))
                 current_ctx: Context = Context(**current_args_dict)
 
                 # Adding ID to circuit_name for uniqueness

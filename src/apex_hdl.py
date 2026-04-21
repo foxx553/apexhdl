@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any
 
 from apex.runner import Runner
 
@@ -10,7 +10,7 @@ def main():
 
     # Parsing args
     runner: Runner = Runner()
-    args_dict: dict = runner.build_dict()
+    args_dict: dict[str, Any] = runner.build_dict()
 
     # Running pipeline(s)
     runner.run(args_dict)
