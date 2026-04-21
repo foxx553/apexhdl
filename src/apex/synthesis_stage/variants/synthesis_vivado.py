@@ -1,7 +1,5 @@
 from pathlib import Path
 import subprocess
-from subprocess import CompletedProcess
-import shutil
 
 from apex.context import Context
 from apex.synthesis_stage.synthesis_registry import SynthesisRegistry, SynthesisStage
@@ -13,6 +11,10 @@ class SynthesisVivado(SynthesisStage):
     """
     
     def execute(self, ctx: Context) -> bool:
+
+        # Preliminary checks
+        if ctx.fpga_board is None:
+            raise ValueError("Vivado synthesis requires ctx.fpga_board to be set")
 
         # Get source folder path
         folder_path: Path = ctx.output_folder_path / ctx.circuit_name / "vhdl"
@@ -59,15 +61,13 @@ end arch_top_{ctx.circuit_name};
 
         # Vivado logs target path
         log_file: Path = syn_folder_path / "vivado.log"
-        jou_file: Path = syn_folder_path / "vivado.jou"
 
         # Vivado execution in batch mode
-        cmd = [
+        cmd: list[str | Path] = [
             "vivado",
             "-mode", "batch",
             "-source", tcl_script,
             "-log", log_file,
-            "-journal", jou_file,
             "-tclargs", ctx.fpga_board, ctx.output_folder_path, ctx.circuit_name, ctx.step
         ]
         subprocess.run(cmd, shell=True, text=True)

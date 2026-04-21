@@ -7,6 +7,7 @@
 **/NA/**
 **/local/**
 **/apex_venv/**
+**/.vscode/**
 
 # Extensions
 *.log

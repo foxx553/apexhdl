@@ -1,13 +1,13 @@
 from pathlib import Path
 import subprocess
-from subprocess import CompletedProcess
 import shutil
 import zipfile
 from string import Template
 import paramiko
-from paramiko import SSHClient
-from scp import SCPClient
-from typing import Any
+from paramiko import SSHClient, Transport
+
+# To prevent static analysis error, we disable type checking for that import
+from scp import SCPClient #type: ignore
 
 from apex.context import Context
 from apex.implementation_stage.implementation_registry import ImplementationRegistry, ImplementationStage
@@ -20,6 +20,10 @@ class ImplementationPynq(ImplementationStage):
     """
     
     def execute(self, ctx: Context) -> bool:
+
+        # Preliminary checks
+        if ctx.fpga_board is None or ctx.ip_address is None or ctx.username is None or ctx.password is None:
+            raise ValueError("PYNQ implementation requires fpga_board, ip_address, username and password to be set")
 
         # Get source folder path
         folder_path: Path = ctx.output_folder_path / ctx.circuit_name / "vhdl"
@@ -117,12 +121,16 @@ end arch_stream_top_{ctx.circuit_name};
         stream_top_file: Path = folder_path / f"stream_top_{ctx.circuit_name}.vhd"
         stream_top_file.write_text(vhdl_code)
 
+        # Vivado logs target path
+        log_file: Path = impl_folder_path / "vivado.log"
+
         # Vivado execution in batch mode
-        cmd = [
+        cmd: list[str | Path] = [
             "vivado",
             "-mode", "batch",
             "-source", tcl_script,
-            "-tclargs", ctx.output_folder_path, ctx.circuit_name
+            "-log", log_file,
+            "-tclargs", ctx.fpga_board, ctx.output_folder_path, ctx.circuit_name
         ]
         subprocess.run(cmd, shell=True, text=True)
         
@@ -149,22 +157,25 @@ end arch_stream_top_{ctx.circuit_name};
         ssh: SSHClient = paramiko.SSHClient()
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         ssh.connect(hostname=ctx.ip_address, username=ctx.username, password=ctx.password)
+        transport: Transport | None = ssh.get_transport()
+        if transport is None:
+            raise RuntimeError("Failed to establish SSH transport")
 
         # Transferring files with SCP
-        with SCPClient(ssh.get_transport()) as scp:
+        with SCPClient(transport) as scp:
             scp.put(f"{str(impl_folder_path)}/{ctx.circuit_name}.bit", f"{ctx.fpga_working_folder_path}/{ctx.circuit_name}.bit")
             scp.put(f"{str(impl_folder_path)}/{ctx.circuit_name}.hwh", f"{ctx.fpga_working_folder_path}/{ctx.circuit_name}.hwh")
             scp.put(f"{str(impl_folder_path)}/target.py", f"{ctx.fpga_working_folder_path}/target.py")
         
         # Command for target script execution (needs PYNQ setup via specific bash scripts)
-        cmd: str = f'''
+        pynq_cmd: str = f'''
 cd {ctx.fpga_working_folder_path} && echo "xilinx" | sudo -S su -c '
 source /etc/profile.d/pynq_venv.sh
 source /etc/profile.d/xrt_setup.sh
 python3 target.py
 '
         '''
-        ssh.exec_command(cmd, get_pty=True) 
+        ssh.exec_command(pynq_cmd, get_pty=True) 
             
         # Downloading output files with SCP
         scp.get(f"{ctx.fpga_working_folder_path}/outputs_{ctx.circuit_name}.csv", f"{str(impl_folder_path)}/outputs_{ctx.circuit_name}.csv")

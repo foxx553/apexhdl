@@ -1,9 +1,5 @@
 from pathlib import Path
 import subprocess
-from subprocess import CompletedProcess
-import matplotlib.pyplot as plt
-import numpy as np
-from typing import Any
 
 from apex.context import Context
 from apex.simulation_stage.simulation_registry import SimulationRegistry, SimulationStage

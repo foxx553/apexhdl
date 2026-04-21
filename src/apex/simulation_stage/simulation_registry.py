@@ -27,7 +27,7 @@ class SimulationRegistry:
     Registry allowing predicate-based simulation variant retrieval
     """
 
-    variants: list[tuple[int, Predicate, SimulationStage]] = []
+    _variants: list[tuple[int, Predicate, type[SimulationStage]]] = []
     """list of all variants stored in the registry"""
     
     @classmethod
@@ -39,14 +39,13 @@ class SimulationRegistry:
             predicate (Predicate): Condition to be met, checked on the execution context
             priority (int): Predicate priority (higher number for higher priority)
         """
-        def decorator(simulation_class: SimulationStage) -> SimulationStage:
-            cls.variants.insert(0, (priority, predicate, simulation_class))
-            cls.variants.sort(key = lambda x: x[0], reverse=True)
+        def decorator(simulation_class: type[SimulationStage]) -> type[SimulationStage]:
+            cls._variants.append((priority, predicate, simulation_class))
             return simulation_class
         return decorator
     
     @classmethod
-    def select(cls, ctx: Context) -> SimulationStage:
+    def select(cls, ctx: Context) -> type[SimulationStage]:
         """
         Simulation variant retrieval
         
@@ -54,9 +53,10 @@ class SimulationRegistry:
             ctx (Context): Context of the pipeline execution
 
         Returns:
-            SimulationStage: Retrieved simulation variant
+            type[SimulationStage]: Retrieved simulation variant
         """
-        for _, predicate, simulation_class in cls.variants:
+        cls._variants.sort(key = lambda x: x[0], reverse=True)
+        for _, predicate, simulation_class in cls._variants:
             if predicate(ctx):
                 return simulation_class
         

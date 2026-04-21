@@ -27,7 +27,7 @@ class GenerationRegistry:
     Registry allowing predicate-based generation variant retrieval
     """
 
-    variants: list[tuple[int, Predicate, GenerationStage]] = []
+    _variants: list[tuple[int, Predicate, type[GenerationStage]]] = []
     """list of all variants stored in the registry"""
     
     @classmethod
@@ -39,14 +39,13 @@ class GenerationRegistry:
             predicate (Predicate): Condition to be met, checked on the execution context
             priority (int): Predicate priority (higher number for higher priority)
         """
-        def decorator(generation_class: GenerationStage) -> GenerationStage:
-            cls.variants.insert(0, (priority, predicate, generation_class))
-            cls.variants.sort(key = lambda x: x[0], reverse=True)
+        def decorator(generation_class: type[GenerationStage]) -> type[GenerationStage]:
+            cls._variants.append((priority, predicate, generation_class))
             return generation_class
         return decorator
     
     @classmethod
-    def select(cls, ctx: Context) -> GenerationStage:
+    def select(cls, ctx: Context) -> type[GenerationStage]:
         """
         Generation variant retrieval
         
@@ -54,9 +53,10 @@ class GenerationRegistry:
             ctx (Context): Context of the pipeline execution
 
         Returns:
-            GenerationStage: Retrieved generation variant
+            type[GenerationStage]: Retrieved generation variant
         """
-        for _, predicate, generation_class in cls.variants:
+        cls._variants.sort(key = lambda x: x[0], reverse=True)
+        for _, predicate, generation_class in cls._variants:
             if predicate(ctx):
                 return generation_class
         

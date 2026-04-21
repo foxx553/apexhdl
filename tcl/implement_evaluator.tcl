@@ -1,9 +1,10 @@
 # Get command line arguments
-set output_folder [lindex $argv 0]
-set module_name [lindex $argv 1]
+set fpga_board [lindex $argv 0]
+set output_folder [lindex $argv 1]
+set module_name [lindex $argv 2]
 
 # Create in-memory project
-create_project -in_memory -part xc7z020clg400-1
+create_project -in_memory -part ${fpga_board}
 
 # Add VHDL source and constraints files
 add_files ${output_folder}/${module_name}/vhdl/${module_name}.vhd
@@ -45,8 +46,8 @@ place_design
 route_design
 
 # Generate output files
-write_bitstream -force ../output/${module_name}/impl/${module_name}.bit
-write_hw_platform -fixed -force -file ../output/${module_name}/impl/${module_name}.xsa
+write_bitstream -force ${output_folder}/${module_name}/impl/${module_name}.bit
+write_hw_platform -fixed -force -file ${output_folder}/${module_name}/impl/${module_name}.xsa
 
 # Close project
 close_project

@@ -27,7 +27,7 @@ class ImplementationRegistry:
     Registry allowing predicate-based implementation variant retrieval
     """
 
-    variants: list[tuple[int, Predicate, ImplementationStage]] = []
+    _variants: list[tuple[int, Predicate, type[ImplementationStage]]] = []
     """list of all variants stored in the registry"""
     
     @classmethod
@@ -39,14 +39,13 @@ class ImplementationRegistry:
             predicate (Predicate): Condition to be met, checked on the execution context
             priority (int): Predicate priority (higher number for higher priority)
         """
-        def decorator(implementation_class: ImplementationStage) -> ImplementationStage:
-            cls.variants.insert(0, (priority, predicate, implementation_class))
-            cls.variants.sort(key = lambda x: x[0], reverse=True)
+        def decorator(implementation_class: type[ImplementationStage]) -> type[ImplementationStage]:
+            cls._variants.append((priority, predicate, implementation_class))
             return implementation_class
         return decorator
     
     @classmethod
-    def select(cls, ctx: Context) -> ImplementationStage:
+    def select(cls, ctx: Context) -> type[ImplementationStage]:
         """
         Implementation variant retrieval
         
@@ -54,9 +53,10 @@ class ImplementationRegistry:
             ctx (Context): Context of the pipeline execution
 
         Returns:
-            ImplementationStage: Retrieved implementation variant
+            type[ImplementationStage]: Retrieved implementation variant
         """
-        for _, predicate, implementation_class in cls.variants:
+        cls._variants.sort(key = lambda x: x[0], reverse=True)
+        for _, predicate, implementation_class in cls._variants:
             if predicate(ctx):
                 return implementation_class
         

@@ -27,7 +27,7 @@ class SynthesisRegistry:
     Registry allowing predicate-based synthesis variant retrieval
     """
 
-    variants: list[tuple[int, Predicate, SynthesisStage]] = []
+    _variants: list[tuple[int, Predicate, type[SynthesisStage]]] = []
     """list of all variants stored in the registry"""
     
     @classmethod
@@ -39,14 +39,13 @@ class SynthesisRegistry:
             predicate (Predicate): Condition to be met, checked on the execution context
             priority (int): Predicate priority (higher number for higher priority)
         """
-        def decorator(synthesis_class: SynthesisStage) -> SynthesisStage:
-            cls.variants.insert(0, (priority, predicate, synthesis_class))
-            cls.variants.sort(key = lambda x: x[0], reverse=True)
+        def decorator(synthesis_class: type[SynthesisStage]) -> type[SynthesisStage]:
+            cls._variants.append((priority, predicate, synthesis_class))
             return synthesis_class
         return decorator
     
     @classmethod
-    def select(cls, ctx: Context) -> SynthesisStage:
+    def select(cls, ctx: Context) -> type[SynthesisStage]:
         """
         Synthesis variant retrieval
         
@@ -54,9 +53,10 @@ class SynthesisRegistry:
             ctx (Context): Context of the pipeline execution
 
         Returns:
-            SynthesisStage: Retrieved synthesis variant
+            type[SynthesisStage]: Retrieved synthesis variant
         """
-        for _, predicate, synthesis_class in cls.variants:
+        cls._variants.sort(key = lambda x: x[0], reverse=True)
+        for _, predicate, synthesis_class in cls._variants:
             if predicate(ctx):
                 return synthesis_class
         
