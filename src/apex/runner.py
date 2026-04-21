@@ -14,7 +14,7 @@ from apex.synthesis_stage.synthesis_registry import SynthesisRegistry
 from apex.implementation_stage.implementation_registry import ImplementationRegistry
 import apex.utils as utils
 
-class Initializer:
+class Runner:
     """
     Class to parse args and init execution, eventually managing benchmarking mode
     """

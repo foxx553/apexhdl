@@ -1,6 +1,6 @@
 from typing import Any, Dict
 
-from apex.initializer import Initializer
+from apex.runner import Runner
 
 # Main function
 def main():
@@ -9,11 +9,11 @@ def main():
     """
 
     # Parsing args
-    initializer: Initializer = Initializer()
-    args_dict: Dict[str, Any] = initializer.build_dict()
+    runner: Runner = Runner()
+    args_dict: dict = runner.build_dict()
 
     # Running pipeline(s)
-    initializer.run(args_dict)
+    runner.run(args_dict)
 
 # Entry point
 if __name__ == "__main__":
