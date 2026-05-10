@@ -11,5 +11,5 @@
 - **Benchmarking** feature for **design exploration** (generation techniques, bits of precision, ...) with **results compiled in a CSV file**.
 
 ## Credits
-- Developer: **Florian DELHON**
-- Contact: florian.delhon@polymtl.ca
+- Authors: **Florian DELHON**, **Kevin PEYMANI**, **Tarek OULD-BACHIR**
+- Developer/maintainer: **Florian DELHON**, florian.delhon@polymtl.ca
