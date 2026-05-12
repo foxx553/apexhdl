@@ -122,16 +122,17 @@ def compute_relative_discrete_output(function_str: str, x_data_width: int, x_min
     # Offset it by the bias
     return [y - clamp_nearest(y_origin, y_min, (y_max - y_min) / (2 ** y_data_width), y_data_width) for y in absolute_values]
     
-def write_apex_report(output_folder: Path, metrics: dict[str, float]):
+def write_apex_report(output_folder: Path, circuit_name: str, metrics: dict[str, float]):
     """
     Writes the ApexHDL report containing all metrics extracted during pipeline execution
 
     Parameters:
-        output_folder (Path): Path to the folder containing the evaluator's artifacts
+        output_folder (Path): Path to the base output folder
+        circuit_name (str): Name of the generated evaluator
         metrics (dict[str, float]): Dictionary containing all metrics extracted
     """
 
-    Path(output_folder / "apex_report.rpt").write_text("----------------------\nGenerated with ApexHDL\n----------------------\n\n" + "\n".join(f"{metric_name}: {metric_value}" for metric_name, metric_value in metrics.items()))
+    Path(output_folder / circuit_name / "apex_report.rpt").write_text("----------------------\nGenerated with ApexHDL\n----------------------\n\n" + "\n".join(f"{metric_name}: {metric_value}" for metric_name, metric_value in metrics.items()))
 
 def create_benchmark_csv(output_folder: Path, benchmark_name: str):
     """
@@ -200,7 +201,7 @@ def generate_apex_plot(x_values: list[float], y_data: dict[str, tuple[list[float
     NOMINAL_FONT_SIZE = 60
 
     # Defining plot overall structure
-    plt.figure(figsize=(PLOT_WIDTH, PLOT_HEIGHT))
+    fig: Figure = plt.figure(figsize=(PLOT_WIDTH, PLOT_HEIGHT))
     plt.suptitle(title, fontsize=NOMINAL_FONT_SIZE + 20, fontweight='bold')
     plt.title(subtitle, fontsize=NOMINAL_FONT_SIZE - 10, pad=20)
     plt.grid(True, linewidth=GRID_WIDTH, color='gray', alpha=0.5)
@@ -224,20 +225,9 @@ def generate_apex_plot(x_values: list[float], y_data: dict[str, tuple[list[float
     # Putting the legend
     plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.10), ncol=len(y_data), prop={'weight': 'bold', 'size': NOMINAL_FONT_SIZE}, frameon=False)
 
-    # Saving the plot
+    # Saving the plot, and finally closing it
     plt.savefig(path, format='svg', facecolor='white', transparent=False, bbox_inches='tight')
-
-def insert_header(path: Path, header: str):
-    """
-    Insert header in file
-
-    Parameters:
-        path (Path): Path of the target file
-        header (str): Header to be inserted at the beginning
-    """
-
-    content = path.read_text()
-    path.write_text(header + content)
+    plt.close(fig)
 
 def process_outputs_file(outputs_file: Path, dest_folder: Path, circuit_name: str, lambda_function: Any, data_width: int, x_min: float, x_max: float, y_min: float, y_max: float, is_simulation: bool) -> tuple[float, float, float, float]:
     """
