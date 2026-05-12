@@ -37,10 +37,10 @@ class Pipeline:
         self.context = ctx
 
         # Selecting the correct variants
-        generation_variant: GenerationStage = GenerationRegistry.select(ctx)
-        simulation_variant: SimulationStage = SimulationRegistry.select(ctx)
-        synthesis_variant: SynthesisStage = SynthesisRegistry.select(ctx)
-        implementation_variant: ImplementationStage = ImplementationRegistry.select(ctx)
+        generation_variant: type[GenerationStage] = GenerationRegistry.select(ctx)
+        simulation_variant: type[SimulationStage] = SimulationRegistry.select(ctx)
+        synthesis_variant: type[SynthesisStage] = SynthesisRegistry.select(ctx)
+        implementation_variant: type[ImplementationStage] = ImplementationRegistry.select(ctx)
 
         # Instanciating these variants
         self.generation_stage = generation_variant()

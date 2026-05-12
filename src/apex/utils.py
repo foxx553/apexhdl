@@ -13,7 +13,7 @@ Alias for a boolean check on pipeline context
 
 THEORETICAL_STEP: float = 0.001
 """
-Step considered for Theoretical vs. experimental analysis
+Step considered for theoretical vs. experimental analysis
 """
 
 def lambdify_function(function_str: str) -> Any:
