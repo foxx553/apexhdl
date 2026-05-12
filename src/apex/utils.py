@@ -3,7 +3,6 @@ from apex.context import Context
 import numpy as np
 import matplotlib.pyplot as plt
 from pathlib import Path
-import re
 from sympy import symbols, sympify, lambdify, Expr # type: ignore
 
 Predicate = Callable[[Context], bool]
@@ -146,14 +145,11 @@ def create_benchmark_csv(output_folder: Path, benchmark_name: str):
     # Create folder if necessary
     output_folder.mkdir(parents=True, exist_ok=True)
 
-    # Create header
-    header: str = "method_name,circuit_name,math_function,data_width,x_min,x_max,y_min,y_max,segment_idx_width,group_idx_width,max_absolute_error,mean_absolute_error,max_relative_error,mean_relative_error,lut,latency,\n"
-
     # Create benchmark CSV file
     file_path: Path = output_folder / f"{benchmark_name}.csv"
-    file_path.write_text(header)
+    file_path.write_text("----------------------\nGenerated with ApexHDL\n----------------------\n\n")
 
-def append_benchmark_csv(output_folder: Path, benchmark_name: str, ctx: Context):
+def append_benchmark_csv(output_folder: Path, benchmark_name: str, ctx: Context, metrics: dict[str, float], is_first: bool):
     """
     Appends the benchmark CSV file with the results of the current circuit
 
@@ -161,44 +157,21 @@ def append_benchmark_csv(output_folder: Path, benchmark_name: str, ctx: Context)
         output_folder (Path): Path to the folder in which all benchmarks modules are put
         benchmark_name (str): Name of the benchmark
         ctx (Context): Context of the current circuit
+        metrics (dict[str, float]): Metrics extracted
+        is_first (bool): Whether a header needs to be added or not
     """
 
     # Get path to CSV file
     file_path: Path = output_folder / f"{benchmark_name}.csv"
 
-    # Parse simulation results, if the file exists
-    simulation_file_path: Path = output_folder / ctx.circuit_name / "sim" / f"results_{ctx.circuit_name}.txt"
-    max_absolute_error, mean_absolute_error, max_relative_error, mean_relative_error = None, None, None, None
-    if simulation_file_path.exists():
-        with simulation_file_path.open('r') as file:
-            lines: list[str] = [line.strip() for line in file if line.strip()]
-            max_absolute_error, mean_absolute_error = map(float, lines[-2].split(','))
-            max_relative_error, mean_relative_error = map(float, lines[-1].split(','))
+    # Add a header if necessary
+    if is_first:
+        header: str = f"MethodName,CircuitName,MathFunction,DataWidth,XMin,XMax,YMin,YMax,SegmentIdxWidth,GroupIdxWidth,{",".join(f"{metric_name}" for metric_name, _ in metrics.items())}\n"
+        with file_path.open('a') as file:
+            file.write(header)
 
-    # Parse utilization report, if the file exists
-    utilization_file_path: Path = output_folder / ctx.circuit_name / "syn" / f"{ctx.circuit_name}_utilization.rpt"
-    lut = None
-    if utilization_file_path.exists():
-        with utilization_file_path.open('r') as file:
-            for line in file:
-                if line.strip().startswith('| top'):
-                    parts = [p.strip() for p in line.split('|')]
-                    lut = int(parts[3])
-    
-    # Parse timing report, if the file exists
-    timing_file_path: Path = output_folder / ctx.circuit_name / "syn" / f"{ctx.circuit_name}_timing.rpt"
-    latency = None
-    if timing_file_path.exists():
-        with timing_file_path.open('r') as file:
-            content = file.read()
-            match = re.search(r"Data Path Delay:\s+([\d.]+)ns", content)
-            if match:
-                latency = float(match.group(1))
-
-    # Create current line
-    current_line: str = f"{ctx.method_name},{ctx.circuit_name},{ctx.math_function},{ctx.data_width},{ctx.x_min},{ctx.x_max},{ctx.y_min},{ctx.y_max},{ctx.segment_idx_width},{ctx.group_idx_width},{max_absolute_error},{mean_absolute_error},{max_relative_error},{mean_relative_error},{lut},{latency},\n"
-
-    # Append current line to benchmark CSV file
+    # Add the current data
+    current_line: str = f"{ctx.method_name},{ctx.circuit_name},{ctx.math_function},{ctx.data_width},{ctx.x_min},{ctx.x_max},{ctx.y_min},{ctx.y_max},{ctx.segment_idx_width},{ctx.group_idx_width},{",".join(f"{metric_value}" for _, metric_value in metrics.items())}\n"
     with file_path.open('a') as file:
         file.write(current_line)
 

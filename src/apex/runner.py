@@ -146,6 +146,7 @@ class Runner:
             benchmark_name: str = args_dict["circuit_name"]
             output_folder: Path = args_dict["output_folder_path"]
             utils.create_benchmark_csv(output_folder, benchmark_name)
+            is_first: bool = True
 
             # Running all possible configurations
             for config in configurations:
@@ -164,7 +165,8 @@ class Runner:
                 utils.write_apex_report(current_ctx.output_folder_path, extracted_metrics)
 
                 # Appending the results in the CSV
-                utils.append_benchmark_csv(output_folder, benchmark_name, current_ctx)
+                utils.append_benchmark_csv(output_folder, benchmark_name, current_ctx, extracted_metrics, is_first)
+                is_first = False
 
         return True
     
