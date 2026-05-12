@@ -1,6 +1,6 @@
 # ApexHDL
 
-*Note: A first release is incoming... ApexHDL is still under active development, and some features might be temporarily unavailable or not fully functional.*
+*Note: A first release is incoming... ApexHDL is still under active development, and some features might be temporarily broken during the process.*
 
 ## Features
 **Automated toolchain** for quick **prototyping**, **validation** and **benchmarking** of **unary and binary hardware function evaluators**. Handles everything for the user, **from the VHDL module generation to the on-chip validation**.
