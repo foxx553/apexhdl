@@ -17,7 +17,7 @@ class ImplementationPynq(ImplementationStage):
     PYNQ implementation stage
     """
     
-    def execute(self, ctx: Context) -> bool:
+    def execute(self, ctx: Context) -> dict[str, float]:
 
         # Preliminary checks
         if ctx.fpga_board is None or ctx.ip_address is None or ctx.username is None or ctx.password is None:
@@ -196,13 +196,9 @@ python3 target.py
             is_simulation=False
         )
 
-        # Inserting outputs file header
-        header = "Results during simulation,,\nGenerated with ApexHDL,,\n,,\n"
-        header += f"MaxAbsError,{"{:.3g}".format(max_absolute_error)},\n"
-        header += f"MeanAbsError,{"{:.3g}".format(mean_absolute_error)},\n"
-        header += f"MaxRelError,{"{:.3g}".format(max_relative_error)},\n"
-        header += f"MeanRelError,{"{:.3g}".format(mean_relative_error)},\n"
-        header += ",,\nInput,Output,\n"
-        utils.insert_header(impl_folder_path / f"outputs_{ctx.circuit_name}.csv", header)
-
-        return True
+        return {
+            "ImplMaxAbsError": max_absolute_error,
+            "ImplMeanAbsError": mean_absolute_error,
+            "ImplMaxRelError": max_relative_error,
+            "ImplMeanRelError": mean_relative_error
+        }

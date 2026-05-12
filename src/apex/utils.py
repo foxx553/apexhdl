@@ -123,6 +123,17 @@ def compute_relative_discrete_output(function_str: str, x_data_width: int, x_min
     # Offset it by the bias
     return [y - clamp_nearest(y_origin, y_min, (y_max - y_min) / (2 ** y_data_width), y_data_width) for y in absolute_values]
     
+def write_apex_report(output_folder: Path, metrics: dict[str, float]):
+    """
+    Writes the ApexHDL report containing all metrics extracted during pipeline execution
+
+    Parameters:
+        output_folder (Path): Path to the folder containing the evaluator's artifacts
+        metrics (dict[str, float]): Dictionary containing all metrics extracted
+    """
+
+    Path(output_folder / "apex_report.rpt").write_text("----------------------\nGenerated with ApexHDL\n----------------------\n\n" + "\n".join(f"{metric_name}: {metric_value}" for metric_name, metric_value in metrics.items()))
+
 def create_benchmark_csv(output_folder: Path, benchmark_name: str):
     """
     Creates the benchmark CSV file, and writes the header in it

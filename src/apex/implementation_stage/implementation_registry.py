@@ -10,7 +10,7 @@ class ImplementationStage(ABC):
     """
 
 	@abstractmethod
-	def execute(self, ctx: Context) -> bool:
+	def execute(self, ctx: Context) -> dict[str, float]:
 		"""
         Main method for implementation stage execution
         
@@ -18,7 +18,7 @@ class ImplementationStage(ABC):
             ctx (Context): Context of the current approximator implementation
 			
         Returns:
-            bool: Whether the stage execution was successful or not
+            dict[str, float]: Metrics returned by the stage execution
         """
 		pass
 

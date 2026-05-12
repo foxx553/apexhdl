@@ -11,7 +11,7 @@ class SimulationGhdl(SimulationStage):
     GHDL simulation stage
     """
     
-    def execute(self, ctx: Context) -> bool:
+    def execute(self, ctx: Context) -> dict[str, float]:
 
         # Get source folder path
         folder_path: Path = ctx.output_folder_path / ctx.circuit_name / "vhdl"
@@ -98,13 +98,9 @@ end arch_tb_{ctx.circuit_name};
             is_simulation=True
         )
 
-        # Inserting outputs file header
-        header = "Results during simulation,,\nGenerated with ApexHDL,,\n,,\n"
-        header += f"MaxAbsError,{"{:.3g}".format(max_absolute_error)},\n"
-        header += f"MeanAbsError,{"{:.3g}".format(mean_absolute_error)},\n"
-        header += f"MaxRelError,{"{:.3g}".format(max_relative_error)},\n"
-        header += f"MeanRelError,{"{:.3g}".format(mean_relative_error)},\n"
-        header += ",,\nInput,Output,\n"
-        utils.insert_header(outputs_file, header)
-
-        return True
+        return {
+            "SimMaxAbsError": max_absolute_error,
+            "SimMeanAbsError": mean_absolute_error,
+            "SimMaxRelError": max_relative_error,
+            "SimMeanRelError": mean_relative_error
+        }

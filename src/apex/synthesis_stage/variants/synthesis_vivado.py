@@ -1,5 +1,7 @@
 from pathlib import Path
 import subprocess
+import re
+from re import Match
 
 from apex.context import Context
 from apex.synthesis_stage.synthesis_registry import SynthesisRegistry, SynthesisStage
@@ -10,7 +12,7 @@ class SynthesisVivado(SynthesisStage):
     Vivado synthesis stage
     """
     
-    def execute(self, ctx: Context) -> bool:
+    def execute(self, ctx: Context) -> dict[str, float]:
 
         # Preliminary checks
         if ctx.fpga_board is None:
@@ -72,4 +74,24 @@ end arch_top_{ctx.circuit_name};
         ]
         subprocess.run(cmd, shell=True, text=True)
 
-        return True
+        metrics_dict: dict[str, float] = {}
+
+        # Parse utilization report, if the file exists
+        utilization_file_path: Path = syn_folder_path / f"{ctx.circuit_name}_utilization.rpt"
+        if utilization_file_path.exists():
+            with utilization_file_path.open('r') as file:
+                for line in file:
+                    if line.strip().startswith('| top'):
+                        parts: list[str] = [p.strip() for p in line.split('|')]
+                        metrics_dict["LutCount"] = int(parts[3])
+        
+        # Parse timing report, if the file exists
+        timing_file_path: Path = syn_folder_path / f"{ctx.circuit_name}_timing.rpt"
+        if timing_file_path.exists():
+            with timing_file_path.open('r') as file:
+                content: str = file.read()
+                match: Match[str] | None = re.search(r"Data Path Delay:\s+([\d.]+)ns", content)
+                if match:
+                    metrics_dict["CriticalPathLatency"] = float(match.group(1))
+
+        return metrics_dict

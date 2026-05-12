@@ -7,5 +7,5 @@ class SynthesisDefault(SynthesisStage):
     Default synthesis stage
     """
     
-    def execute(self, ctx: Context) -> bool:
-        return True
+    def execute(self, ctx: Context) -> dict[str, float]:
+        return {}

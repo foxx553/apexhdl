@@ -7,5 +7,5 @@ class SimulationDefault(SimulationStage):
     Default simulation stage
     """
     
-    def execute(self, ctx: Context) -> bool:
-        return True
+    def execute(self, ctx: Context) -> dict[str, float]:
+        return {}

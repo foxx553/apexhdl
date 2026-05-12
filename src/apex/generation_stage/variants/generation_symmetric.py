@@ -12,7 +12,7 @@ class GenerationSymmetric(GenerationStage):
     Symmetric bipartite generation stage
     """
     
-    def execute(self, ctx: Context) -> bool:
+    def execute(self, ctx: Context) -> dict[str, float]:
 
         # Create folder if necessary
         folder_path: Path = ctx.output_folder_path / ctx.circuit_name / "vhdl"
@@ -157,4 +157,4 @@ end arch_{ctx.circuit_name};
         file_path: Path = folder_path / f"{ctx.circuit_name}.vhd"
         file_path.write_text(vhdl_code)
 
-        return True
+        return {}

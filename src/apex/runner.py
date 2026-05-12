@@ -135,7 +135,8 @@ class Runner:
             # Just running the only configuration
             ctx: Context = Context(**args_dict)
             pipeline: Pipeline = Pipeline(ctx)
-            pipeline.run()
+            extracted_metrics: dict[str, float] = pipeline.run()
+            utils.write_apex_report(ctx.output_folder_path, extracted_metrics)
 
         # Benchmarking mode
         elif len(configurations) > 1:
@@ -159,7 +160,8 @@ class Runner:
 
                 # Running the current configuration
                 current_pipeline: Pipeline = Pipeline(current_ctx)
-                current_pipeline.run()
+                extracted_metrics: dict[str, float] = current_pipeline.run()
+                utils.write_apex_report(current_ctx.output_folder_path, extracted_metrics)
 
                 # Appending the results in the CSV
                 utils.append_benchmark_csv(output_folder, benchmark_name, current_ctx)

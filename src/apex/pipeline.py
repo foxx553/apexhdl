@@ -49,17 +49,17 @@ class Pipeline:
         self.implementation_stage = implementation_variant()
 
 
-    def run(self) -> bool:
+    def run(self) -> dict[str, float]:
         """
         Pipeline execution
 
         Returns:
-            bool: Whether the pipeline execution was successful or not
+            dict[str, float]: Metrics extracted during the pipeline execution
         """
 
-        self.generation_stage.execute(self.context)
-        self.simulation_stage.execute(self.context)
-        self.synthesis_stage.execute(self.context)
-        self.implementation_stage.execute(self.context)
-
-        return True
+        return (
+            self.generation_stage.execute(self.context) |
+            self.simulation_stage.execute(self.context) |
+            self.synthesis_stage.execute(self.context) |
+            self.implementation_stage.execute(self.context)
+        )
