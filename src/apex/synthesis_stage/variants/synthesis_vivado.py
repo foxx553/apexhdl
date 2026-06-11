@@ -65,13 +65,7 @@ end arch_top_{ctx.circuit_name};
         log_file: Path = syn_folder_path / "vivado.log"
 
         # Vivado execution in batch mode
-        cmd: list[str | Path] = [
-            "vivado",
-            "-mode", "batch",
-            "-source", tcl_script,
-            "-log", log_file,
-            "-tclargs", ctx.fpga_board, ctx.output_folder_path, ctx.circuit_name, ctx.step
-        ]
+        cmd: str = f"vivado -mode batch -source {tcl_script} -log {log_file} -tclargs {ctx.fpga_board} {ctx.output_folder_path} {ctx.circuit_name} {ctx.step}"
         subprocess.run(cmd, shell=True, text=True)
 
         metrics_dict: dict[str, float] = {}
