@@ -1,5 +1,5 @@
 ### *ApexHDL Documentation*
-# 1.1. Python set-up
+# 1.1. Python environment
 
 ## 1.1.1. Python version check
 
@@ -46,7 +46,7 @@ pip install -r src/requirements.txt
 
 ## 1.1.5. Final check
 
-- To validate Python is installed and all dependencies are known, run the ApexHDL `help` command:
+- To validate Python is installed and all dependencies are known, **run the ApexHDL `help` command**:
 ```bash
 python src/apexhdl.py --help
 ```
