@@ -1,13 +1,13 @@
 ### *ApexHDL Documentation*
-# 3.2. EDA tools
+# 1.3. EDA tools
 
-## 3.2.1. List of supported EDA tools & targets
+## 1.3.1. List of supported EDA tools & targets
 
 | Tool                  | Editor                | Executable    | Target(s)                     |
 | :-------------------- | :-------------------- | :------------ | :---------------------------- |
 | Vivado Design Suite   | AMD (formerly Xilinx) | `vivado`      | `xc7z020clg400-1` (PYNQ-Z2)   |
 
-## 3.2.2. Vivado Design Suite
+## 1.3.2. Vivado Design Suite
 
 - ApexHDL supports Vivado Design Suite for synthesis.
 - Install Vivado, by downloading the installer in the [downloads page](https://www.xilinx.com/support/download/index.html/content/xilinx/en/downloadNav/vivado-design-tools.html). **Vivado 2024.1 or later** should work.

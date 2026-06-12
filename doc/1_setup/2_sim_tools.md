@@ -1,13 +1,13 @@
 ### *ApexHDL Documentation*
-# 2.2. Simulation tools
+# 1.2. Simulation tools
 
-## 2.2.1. List of supported simulation tools
+## 1.2.1. List of supported simulation tools
 
 | Tool                  | Editor                | Executable    |
 | :-------------------- | :-------------------- | :------------ |
 | GHDL                  | *open-source*         | `ghdl`        |
 
-## 2.2.2. GHDL
+## 1.2.2. GHDL
 
 - ApexHDL supports GHDL for the RTL simulation of the generated VHDL files.
 - Install GHDL, with all informations on its [GitHub page](https://github.com/ghdl/ghdl).
