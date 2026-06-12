@@ -8,11 +8,12 @@ Welcome to ApexHDL documentation. It contains all necessary informations for bot
     - `3_eda_tools.md` = EDA tools installation.
 
 - `2_user` = Tool features:
-    - `1_params` = Parameters for function evaluators generation,
-    - `2_output` = Generated function evaluators files,
-    - `3_benchmark` = Benchmark mode.
+    - **`examples/` = Examples of JSON configurations**,
+    - `1_params.md` = Parameters for function evaluators generation,
+    - `2_output.md` = Generated function evaluators files,
+    - `3_benchmark.md` = Benchmark mode.
 
 - `3_dev` = Code structure for developers:
-    - `1_structure` = Overall pipeline structure,
-    - `2_stages` = Stages definition,
-    - `3_extension` = Extensions points.
+    - `1_structure.md` = Overall pipeline structure,
+    - `2_stages.md` = Stages definition,
+    - `3_extension.md` = Extensions points.
