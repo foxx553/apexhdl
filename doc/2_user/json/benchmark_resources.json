@@ -31,7 +31,6 @@
     
     "simulation_tool": "ghdl",
     "synthesis_tool": "vivado",
-    "implementation_tool": "vivado",
 
     "fpga_board": "xc7z020clg400-1",
     "ip_address": "192.168.2.99",

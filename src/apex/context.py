@@ -98,12 +98,6 @@ class Context:
         "group": "Tools"
     })
     """Tool used for the synthesis: vivado = Vivado"""
-
-    implementation_tool: Optional[Literal["vivado"]] = field(metadata={
-        "description": "Tool used for the wrapping and bitstream generation: vivado = Vivado",
-        "group": "Tools"
-    })
-    """Tool used for the wrapping and bitstream generation: vivado = Vivado"""
     
     # Target FPGA
     fpga_board: Optional[Literal["xc7z020clg400-1"]] = field(metadata={
