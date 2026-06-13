@@ -11,7 +11,7 @@ from apex.context import Context
 from apex.implementation_stage.implementation_registry import ImplementationRegistry, ImplementationStage
 import apex.utils as utils
 
-@ImplementationRegistry.register(predicate=lambda ctx: ctx.step == "impl" and ctx.synthesis_tool == "vivado" and ctx.fpga_board == "xc7z020clg400-1", priority=1)
+@ImplementationRegistry.register(predicate=lambda ctx: ctx.step == "impl" and ctx.eda_tool == "vivado" and ctx.fpga_board == "xc7z020clg400-1", priority=1)
 class ImplementationPynq(ImplementationStage):
     """
     PYNQ implementation stage
@@ -155,13 +155,13 @@ end arch_stream_top_{ctx.circuit_name};
 
         # Transferring files with SCP
         with SCPClient(transport) as scp:
-            scp.put(f"{str(impl_folder_path)}/{ctx.circuit_name}.bit", f"{ctx.fpga_working_folder_path}/{ctx.circuit_name}.bit")
-            scp.put(f"{str(impl_folder_path)}/{ctx.circuit_name}.hwh", f"{ctx.fpga_working_folder_path}/{ctx.circuit_name}.hwh")
-            scp.put(f"{str(impl_folder_path)}/target.py", f"{ctx.fpga_working_folder_path}/target.py")
+            scp.put(f"{str(impl_folder_path)}/{ctx.circuit_name}.bit", f"{ctx.fpga_working_dir}/{ctx.circuit_name}.bit")
+            scp.put(f"{str(impl_folder_path)}/{ctx.circuit_name}.hwh", f"{ctx.fpga_working_dir}/{ctx.circuit_name}.hwh")
+            scp.put(f"{str(impl_folder_path)}/target.py", f"{ctx.fpga_working_dir}/target.py")
         
         # Command for target script execution (needs PYNQ setup via specific bash scripts)
         pynq_cmd: str = f'''
-cd {ctx.fpga_working_folder_path} && echo "xilinx" | sudo -S su -c '
+cd {ctx.fpga_working_dir} && echo "xilinx" | sudo -S su -c '
 source /etc/profile.d/pynq_venv.sh
 source /etc/profile.d/xrt_setup.sh
 python3 target.py
@@ -170,7 +170,7 @@ python3 target.py
         ssh.exec_command(pynq_cmd, get_pty=True) 
             
         # Downloading output files with SCP
-        scp.get(f"{ctx.fpga_working_folder_path}/outputs_{ctx.circuit_name}.csv", f"{str(impl_folder_path)}/outputs_{ctx.circuit_name}.csv")
+        scp.get(f"{ctx.fpga_working_dir}/outputs_{ctx.circuit_name}.csv", f"{str(impl_folder_path)}/outputs_{ctx.circuit_name}.csv")
         
         # Closing connection 
         scp.close()

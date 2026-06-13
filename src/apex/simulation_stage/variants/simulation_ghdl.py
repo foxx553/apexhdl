@@ -5,7 +5,7 @@ from apex.context import Context
 from apex.simulation_stage.simulation_registry import SimulationRegistry, SimulationStage
 import apex.utils as utils
 
-@SimulationRegistry.register(predicate=lambda ctx: ctx.step == "sim" and ctx.simulation_tool == "ghdl", priority=1)
+@SimulationRegistry.register(predicate=lambda ctx: ctx.step == "sim" and ctx.sim_tool == "ghdl", priority=1)
 class SimulationGhdl(SimulationStage):
     """
     GHDL simulation stage

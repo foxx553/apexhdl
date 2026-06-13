@@ -10,11 +10,11 @@ class Context:
     
     # General
     method_name: Literal["rom", "unary", "hybrid", "bipartite", "symmetric"] = field(metadata={
-        "description": "Name of the circuit generation method(s): rom = Single ROM, unary = Purely Unary, hybrid = Hybrid Binary/Unary, bipartite = Bipartite, symmetric = Symmetric Bipartite",
+        "description": "Name of the circuit generation method(s): rom = single ROM, unary = purely unary, hybrid = hybrid binary/unary, bipartite = bipartite, symmetric = symmetric bipartite",
         "group": "General",
         "allow_multiple": True
     })
-    """Name of the circuit generation method(s): rom = Single ROM, unary = Purely Unary, hybrid = Hybrid Binary/Unary, bipartite = Bipartite, symmetric = Symmetric Bipartite"""
+    """Name of the circuit generation method(s): rom = single ROM, unary = purely unary, hybrid = hybrid binary/unary, bipartite = bipartite, symmetric = symmetric bipartite"""
 
     circuit_name: str = field(metadata={
         "description": "Name of the generated circuit(s)",
@@ -87,17 +87,17 @@ class Context:
     """Bits indexing group of segments (for bipartite, and symmetric)"""
 
     # Tools
-    simulation_tool: Optional[Literal["ghdl"]] = field(metadata={
+    sim_tool: Optional[Literal["ghdl"]] = field(metadata={
         "description": "Tool used for behavorial simulation: ghdl = GHDL",
         "group": "Tools"
     })
     """Tool used for behavorial simulation: ghdl = GHDL"""
 
-    synthesis_tool: Optional[Literal["vivado"]] = field(metadata={
-        "description": "Tool used for the synthesis: vivado = Vivado",
+    eda_tool: Optional[Literal["vivado"]] = field(metadata={
+        "description": "Tool used for synthesis, place, and route: vivado = Vivado",
         "group": "Tools"
     })
-    """Tool used for the synthesis: vivado = Vivado"""
+    """Tool used for synthesis, place, and route: vivado = Vivado"""
     
     # Target FPGA
     fpga_board: Optional[Literal["xc7z020clg400-1"]] = field(metadata={
@@ -124,7 +124,7 @@ class Context:
     })
     """Target FPGA SSH password"""
 
-    fpga_working_folder_path: Optional[str] = field(metadata={
+    fpga_working_dir: Optional[str] = field(metadata={
         "description": "Target FPGA working directory (WARNING: Files will be transferred and executed in this folder)",
         "group": "Target FPGA"
     })

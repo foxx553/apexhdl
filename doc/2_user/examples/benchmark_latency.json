@@ -23,13 +23,13 @@
     
     "data_width": 8,
     
-    "simulation_tool": "ghdl",
-    "synthesis_tool": "vivado",
+    "sim_tool": "ghdl",
+    "eda_tool": "vivado",
 
     "fpga_board": "xc7z020clg400-1",
     "ip_address": "192.168.2.99",
     "username": "xilinx",
     "password": "xilinx",
-    "fpga_working_folder_path": "/home/xilinx/sandbox"
+    "fpga_working_dir": "/home/xilinx/sandbox"
 
 }
