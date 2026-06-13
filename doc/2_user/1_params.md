@@ -40,8 +40,8 @@ python apexhdl.py <args> # Replace <args> with the parameters detailed below
 | Name | Type | Description | Necessity | Benchmark |
 | --- | --- | --- | --- | --- |
 | `data_width` | `int` | Word length of input/output values | Always | **Yes** |
-| `segmentid_width` | `int` | Bits indexing segments (for hybrid, bipartite, and symmetric) | When `method_name` in `{"hybrid", "bipartite", "symmetric"}`<br>> Defaults to $\lfloor$`data_width`$/2\rfloor$ | No |
-| `groupid_width` | `int` | Bits indexing group of segments (for bipartite, and symmetric) | When `method_name` in `{"bipartite", "symmetric"}`<br>> Defaults to $\lfloor$`data_width`$/4\rfloor$ | No |
+| `segmentid_width` | `int` | Bits indexing segments (for hybrid, bipartite, and symmetric) | When `method_name` in `{"hybrid", "bipartite", "symmetric"}`<br>> Defaults to $\lfloor$ `data_width` $/2\rfloor$ | No |
+| `groupid_width` | `int` | Bits indexing group of segments (for bipartite, and symmetric) | When `method_name` in `{"bipartite", "symmetric"}`<br>> Defaults to $\lfloor$ `data_width` $/4\rfloor$ | No |
 
 ### 2.1.2.5. Tools
 
