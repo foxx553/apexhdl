@@ -172,7 +172,7 @@ def append_benchmark_csv(output_folder: Path, benchmark_name: str, ctx: Context,
             file.write(header)
 
     # Add the current data
-    current_line: str = f"{ctx.method_name},{ctx.circuit_name},{ctx.math_function},{ctx.data_width},{ctx.x_min},{ctx.x_max},{ctx.y_min},{ctx.y_max},{ctx.segment_idx_width},{ctx.group_idx_width},{",".join(f"{metric_value}" for _, metric_value in metrics.items())}\n"
+    current_line: str = f"{ctx.method_name},{ctx.circuit_name},{ctx.math_function},{ctx.data_width},{ctx.x_min},{ctx.x_max},{ctx.y_min},{ctx.y_max},{ctx.segmentid_width},{ctx.groupid_width},{",".join(f"{metric_value}" for _, metric_value in metrics.items())}\n"
     with file_path.open('a') as file:
         file.write(current_line)
 

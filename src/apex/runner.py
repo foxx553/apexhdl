@@ -136,7 +136,7 @@ class Runner:
             ctx: Context = Context(**args_dict)
             pipeline: Pipeline = Pipeline(ctx)
             extracted_metrics: dict[str, float] = pipeline.run()
-            utils.write_apex_report(ctx.output_folder_path, ctx.circuit_name, extracted_metrics)
+            utils.write_apex_report(ctx.output_folder, ctx.circuit_name, extracted_metrics)
 
         # Benchmarking mode
         elif len(configurations) > 1:
@@ -144,7 +144,7 @@ class Runner:
             # Initializing necessary variables/files
             counter: int = 1
             benchmark_name: str = args_dict["circuit_name"]
-            output_folder: Path = args_dict["output_folder_path"]
+            output_folder: Path = args_dict["output_folder"]
             utils.create_benchmark_csv(output_folder, benchmark_name)
             is_first: bool = True
 
@@ -162,7 +162,7 @@ class Runner:
                 # Running the current configuration
                 current_pipeline: Pipeline = Pipeline(current_ctx)
                 extracted_metrics: dict[str, float] = current_pipeline.run()
-                utils.write_apex_report(current_ctx.output_folder_path, current_ctx.circuit_name, extracted_metrics)
+                utils.write_apex_report(current_ctx.output_folder, current_ctx.circuit_name, extracted_metrics)
 
                 # Appending the results in the CSV
                 utils.append_benchmark_csv(output_folder, benchmark_name, current_ctx, extracted_metrics, is_first)

@@ -19,13 +19,13 @@ class SynthesisVivado(SynthesisStage):
             raise ValueError("Vivado synthesis requires ctx.fpga_board to be set")
 
         # Get source folder path
-        folder_path: Path = ctx.output_folder_path / ctx.circuit_name / "vhdl"
+        folder_path: Path = ctx.output_folder / ctx.circuit_name / "vhdl"
 
         # Get TCL script path
         tcl_script: Path = Path("../tcl/analyze_evaluator.tcl")
 
         # Create syn folder
-        syn_folder_path: Path = ctx.output_folder_path / ctx.circuit_name / "syn"
+        syn_folder_path: Path = ctx.output_folder / ctx.circuit_name / "syn"
         syn_folder_path.mkdir(parents=True, exist_ok=True)
 
         # Top file generation
@@ -65,7 +65,7 @@ end arch_top_{ctx.circuit_name};
         log_file: Path = syn_folder_path / "vivado.log"
 
         # Vivado execution in batch mode
-        cmd: str = f"vivado -mode batch -source {tcl_script} -log {log_file} -tclargs {ctx.fpga_board} {ctx.output_folder_path} {ctx.circuit_name} {ctx.step}"
+        cmd: str = f"vivado -mode batch -source {tcl_script} -log {log_file} -tclargs {ctx.fpga_board} {ctx.output_folder} {ctx.circuit_name} {ctx.step}"
         subprocess.run(cmd, shell=True, text=True)
 
         metrics_dict: dict[str, float] = {}

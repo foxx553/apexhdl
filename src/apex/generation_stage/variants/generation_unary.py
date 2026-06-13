@@ -13,7 +13,7 @@ class GenerationUnary(GenerationStage):
     def execute(self, ctx: Context) -> dict[str, float]:
 
         # Create folder if necessary
-        folder_path: Path = ctx.output_folder_path / ctx.circuit_name / "vhdl"
+        folder_path: Path = ctx.output_folder / ctx.circuit_name / "vhdl"
         folder_path.mkdir(parents=True, exist_ok=True)
 
         # Discrete output calculation

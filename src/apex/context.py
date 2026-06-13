@@ -22,7 +22,7 @@ class Context:
     })
     """Name of the generated circuit(s)"""
 
-    output_folder_path: Path = field(metadata={
+    output_folder: Path = field(metadata={
         "description": "Folder containing all generated artifacts",
         "group": "General"
     })
@@ -74,13 +74,13 @@ class Context:
     })
     """Word length(s) of input/output values"""
 
-    segment_idx_width: Optional[int] = field(metadata={
+    segmentid_width: Optional[int] = field(metadata={
         "description": "Bits indexing segments",
         "group": "Bit-precision"
     })
     """Bits indexing segments (for hybrid, bipartite, and symmetric)"""
 
-    group_idx_width: Optional[int] = field(metadata={
+    groupid_width: Optional[int] = field(metadata={
         "description": "Bits indexing group of segments",
         "group": "Bit-precision"
     })
@@ -124,7 +124,7 @@ class Context:
     })
     """Target FPGA SSH password"""
 
-    fpga_working_dir: Optional[str] = field(metadata={
+    fpga_workdir: Optional[str] = field(metadata={
         "description": "Target FPGA working directory (WARNING: Files will be transferred and executed in this folder)",
         "group": "Target FPGA"
     })

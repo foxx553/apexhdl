@@ -14,11 +14,11 @@ class SimulationGhdl(SimulationStage):
     def execute(self, ctx: Context) -> dict[str, float]:
 
         # Get source folder path
-        folder_path: Path = ctx.output_folder_path / ctx.circuit_name / "vhdl"
+        folder_path: Path = ctx.output_folder / ctx.circuit_name / "vhdl"
         module_file: Path = folder_path / f"{ctx.circuit_name}.vhd"
 
         # Create sim folder
-        sim_folder_path: Path = ctx.output_folder_path / ctx.circuit_name / "sim"
+        sim_folder_path: Path = ctx.output_folder / ctx.circuit_name / "sim"
         sim_folder_path.mkdir(parents=True, exist_ok=True)
         outputs_file: Path = sim_folder_path / f"outputs_{ctx.circuit_name}.csv"
 

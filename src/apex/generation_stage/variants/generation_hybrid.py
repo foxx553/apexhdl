@@ -14,11 +14,11 @@ class GenerationHybrid(GenerationStage):
     def execute(self, ctx: Context) -> dict[str, float]:
 
         # Create folder if necessary
-        folder_path: Path = ctx.output_folder_path / ctx.circuit_name / "vhdl"
+        folder_path: Path = ctx.output_folder / ctx.circuit_name / "vhdl"
         folder_path.mkdir(parents=True, exist_ok=True)
         
         # If necessary, putting default values for group and segment indexes
-        ctx.segment_idx_width = ctx.segment_idx_width if ctx.segment_idx_width is not None else math.ceil(ctx.data_width / 2)
+        ctx.segmentid_width = ctx.segmentid_width if ctx.segmentid_width is not None else math.ceil(ctx.data_width / 2)
 
         # Discrete output calculation
         y_discrete_values: list[int] = utils.compute_discrete_output(
@@ -32,11 +32,11 @@ class GenerationHybrid(GenerationStage):
         )
 
         # Division in subfunctions
-        segment_width: int = ctx.data_width - ctx.segment_idx_width
-        subfunctions: list[list[int]] = [[0 for _ in range(2**segment_width)] for _ in range(2**ctx.segment_idx_width)]
+        segment_width: int = ctx.data_width - ctx.segmentid_width
+        subfunctions: list[list[int]] = [[0 for _ in range(2**segment_width)] for _ in range(2**ctx.segmentid_width)]
         biases: list[int] = []
         largest_core_value: int = 0
-        for i in range(2**ctx.segment_idx_width):
+        for i in range(2**ctx.segmentid_width):
             current_array: list[int] = y_discrete_values[i * 2**segment_width:(i + 1) * 2**segment_width]
             current_bias: int = min(current_array)
             biases.append(current_bias)
@@ -45,7 +45,7 @@ class GenerationHybrid(GenerationStage):
         core_output_width: int = math.ceil(math.log2(largest_core_value))
         
         # Computing unary core routing logic
-        unary_core_array: list[list[list[int]]] = [[[-1] for _ in range(2**core_output_width)] for _ in range(2**ctx.segment_idx_width)]
+        unary_core_array: list[list[list[int]]] = [[[-1] for _ in range(2**core_output_width)] for _ in range(2**ctx.segmentid_width)]
         for segment_idx, discrete_values in enumerate(subfunctions):
             for output_value in range(2**core_output_width):
                 for x_value, y_value in enumerate(discrete_values):
@@ -70,12 +70,12 @@ class GenerationHybrid(GenerationStage):
 
         # Declaring all core signals
         signals_declaration_code: str = f"\tconstant LARGEST_CORE_VALUE : integer := {largest_core_value};\n\tconstant CORE_OUTPUT_WIDTH : integer := {core_output_width};\n"
-        for segment_idx in range(2**ctx.segment_idx_width):
+        for segment_idx in range(2**ctx.segmentid_width):
             signals_declaration_code += f"\tsignal core_{segment_idx}_output: STD_LOGIC_VECTOR(LARGEST_CORE_VALUE downto 0);\n"
 
         # Mux for choosing subfunction
         mux_code: str = "\tcore_selector: process(all)\n\tbegin\n\t\tcase to_integer(unsigned(selector)) is\n"
-        for i in range(2**ctx.segment_idx_width):
+        for i in range(2**ctx.segmentid_width):
             mux_code += f"\t\t\twhen {i} => core_value <= core_{i}_output;\n"
         mux_code += "\t\t\twhen others => core_value <= (others => '0');"
         mux_code += "\n\t\tend case;\n\tend process core_selector;"
@@ -94,7 +94,7 @@ class GenerationHybrid(GenerationStage):
 -- Function: f(x) = {ctx.math_function}
 -- Evaluator method: Hybrid
 -- Data width: {ctx.data_width} bits
--- Segment index width: {ctx.segment_idx_width} bits
+-- Segment index width: {ctx.segmentid_width} bits
 -- Range: x in [{ctx.x_min}; {ctx.x_max}[, y in [{ctx.y_min}; {ctx.y_max}[
 -------------------------------------
 
@@ -105,7 +105,7 @@ use IEEE.NUMERIC_STD.ALL;
 entity {ctx.circuit_name} is
     generic (
         DATA_WIDTH : positive := {ctx.data_width};
-        SEGMENT_IDX_WIDTH : positive := {ctx.segment_idx_width}
+        segmentid_width : positive := {ctx.segmentid_width}
     );
     port (
         input_a : in STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0);
@@ -116,24 +116,24 @@ end {ctx.circuit_name};
 architecture arch_{ctx.circuit_name} of {ctx.circuit_name} is
 
     attribute rom_style : string;
-    type bias_array_t is array (0 to 2**SEGMENT_IDX_WIDTH - 1) of STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0);
+    type bias_array_t is array (0 to 2**segmentid_width - 1) of STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0);
     constant BIAS_TABLE : bias_array_t := (
 {rom_code}
     );
     attribute rom_style of BIAS_TABLE : constant is "distributed";
 
 {signals_declaration_code}
-    signal encoder_output: STD_LOGIC_VECTOR(2**(DATA_WIDTH - SEGMENT_IDX_WIDTH) - 1 downto 0);
+    signal encoder_output: STD_LOGIC_VECTOR(2**(DATA_WIDTH - segmentid_width) - 1 downto 0);
     signal core_value: STD_LOGIC_VECTOR(LARGEST_CORE_VALUE downto 0);
     signal subfunction_value: STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0);
-    signal selector: STD_LOGIC_VECTOR(SEGMENT_IDX_WIDTH - 1 downto 0);
+    signal selector: STD_LOGIC_VECTOR(segmentid_width - 1 downto 0);
     signal bias: STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0);
-    signal least_significants: STD_LOGIC_VECTOR(DATA_WIDTH - SEGMENT_IDX_WIDTH - 1 downto 0);
+    signal least_significants: STD_LOGIC_VECTOR(DATA_WIDTH - segmentid_width - 1 downto 0);
 
 begin
 
-    selector <= input_a(DATA_WIDTH - 1 downto DATA_WIDTH - SEGMENT_IDX_WIDTH);
-    least_significants <= input_a(DATA_WIDTH - SEGMENT_IDX_WIDTH - 1 downto 0);
+    selector <= input_a(DATA_WIDTH - 1 downto DATA_WIDTH - segmentid_width);
+    least_significants <= input_a(DATA_WIDTH - segmentid_width - 1 downto 0);
     bias <= BIAS_TABLE(to_integer(unsigned(selector)));
 
     -- One-hot encoder    

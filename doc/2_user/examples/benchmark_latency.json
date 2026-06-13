@@ -8,8 +8,8 @@
         "symmetric"
     ],
     "circuit_name": "bench_latency",
-    "output_folder_path": "../output/bench_latency",
-    "step": "syn-impl",
+    "output_folder": "../output/bench_latency",
+    "step": "syn-pnr",
 
     "math_function": [
         "0.4*sin(2*pi*x)+0.5", 
@@ -30,6 +30,6 @@
     "ip_address": "192.168.2.99",
     "username": "xilinx",
     "password": "xilinx",
-    "fpga_working_dir": "/home/xilinx/sandbox"
+    "fpga_workdir": "/home/xilinx/sandbox"
 
 }

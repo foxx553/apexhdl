@@ -24,13 +24,13 @@ class ImplementationPynq(ImplementationStage):
             raise ValueError("PYNQ implementation requires fpga_board, ip_address, username and password to be set")
 
         # Get source folder path
-        folder_path: Path = ctx.output_folder_path / ctx.circuit_name / "vhdl"
+        folder_path: Path = ctx.output_folder / ctx.circuit_name / "vhdl"
 
         # Get TCL script path
         tcl_script: Path = Path("../tcl/implement_evaluator.tcl")
 
         # Create impl folder
-        impl_folder_path: Path = ctx.output_folder_path / ctx.circuit_name / "impl"
+        impl_folder_path: Path = ctx.output_folder / ctx.circuit_name / "impl"
         impl_folder_path.mkdir(parents=True, exist_ok=True)
 
         # AXI-Stream top file generation
@@ -123,7 +123,7 @@ end arch_stream_top_{ctx.circuit_name};
         log_file: Path = impl_folder_path / "vivado.log"
 
         # Vivado execution in batch mode
-        cmd: str = f"vivado -mode batch -source {tcl_script} -log {log_file} -tclargs {ctx.fpga_board} {ctx.output_folder_path} {ctx.circuit_name}"
+        cmd: str = f"vivado -mode batch -source {tcl_script} -log {log_file} -tclargs {ctx.fpga_board} {ctx.output_folder} {ctx.circuit_name}"
         subprocess.run(cmd, shell=True, text=True)
         
         # Removing old logs and putting in new Vivado logs
@@ -155,13 +155,13 @@ end arch_stream_top_{ctx.circuit_name};
 
         # Transferring files with SCP
         with SCPClient(transport) as scp:
-            scp.put(f"{str(impl_folder_path)}/{ctx.circuit_name}.bit", f"{ctx.fpga_working_dir}/{ctx.circuit_name}.bit")
-            scp.put(f"{str(impl_folder_path)}/{ctx.circuit_name}.hwh", f"{ctx.fpga_working_dir}/{ctx.circuit_name}.hwh")
-            scp.put(f"{str(impl_folder_path)}/target.py", f"{ctx.fpga_working_dir}/target.py")
+            scp.put(f"{str(impl_folder_path)}/{ctx.circuit_name}.bit", f"{ctx.fpga_workdir}/{ctx.circuit_name}.bit")
+            scp.put(f"{str(impl_folder_path)}/{ctx.circuit_name}.hwh", f"{ctx.fpga_workdir}/{ctx.circuit_name}.hwh")
+            scp.put(f"{str(impl_folder_path)}/target.py", f"{ctx.fpga_workdir}/target.py")
         
         # Command for target script execution (needs PYNQ setup via specific bash scripts)
         pynq_cmd: str = f'''
-cd {ctx.fpga_working_dir} && echo "xilinx" | sudo -S su -c '
+cd {ctx.fpga_workdir} && echo "xilinx" | sudo -S su -c '
 source /etc/profile.d/pynq_venv.sh
 source /etc/profile.d/xrt_setup.sh
 python3 target.py
@@ -170,7 +170,7 @@ python3 target.py
         ssh.exec_command(pynq_cmd, get_pty=True) 
             
         # Downloading output files with SCP
-        scp.get(f"{ctx.fpga_working_dir}/outputs_{ctx.circuit_name}.csv", f"{str(impl_folder_path)}/outputs_{ctx.circuit_name}.csv")
+        scp.get(f"{ctx.fpga_workdir}/outputs_{ctx.circuit_name}.csv", f"{str(impl_folder_path)}/outputs_{ctx.circuit_name}.csv")
         
         # Closing connection 
         scp.close()
