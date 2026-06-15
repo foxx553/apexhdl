@@ -124,7 +124,7 @@ end arch_stream_top_{ctx.circuit_name};
 
         # Vivado execution in batch mode
         cmd: str = f"vivado -mode batch -source {tcl_script} -log {log_file} -tclargs {ctx.fpga_board} {ctx.output_folder} {ctx.circuit_name}"
-        subprocess.run(cmd, shell=True, text=True)
+        subprocess.run(cmd, shell=True, text=True, timeout=utils.SUBPROCESS_TIMEOUT)
         
         # Removing old logs and putting in new Vivado logs
         Path(impl_folder_path / "vivado.log").unlink(missing_ok=True)

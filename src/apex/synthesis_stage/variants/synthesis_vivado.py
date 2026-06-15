@@ -5,6 +5,7 @@ from re import Match
 
 from apex.context import Context
 from apex.synthesis_stage.synthesis_registry import SynthesisRegistry, SynthesisStage
+import apex.utils as utils
 
 @SynthesisRegistry.register(predicate=lambda ctx: ctx.step in ["syn", "syn-pnr", "all"] and ctx.eda_tool == "vivado", priority=1)
 class SynthesisVivado(SynthesisStage):
@@ -66,7 +67,7 @@ end arch_top_{ctx.circuit_name};
 
         # Vivado execution in batch mode
         cmd: str = f"vivado -mode batch -source {tcl_script} -log {log_file} -tclargs {ctx.fpga_board} {ctx.output_folder} {ctx.circuit_name} {ctx.step}"
-        subprocess.run(cmd, shell=True, text=True)
+        subprocess.run(cmd, shell=True, text=True, timeout=utils.SUBPROCESS_TIMEOUT)
 
         metrics_dict: dict[str, float] = {}
 

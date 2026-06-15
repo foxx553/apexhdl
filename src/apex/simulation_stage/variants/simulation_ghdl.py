@@ -80,9 +80,9 @@ end arch_tb_{ctx.circuit_name};
         Path("./work-obj08.cf").unlink(missing_ok=True) 
 
         # Run GHDL simulation, with error handling
-        subprocess.run(f"ghdl -a --std=08 {module_file} {tb_file}", shell=True, capture_output=True, check=True)
-        subprocess.run(f"ghdl -e --std=08 tb_{ctx.circuit_name}", shell=True, capture_output=True, check=True)
-        subprocess.run(f"ghdl -r --std=08 tb_{ctx.circuit_name}", shell=True, capture_output=True, text=True)
+        subprocess.run(f"ghdl -a --std=08 {module_file} {tb_file}", shell=True, capture_output=True, check=True, timeout=utils.SUBPROCESS_TIMEOUT)
+        subprocess.run(f"ghdl -e --std=08 tb_{ctx.circuit_name}", shell=True, capture_output=True, check=True, timeout=utils.SUBPROCESS_TIMEOUT)
+        subprocess.run(f"ghdl -r --std=08 tb_{ctx.circuit_name}", shell=True, capture_output=True, text=True, timeout=utils.SUBPROCESS_TIMEOUT)
 
         # Perform outputs results processing
         mean_absolute_error, max_absolute_error, mean_relative_error, max_relative_error = utils.process_outputs_file(

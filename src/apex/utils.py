@@ -10,10 +10,11 @@ Predicate = Callable[[Context], bool]
 Alias for a boolean check on pipeline context
 """
 
+SUBPROCESS_TIMEOUT: int = 900
+"""Timeout (in seconds) considered for tool calls"""
+
 THEORETICAL_STEP: float = 0.001
-"""
-Step considered for theoretical vs. experimental analysis
-"""
+"""Step considered for theoretical vs. experimental analysis"""
 
 def lambdify_function(function_str: str) -> Any:
     """
