@@ -4,6 +4,9 @@ from apex.simulation_stage.simulation_registry import SimulationRegistry, Simula
 from apex.synthesis_stage.synthesis_registry import SynthesisRegistry, SynthesisStage
 from apex.implementation_stage.implementation_registry import ImplementationRegistry, ImplementationStage
 
+import logging
+logger = logging.getLogger(__name__) 
+
 class Pipeline:
     """
     Pipeline class for managing circuit generation lifecycle
@@ -33,6 +36,8 @@ class Pipeline:
             ctx (Context): Context of the new pipeline
         """
 
+        logger.info("Building pipeline stages tailored to params...")
+
         # Init the context
         self.context = ctx
 
@@ -56,6 +61,8 @@ class Pipeline:
         Returns:
             dict[str, float]: Metrics extracted during the pipeline execution
         """
+
+        logger.info("Starting pipeline execution...")
 
         return (
             self.generation_stage.execute(self.context) |

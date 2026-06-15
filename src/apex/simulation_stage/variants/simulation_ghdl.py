@@ -13,6 +13,8 @@ class SimulationGhdl(SimulationStage):
     
     def execute(self, ctx: Context) -> dict[str, float]:
 
+        self.logger.info("Starting GHDL simulation stage...")
+
         # Get source folder path
         folder_path: Path = ctx.output_folder / ctx.circuit_name / "vhdl"
         module_file: Path = folder_path / f"{ctx.circuit_name}.vhd"

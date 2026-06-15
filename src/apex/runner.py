@@ -15,6 +15,9 @@ from apex.synthesis_stage.synthesis_registry import SynthesisRegistry
 from apex.implementation_stage.implementation_registry import ImplementationRegistry
 import apex.utils as utils
 
+import logging
+logger = logging.getLogger(__name__) 
+
 class Runner:
     """
     Class to parse args and init execution, eventually managing benchmarking mode
@@ -27,6 +30,8 @@ class Runner:
         """
         Execution initialization
         """
+        
+        logger.info("Initializing pipeline and parser...")
 
         # Loading all variants in registries
         GenerationRegistry.load_variants()
@@ -91,8 +96,10 @@ class Runner:
         Parsing args to create args dictionary, with CLI overwriting JSON default config
 
         Returns:
-            dict[str, Any]: dictionary with all args and their value(s)
+            dict[str, Any]: Dictionary with all args and their value(s)
         """
+
+        logger.info("Parsing args...")
 
         # Show manual when no arguments were provided
         if len(sys.argv) < 2:
@@ -124,11 +131,13 @@ class Runner:
         Running the pipeline(s), eventually managing benchmarking mode
 
         Parameters:
-            args_dict (dict[str, Any]): dictionary with all args and their value(s)
+            args_dict (dict[str, Any]): Dictionary with all args and their value(s)
         
         Returns:
             bool: Whether the overall execution was successful or not
         """
+
+        logger.info("Computing possible configs...")
 
         # Generating all possible configurations
         keys: KeysView[str] = args_dict.keys()
@@ -137,6 +146,8 @@ class Runner:
 
         # Normal mode
         if len(configurations) == 1:
+
+            logger.info("Running in normal mode...")
 
             # Just running the only configuration
             ctx: Context = Context(**args_dict)
@@ -147,6 +158,8 @@ class Runner:
         # Benchmarking mode
         elif len(configurations) > 1:
 
+            logger.info("Running in benchmark mode...")
+
             # Initializing necessary variables/files
             counter: int = 1
             benchmark_name: str = args_dict["circuit_name"]
@@ -156,6 +169,8 @@ class Runner:
 
             # Running all possible configurations
             for config in configurations:
+
+                logger.info(f"Running config {counter} of {len(configurations)}...")
 
                 # Building the current configuration
                 current_args_dict: dict[str, Any] = dict(zip(keys, config))

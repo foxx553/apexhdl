@@ -13,6 +13,8 @@ class GenerationHybrid(GenerationStage):
     
     def execute(self, ctx: Context) -> dict[str, float]:
 
+        self.logger.info("Starting Hybrid generation stage...")
+
         # Create folder if necessary
         folder_path: Path = ctx.output_folder / ctx.circuit_name / "vhdl"
         folder_path.mkdir(parents=True, exist_ok=True)

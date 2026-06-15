@@ -15,6 +15,8 @@ class SynthesisVivado(SynthesisStage):
     
     def execute(self, ctx: Context) -> dict[str, float]:
 
+        self.logger.info("Starting Vivado synthesis stage...")
+
         # Preliminary checks
         if ctx.fpga_board is None:
             raise ValueError("Vivado synthesis requires ctx.fpga_board to be set")

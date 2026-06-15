@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 import pkgutil
 import importlib
+import logging
+from logging import Logger
 from apex.context import Context
 from apex.utils import Predicate
 
@@ -8,6 +10,12 @@ class GenerationStage(ABC):
 	"""
     Abstract base class for generation stage definition
     """
+     
+	def __init__(self):
+		"""
+		Generation stage initialization
+		"""
+		self.logger: Logger = logging.getLogger(f"{self.__class__.__module__}")
 
 	@abstractmethod
 	def execute(self, ctx: Context) -> dict[str, float]:

@@ -6,9 +6,7 @@ from pathlib import Path
 from sympy import symbols, sympify, lambdify, Expr # type: ignore
 
 Predicate = Callable[[Context], bool]
-"""
-Alias for a boolean check on pipeline context
-"""
+"""Alias for a boolean check on pipeline context"""
 
 SUBPROCESS_TIMEOUT: int = 900
 """Timeout (in seconds) considered for tool calls"""

@@ -19,6 +19,8 @@ class ImplementationPynq(ImplementationStage):
     
     def execute(self, ctx: Context) -> dict[str, float]:
 
+        self.logger.info("Starting PYNQ implementation stage...")
+
         # Preliminary checks
         if ctx.fpga_board is None or ctx.ip_address is None or ctx.username is None or ctx.password is None:
             raise ValueError("PYNQ implementation requires fpga_board, ip_address, username and password to be set")
