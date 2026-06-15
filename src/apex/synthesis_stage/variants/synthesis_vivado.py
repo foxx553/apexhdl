@@ -86,6 +86,6 @@ end arch_top_{ctx.circuit_name};
                 content: str = file.read()
                 match: Match[str] | None = re.search(r"Data Path Delay:\s+([\d.]+)ns", content)
                 if match:
-                    metrics_dict["CriticalPathLatency"] = float(match.group(1))
+                    metrics_dict["CriticalPathLatency (ns)"] = float(match.group(1))
 
         return metrics_dict

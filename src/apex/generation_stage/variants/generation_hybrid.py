@@ -91,7 +91,7 @@ class GenerationHybrid(GenerationStage):
 -------------------------------------
 -- Generated with ApexHDL
 -- Module Name: {ctx.circuit_name}
--- Function: f(x) = {ctx.math_function}
+-- Function: y = {ctx.math_function}
 -- Evaluator method: Hybrid
 -- Data width: {ctx.data_width} bits
 -- Segment index width: {ctx.segmentid_width} bits

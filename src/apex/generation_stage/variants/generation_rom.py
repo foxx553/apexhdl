@@ -38,7 +38,7 @@ class GenerationRom(GenerationStage):
 -------------------------------------
 -- Generated with ApexHDL
 -- Module Name: {ctx.circuit_name}
--- Function: f(x) = {ctx.math_function}
+-- Function: y = {ctx.math_function}
 -- Evaluator method: ROM
 -- Data width: {ctx.data_width} bits
 -- Range: x in [{ctx.x_min}; {ctx.x_max}[, y in [{ctx.y_min}; {ctx.y_max}[

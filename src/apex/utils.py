@@ -122,17 +122,26 @@ def compute_relative_discrete_output(function_str: str, x_data_width: int, x_min
     # Offset it by the bias
     return [y - clamp_nearest(y_origin, y_min, (y_max - y_min) / (2 ** y_data_width), y_data_width) for y in absolute_values]
     
-def write_apex_report(output_folder: Path, circuit_name: str, metrics: dict[str, float]):
+def write_apex_report(ctx: Context, metrics: dict[str, float]):
     """
     Writes the ApexHDL report containing all metrics extracted during pipeline execution
 
     Parameters:
-        output_folder (Path): Path to the base output folder
-        circuit_name (str): Name of the generated evaluator
+        ctx (Context): Current generation parameters 
         metrics (dict[str, float]): Dictionary containing all metrics extracted
     """
 
-    Path(output_folder / circuit_name / "apex_report.rpt").write_text("----------------------\nGenerated with ApexHDL\n----------------------\n\n" + "\n".join(f"{metric_name}: {metric_value}" for metric_name, metric_value in metrics.items()))
+    report_content: str = "----------------------\nGenerated with ApexHDL\n----------------------\n\n"
+    report_content += "Parameters\n----------------------\n"
+    report_content += f"ModuleName: {ctx.circuit_name}\nMathFunction: y = {ctx.math_function}\nEvaluationMethod: {ctx.method_name}\nDataWidth: {ctx.data_width}\n"
+    if ctx.method_name in ["hybrid", "bipartite", "symmetric"]:
+        report_content += f"SegmentIdWidth: {ctx.segmentid_width}\n"
+        if ctx.method_name != "hybrid":
+            report_content += f"GroupIdWidth: {ctx.groupid_width}\n"
+    report_content += f"Range: x in [{ctx.x_min}; {ctx.x_max}[, y in [{ctx.y_min}; {ctx.y_max}[\n\n"
+    report_content += "Results\n----------------------\n"
+    report_content += "\n".join(f"{metric_name}: {metric_value}" for metric_name, metric_value in metrics.items())
+    Path(ctx.output_folder / ctx.circuit_name / "apex_report.rpt").write_text(report_content)
 
 def create_benchmark_csv(output_folder: Path, benchmark_name: str):
     """
