@@ -29,3 +29,7 @@ vivado -version
     1. Add [PYNQ-Z2 board files](https://dpoauwgwqsy2x.cloudfront.net/Download/pynq-z2.zip) in Vivado, as described in the [documentation](https://pynq.readthedocs.io/en/latest/overlay_design_methodology/board_settings.html#vivado-board-files),
     2. Flash [PYNQ Linux image](https://download.amd.com/opendownload/pynq/pynq_z2_v3.1.1.zip) on a Micro-SD card, like described in the [documentation](https://pynq.readthedocs.io/en/latest/getting_started/other_boards.html#microsd-card-setup), and plug it in the PYNQ-Z2,
     3. Set-up the network connection with the PYNQ-Z2, as described in the [documentation](https://pynq.readthedocs.io/en/latest/getting_started/pynq_z2_setup.html#network-connection), and plug your PYNQ-Z2 to a router or your laptop via Ethernet.
+- To be sure that the network set-up is good, open a terminal and start an SSH connection to the PYNQ-Z2:
+```bash
+ssh xilinx@192.168.2.99 # Default password is "xilinx"
+```
