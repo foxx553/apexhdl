@@ -39,8 +39,8 @@ class GenerationRom(GenerationStage):
 -- Generated with ApexHDL
 -- Module Name: {ctx.circuit_name}
 -- Function: y = {ctx.math_function}
--- Evaluator method: ROM
--- Data width: {ctx.data_width} bits
+-- Evaluator Method: ROM
+-- Data Width: {ctx.data_width} bits
 -- Range: x in [{ctx.x_min}; {ctx.x_max}[, y in [{ctx.y_min}; {ctx.y_max}[
 -------------------------------------
 
@@ -50,11 +50,11 @@ use IEEE.NUMERIC_STD.ALL;
 
 entity {ctx.circuit_name} is
     generic (
-        DATA_WIDTH : positive := {ctx.data_width}
+        DATA_WIDTH  : positive := {ctx.data_width}
     );
     port (
-        input_a : in STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0);
-        result : out STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0)
+        input_a     : in STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0);
+        result      : out STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0)
     );
 end {ctx.circuit_name};
 
@@ -69,6 +69,7 @@ architecture arch_{ctx.circuit_name} of {ctx.circuit_name} is
 
 begin
 
+    -- Output of the exhaustive ROM
     result <= ROM_VALUES(to_integer(unsigned(input_a)));
 
 end arch_{ctx.circuit_name};

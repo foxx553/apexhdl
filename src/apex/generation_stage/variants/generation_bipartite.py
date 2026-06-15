@@ -72,10 +72,10 @@ class GenerationBipartite(GenerationStage):
 -- Generated with ApexHDL
 -- Module Name: {ctx.circuit_name}
 -- Function: y = {ctx.math_function}
--- Evaluator method: Binary
--- Data width: {ctx.data_width} bits
--- Group index width: {ctx.groupid_width} bits
--- Segment index width: {ctx.segmentid_width} bits
+-- Evaluator Method: Binary
+-- Data Width: {ctx.data_width} bits
+-- Group Index Width: {ctx.groupid_width} bits
+-- Segment Index Width: {ctx.segmentid_width} bits
 -- Range: x in [{ctx.x_min}; {ctx.x_max}[, y in [{ctx.y_min}; {ctx.y_max}[
 -------------------------------------
 
@@ -85,13 +85,13 @@ use IEEE.NUMERIC_STD.ALL;
 
 entity {ctx.circuit_name} is
     generic (
-        DATA_WIDTH : positive := {ctx.data_width};
-        groupid_width : positive := {ctx.groupid_width};
+        DATA_WIDTH      : positive := {ctx.data_width};
+        groupid_width   : positive := {ctx.groupid_width};
         segmentid_width : positive := {ctx.segmentid_width}
     );
     port (
-        input_a : in STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0);
-        result : out STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0)
+        input_a     : in STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0);
+        result      : out STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0)
     );
 end {ctx.circuit_name};
 
@@ -100,7 +100,7 @@ architecture arch_{ctx.circuit_name} of {ctx.circuit_name} is
     attribute rom_style : string;
     signal offset_entry : STD_LOGIC_VECTOR(groupid_width + DATA_WIDTH - segmentid_width - 1 downto 0);
     signal offset_value : STD_LOGIC_VECTOR(DATA_WIDTH downto 0);
-    signal input_value : STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0);
+    signal input_value  : STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0);
     
     -- Offset table
     type offset_array_t is array (0 to 2**(groupid_width + DATA_WIDTH - segmentid_width) - 1) of STD_LOGIC_VECTOR(DATA_WIDTH downto 0);
@@ -118,13 +118,15 @@ architecture arch_{ctx.circuit_name} of {ctx.circuit_name} is
     
 begin
 
+    -- Offset table addressing
     offset_entry <= input_a(DATA_WIDTH - 1 downto DATA_WIDTH - groupid_width) & input_a(DATA_WIDTH - segmentid_width - 1 downto 0);
 
+    -- Outputs of input and offset tables
     offset_value <= OFFSET_TABLE(to_integer(unsigned(offset_entry)));
-
     input_value <= INPUT_TABLE(to_integer(unsigned(input_a(DATA_WIDTH - 1 downto DATA_WIDTH - segmentid_width))));
 
-    adder: process(input_value, offset_value)
+    -- Addition of input and offset
+    adder : process(input_value, offset_value)
         variable sum : integer := 0;
     begin
         sum := to_integer(signed(offset_value)) + to_integer(unsigned(input_value));

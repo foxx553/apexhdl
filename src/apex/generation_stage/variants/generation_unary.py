@@ -54,8 +54,8 @@ class GenerationUnary(GenerationStage):
 -- Generated with ApexHDL
 -- Module Name: {ctx.circuit_name}
 -- Function: y = {ctx.math_function}
--- Evaluator method: Unary
--- Data width: {ctx.data_width} bits
+-- Evaluator Method: Unary
+-- Data Width: {ctx.data_width} bits
 -- Range: x in [{ctx.x_min};{ctx.x_max}[, y in [{ctx.y_min};{ctx.y_max}[
 -------------------------------------
 
@@ -65,23 +65,23 @@ use IEEE.NUMERIC_STD.ALL;
 
 entity {ctx.circuit_name} is
     generic (
-        DATA_WIDTH : positive := {ctx.data_width}
+        DATA_WIDTH  : positive := {ctx.data_width}
     );
     port (
-        input_a : in STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0);
-        result : out STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0)
+        input_a     : in STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0);
+        result      : out STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0)
     );
 end {ctx.circuit_name};
 
 architecture arch_{ctx.circuit_name} of {ctx.circuit_name} is
 
-    signal encoder_output: STD_LOGIC_VECTOR(2**DATA_WIDTH - 1 downto 0);
-    signal decoder_input: STD_LOGIC_VECTOR(2**DATA_WIDTH - 1 downto 0);
+    signal encoder_output   : STD_LOGIC_VECTOR(2**DATA_WIDTH - 1 downto 0);
+    signal decoder_input    : STD_LOGIC_VECTOR(2**DATA_WIDTH - 1 downto 0);
 
 begin
 
     -- One-hot encoder    
-    one_hot_encoder: process(input_a)
+    one_hot_encoder : process(input_a)
     begin
         encoder_output <= (others => '0');
         encoder_output(to_integer(unsigned(input_a))) <= '1';
@@ -91,7 +91,7 @@ begin
 {unary_core_code}
 
     -- One-hot decoder
-    one_hot_decoder: process(decoder_input)
+    one_hot_decoder : process(decoder_input)
     begin
         result <= (others => '0');
         for i in 0 to decoder_input'length - 1 loop

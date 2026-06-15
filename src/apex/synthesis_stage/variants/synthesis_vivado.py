@@ -50,6 +50,8 @@ end top_{ctx.circuit_name};
 
 architecture arch_top_{ctx.circuit_name} of top_{ctx.circuit_name} is
 begin
+
+    -- Generated circuit
     uut : entity work.{ctx.circuit_name}
         port map (
             input_a => input_a,

@@ -92,9 +92,9 @@ class GenerationHybrid(GenerationStage):
 -- Generated with ApexHDL
 -- Module Name: {ctx.circuit_name}
 -- Function: y = {ctx.math_function}
--- Evaluator method: Hybrid
--- Data width: {ctx.data_width} bits
--- Segment index width: {ctx.segmentid_width} bits
+-- Evaluator Method: Hybrid
+-- Data Width: {ctx.data_width} bits
+-- Segment Index Width: {ctx.segmentid_width} bits
 -- Range: x in [{ctx.x_min}; {ctx.x_max}[, y in [{ctx.y_min}; {ctx.y_max}[
 -------------------------------------
 
@@ -104,12 +104,12 @@ use IEEE.NUMERIC_STD.ALL;
 
 entity {ctx.circuit_name} is
     generic (
-        DATA_WIDTH : positive := {ctx.data_width};
+        DATA_WIDTH      : positive := {ctx.data_width};
         segmentid_width : positive := {ctx.segmentid_width}
     );
     port (
-        input_a : in STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0);
-        result : out STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0)
+        input_a     : in STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0);
+        result      : out STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0)
     );
 end {ctx.circuit_name};
 
@@ -123,21 +123,22 @@ architecture arch_{ctx.circuit_name} of {ctx.circuit_name} is
     attribute rom_style of BIAS_TABLE : constant is "distributed";
 
 {signals_declaration_code}
-    signal encoder_output: STD_LOGIC_VECTOR(2**(DATA_WIDTH - segmentid_width) - 1 downto 0);
-    signal core_value: STD_LOGIC_VECTOR(LARGEST_CORE_VALUE downto 0);
-    signal subfunction_value: STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0);
-    signal selector: STD_LOGIC_VECTOR(segmentid_width - 1 downto 0);
-    signal bias: STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0);
-    signal least_significants: STD_LOGIC_VECTOR(DATA_WIDTH - segmentid_width - 1 downto 0);
+    signal encoder_output       : STD_LOGIC_VECTOR(2**(DATA_WIDTH - segmentid_width) - 1 downto 0);
+    signal core_value           : STD_LOGIC_VECTOR(LARGEST_CORE_VALUE downto 0);
+    signal subfunction_value    : STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0);
+    signal selector             : STD_LOGIC_VECTOR(segmentid_width - 1 downto 0);
+    signal bias                 : STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0);
+    signal least_significants   : STD_LOGIC_VECTOR(DATA_WIDTH - segmentid_width - 1 downto 0);
 
 begin
 
+    -- Routing and selection
     selector <= input_a(DATA_WIDTH - 1 downto DATA_WIDTH - segmentid_width);
     least_significants <= input_a(DATA_WIDTH - segmentid_width - 1 downto 0);
     bias <= BIAS_TABLE(to_integer(unsigned(selector)));
 
     -- One-hot encoder    
-    one_hot_encoder: process(least_significants)
+    one_hot_encoder : process(least_significants)
     begin
         encoder_output <= (others => '0');
         encoder_output(to_integer(unsigned(least_significants))) <= '1';
@@ -150,7 +151,7 @@ begin
 {mux_code}
 
     -- One-hot decoder
-    one_hot_decoder: process(core_value)
+    one_hot_decoder : process(core_value)
     begin
         subfunction_value <= (others => '0');
         for i in 0 to core_value'length - 1 loop
@@ -160,7 +161,8 @@ begin
         end loop;
     end process one_hot_decoder;
     
-    adder: process(subfunction_value, bias)
+    -- Addition of subfunction result and bias
+    adder : process(subfunction_value, bias)
         variable sum : integer := 0;
     begin
         sum := to_integer(unsigned(subfunction_value)) + to_integer(unsigned(bias));

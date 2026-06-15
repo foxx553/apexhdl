@@ -68,46 +68,31 @@ architecture arch_stream_top_{ctx.circuit_name} of stream_top_{ctx.circuit_name}
 
 begin
 
+    -- Generated circuit
     uut : entity work.{ctx.circuit_name}
         port map (
             input_a => din_tdata({ctx.data_width - 1} downto 0),
             result  => reg_tdata_in
         );
 
-	reg_tdata : process(clk, rstn)
+    -- FFs for AXI-Stream interface
+	reg_axistream : process(clk, rstn)
 	begin
 		if rstn = '0' then
 			dout_tdata <= (others => '0');
+			dout_tlast <= '0';
+			reg_tvalid_out <= '0';
 		elsif rising_edge(clk) then
 			if reg_en = '1' then
 				dout_tdata <= (others => '0');
 				dout_tdata({ctx.data_width - 1} downto 0) <= reg_tdata_in;
-			end if;
-		end if;
-	end process reg_tdata; 
-
-	reg_tlast : process(clk, rstn)
-	begin
-		if rstn = '0' then
-			dout_tlast <= '0';
-		elsif rising_edge(clk) then
-			if reg_en = '1' then
 				dout_tlast <= din_tlast;
-			end if;
-		end if;
-	end process reg_tlast;
-
-	reg_tvalid : process(clk, rstn)
-	begin
-		if rstn = '0' then
-			reg_tvalid_out <= '0';
-		elsif rising_edge(clk) then
-			if reg_en = '1' then
 				reg_tvalid_out <= din_tvalid;
 			end if;
 		end if;
-	end process reg_tvalid; 
+	end process reg_axistream;
 
+    -- Input/output routing
 	dout_tvalid <= reg_tvalid_out;
 	reg_en <= dout_tready or not reg_tvalid_out;
 	din_tready <= reg_en;

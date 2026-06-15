@@ -40,20 +40,22 @@ end tb_{ctx.circuit_name};
 
 architecture arch_tb_{ctx.circuit_name} of tb_{ctx.circuit_name} is
 
-    signal input_a : STD_LOGIC_VECTOR({ctx.data_width - 1} downto 0);
-    signal result  : STD_LOGIC_VECTOR({ctx.data_width - 1} downto 0);
+    signal input_a      : STD_LOGIC_VECTOR({ctx.data_width - 1} downto 0);
+    signal result       : STD_LOGIC_VECTOR({ctx.data_width - 1} downto 0);
 
-    file result_file : TEXT open WRITE_MODE is "{str(outputs_file)}";
+    file result_file    : TEXT open WRITE_MODE is "{str(outputs_file)}";
 
 begin
 
+    -- Generated circuit
     uut : entity work.{ctx.circuit_name}
         port map (
             input_a => input_a,
             result  => result
         );
 
-    tb_proc: process
+    -- Exhaustive stimuli process
+    tb_proc : process
         variable line_out : line;
     begin
         for i in 0 to 2**{ctx.data_width} - 1 loop
