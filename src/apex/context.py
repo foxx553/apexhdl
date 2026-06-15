@@ -28,11 +28,11 @@ class Context:
     })
     """Folder containing all generated artifacts"""
 
-    step: Literal["sim", "syn", "syn-pnr", "impl"] = field(metadata={
-        "description": "Executed stages: sim = simulation, syn = reporting after synthesis, syn-pnr = reporting after place-and-route, impl = on-chip validation",
+    step: Literal["sim", "syn", "syn-pnr", "impl", "all"] = field(metadata={
+        "description": "Executed stages besides generation and simulation: sim = nothing more, syn = reporting after synthesis, syn-pnr = reporting after place-and-route, impl = on-chip validation, all = all of them",
         "group": "General"
     })
-    """Executed stages: sim = simulation, syn-synth = reporting after synthesis, syn = reporting after place-and-route, impl = on-chip validation"""
+    """Executed stages besides generation and simulation: sim = nothing more, syn = reporting after synthesis, syn-pnr = reporting after place-and-route, impl = on-chip validation, all = all of them"""
 
     # Maths
     math_function: str = field(metadata={

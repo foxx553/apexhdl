@@ -11,7 +11,7 @@ from apex.context import Context
 from apex.implementation_stage.implementation_registry import ImplementationRegistry, ImplementationStage
 import apex.utils as utils
 
-@ImplementationRegistry.register(predicate=lambda ctx: ctx.step == "impl" and ctx.eda_tool == "vivado" and ctx.fpga_board == "xc7z020clg400-1", priority=1)
+@ImplementationRegistry.register(predicate=lambda ctx: ctx.step in ["impl", "all"] and ctx.eda_tool == "vivado" and ctx.fpga_board == "xc7z020clg400-1", priority=1)
 class ImplementationPynq(ImplementationStage):
     """
     PYNQ implementation stage

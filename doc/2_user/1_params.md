@@ -23,7 +23,7 @@ python apexhdl.py <args> # Replace <args> with the parameters detailed below
 | `method_name` | Value in `{"rom", "unary", "hybrid", "bipartite", "symmetric"}` | Name of the circuit generation method:<br>- `rom`: single ROM,<br>- `unary`: purely unary,<br>- `hybrid`: hybrid binary/unary,<br>- `bipartite`: bipartite,<br>- `symmetric`: symmetric bipartite | Always | **Yes** |
 | `circuit_name` | `str` | Name of the generated circuit | Always | No |
 | `output_folder` | `str` | Path of the folder which will contain all generated artifacts | Always | No |
-| `step` | Value in `{"sim", "syn", "syn-pnr", "impl"}` | Executed stages:<br>- `sim`: simulation,<br>- `syn`: reporting after synthesis,<br>- `syn-pnr`: reporting after place-and-route,<br>- `impl`: on-chip validation | Always | No |
+| `step` | Value in `{"sim", "syn", "syn-pnr", "impl", "all"}` | Executed stages besides generation and simulation:<br>- `sim`: nothing more,<br>- `syn`: reporting after synthesis,<br>- `syn-pnr`: reporting after place-and-route,<br>- `impl`: on-chip validation,<br>- `all`: all of them | Always | No |
 
 ### 2.1.2.3. Maths
 

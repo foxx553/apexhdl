@@ -6,7 +6,7 @@ from re import Match
 from apex.context import Context
 from apex.synthesis_stage.synthesis_registry import SynthesisRegistry, SynthesisStage
 
-@SynthesisRegistry.register(predicate=lambda ctx: "syn" in ctx.step and ctx.eda_tool == "vivado", priority=1)
+@SynthesisRegistry.register(predicate=lambda ctx: ctx.step in ["syn", "syn-pnr", "all"] and ctx.eda_tool == "vivado", priority=1)
 class SynthesisVivado(SynthesisStage):
     """
     Vivado synthesis stage
