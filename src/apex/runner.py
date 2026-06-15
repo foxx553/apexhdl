@@ -1,3 +1,4 @@
+import sys
 import argparse
 import json
 import itertools
@@ -92,6 +93,11 @@ class Runner:
         Returns:
             dict[str, Any]: dictionary with all args and their value(s)
         """
+
+        # Show manual when no arguments were provided
+        if len(sys.argv) < 2:
+            self._parser.print_help()
+            sys.exit(0)
 
         # If there's a JSON config file, defining default values
         initial_args: tuple[Namespace, list[str]] = self._parser.parse_known_args()
