@@ -1,7 +1,6 @@
 import sys
 from pathlib import Path
 import subprocess
-import shutil
 import zipfile
 from string import Template
 import paramiko
@@ -123,10 +122,6 @@ end arch_stream_top_{ctx.circuit_name};
             self.logger.debug(f"Captured error: {e.stderr}")
         except subprocess.TimeoutExpired:
             self.logger.error(f"Vivado timed out, exceeding the {utils.SUBPROCESS_TIMEOUT} seconds threshold...")
-        
-        # Removing old logs and putting in new Vivado logs
-        Path(impl_folder_path / "vivado.log").unlink(missing_ok=True)
-        shutil.move("vivado.log", impl_folder_path)
 
         # Extracting HWH from XSA archive
         xsa_archive: Path = impl_folder_path / f"{ctx.circuit_name}.xsa"
@@ -166,32 +161,49 @@ source /etc/profile.d/xrt_setup.sh
 python3 target.py
 '
         '''
-        ssh.exec_command(pynq_cmd, get_pty=True) 
+
+        # Execute SSH command and read exit to for ce Paramiko to block until the remote script finishes
+        _, stdout, stderr = ssh.exec_command(pynq_cmd, get_pty=True, timeout=utils.SUBPROCESS_TIMEOUT) 
+        exit_status: int = stdout.channel.recv_exit_status()
+
+        if exit_status == 0:
+
+            # Downloading output files with SCP
+            scp.get(f"{ctx.fpga_workdir}/outputs_{ctx.circuit_name}.csv", f"{str(impl_folder_path)}/outputs_{ctx.circuit_name}.csv")
             
-        # Downloading output files with SCP
-        scp.get(f"{ctx.fpga_workdir}/outputs_{ctx.circuit_name}.csv", f"{str(impl_folder_path)}/outputs_{ctx.circuit_name}.csv")
+            # Closing connection 
+            scp.close()
+            ssh.close()
+
+            # Perform outputs results processing
+            mean_absolute_error, max_absolute_error, mean_relative_error, max_relative_error = utils.process_outputs_file(
+                impl_folder_path / f"outputs_{ctx.circuit_name}.csv",
+                impl_folder_path,
+                ctx.circuit_name,
+                utils.lambdify_function(ctx.math_function),
+                ctx.data_width,
+                ctx.x_min,
+                ctx.x_max,
+                ctx.y_min,
+                ctx.y_max,
+                is_simulation=False
+            )
+
+            return {
+                "ImplMaxAbsError": max_absolute_error,
+                "ImplMeanAbsError": mean_absolute_error,
+                "ImplMaxRelError": max_relative_error,
+                "ImplMeanRelError": mean_relative_error
+            }
         
-        # Closing connection 
-        scp.close()
-        ssh.close()
+        else:
 
-        # Perform outputs results processing
-        mean_absolute_error, max_absolute_error, mean_relative_error, max_relative_error = utils.process_outputs_file(
-            impl_folder_path / f"outputs_{ctx.circuit_name}.csv",
-            impl_folder_path,
-            ctx.circuit_name,
-            utils.lambdify_function(ctx.math_function),
-            ctx.data_width,
-            ctx.x_min,
-            ctx.x_max,
-            ctx.y_min,
-            ctx.y_max,
-            is_simulation=False
-        )
+            # Logging errors
+            self.logger.error(f"PYNQ implementation failed... {stderr.read().decode()}")
 
-        return {
-            "ImplMaxAbsError": max_absolute_error,
-            "ImplMeanAbsError": mean_absolute_error,
-            "ImplMaxRelError": max_relative_error,
-            "ImplMeanRelError": mean_relative_error
-        }
+            return {
+                "ImplMaxAbsError": -1,
+                "ImplMeanAbsError": -1,
+                "ImplMaxRelError": -1,
+                "ImplMeanRelError": -1
+            }
