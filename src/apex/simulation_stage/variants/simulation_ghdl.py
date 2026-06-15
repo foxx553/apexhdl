@@ -63,7 +63,7 @@ begin
 
             wait for 10 ns;
 
-            write(line_out, to_string(i) & "," & to_string(to_integer(unsigned(result))) & ",");
+            write(line_out, to_string(i) & "," & to_string(to_integer(unsigned(result))));
             writeline(result_file, line_out);
         
         end loop;
