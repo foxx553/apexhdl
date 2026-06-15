@@ -12,4 +12,7 @@
 - ApexHDL supports GHDL for the RTL simulation of the generated VHDL files.
 - Install GHDL, with all informations on its [GitHub page](https://github.com/ghdl/ghdl).
 - Make sure that GHDL is **added to the PATH environment variable**.
-- Check that `ghdl` command is recognized by typing it in command line.
+- **Check that `ghdl` command is recognized** by typing the following command:
+```bash
+ghdl --version
+```
