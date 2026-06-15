@@ -1,10 +1,12 @@
+import sys
 from abc import ABC, abstractmethod
 import pkgutil
 import importlib
-import logging
-from logging import Logger
 from apex.context import Context
 from apex.utils import Predicate
+
+import logging
+current_logger = logging.getLogger(__name__)
 
 class SynthesisStage(ABC):
 	"""
@@ -15,7 +17,7 @@ class SynthesisStage(ABC):
 		"""
 		Synthesis stage initialization
 		"""
-		self.logger: Logger = logging.getLogger(f"{self.__class__.__module__}")
+		self.logger = logging.getLogger(f"{self.__class__.__module__}")
 
 	@abstractmethod
 	def execute(self, ctx: Context) -> dict[str, float]:
@@ -68,7 +70,8 @@ class SynthesisRegistry:
             if predicate(ctx):
                 return synthesis_class
         
-        raise RuntimeError("No synthesis variant found matching the starting context")
+        current_logger.error("No synthesis variant found matching the starting context...")
+        sys.exit(1)
     
     @classmethod
     def load_variants(cls):

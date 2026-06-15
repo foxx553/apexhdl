@@ -1,3 +1,4 @@
+import sys
 from pathlib import Path
 import subprocess
 import shutil
@@ -23,7 +24,8 @@ class ImplementationPynq(ImplementationStage):
 
         # Preliminary checks
         if ctx.fpga_board is None or ctx.ip_address is None or ctx.username is None or ctx.password is None:
-            raise ValueError("PYNQ implementation requires fpga_board, ip_address, username and password to be set")
+            self.logger.error("PYNQ implementation requires fpga_board, ip_address, username and password to be set...")
+            sys.exit(1)
 
         # Get source folder path
         folder_path: Path = ctx.output_folder / ctx.circuit_name / "vhdl"
@@ -106,12 +108,21 @@ end arch_stream_top_{ctx.circuit_name};
         stream_top_file: Path = folder_path / f"stream_top_{ctx.circuit_name}.vhd"
         stream_top_file.write_text(vhdl_code)
 
-        # Vivado logs target path
+        # Vivado logs target path and command
         log_file: Path = impl_folder_path / "vivado.log"
-
-        # Vivado execution in batch mode
         cmd: str = f"vivado -mode batch -source {tcl_script} -log {log_file} -tclargs {ctx.fpga_board} {ctx.output_folder} {ctx.circuit_name}"
-        subprocess.run(cmd, shell=True, text=True, timeout=utils.SUBPROCESS_TIMEOUT)
+
+        self.logger.info(f"Launching Vivado... Follow detailed progress in {str(log_file)}")
+
+        # Vivado execution with errors handling
+        try:
+            subprocess.run(cmd, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, text=True, timeout=utils.SUBPROCESS_TIMEOUT)
+            self.logger.info("Vivado completed successfully!")
+        except subprocess.CalledProcessError as e:
+            self.logger.error("Vivado failed, please check the log file for details...")
+            self.logger.debug(f"Captured error: {e.stderr}")
+        except subprocess.TimeoutExpired:
+            self.logger.error(f"Vivado timed out, exceeding the {utils.SUBPROCESS_TIMEOUT} seconds threshold...")
         
         # Removing old logs and putting in new Vivado logs
         Path(impl_folder_path / "vivado.log").unlink(missing_ok=True)
@@ -138,7 +149,8 @@ end arch_stream_top_{ctx.circuit_name};
         ssh.connect(hostname=ctx.ip_address, username=ctx.username, password=ctx.password)
         transport: Transport | None = ssh.get_transport()
         if transport is None:
-            raise RuntimeError("Failed to establish SSH transport")
+            self.logger.error("Failed to establish SSH transport...")
+            sys.exit(1)
 
         # Transferring files with SCP
         with SCPClient(transport) as scp:

@@ -126,7 +126,7 @@ class Runner:
         
         return args_dict
     
-    def run(self, args_dict: dict[str, Any]) -> bool:
+    def run(self, args_dict: dict[str, Any]):
         """
         Running the pipeline(s), eventually managing benchmarking mode
 
@@ -188,6 +188,4 @@ class Runner:
                 # Appending the results in the CSV
                 utils.append_benchmark_csv(output_folder, benchmark_name, current_ctx, extracted_metrics, is_first)
                 is_first = False
-
-        return True
     

@@ -1,9 +1,13 @@
+import sys
 from typing import Callable, Any, cast, no_type_check
 from apex.context import Context
 import numpy as np
 import matplotlib.pyplot as plt
 from pathlib import Path
 from sympy import symbols, sympify, lambdify, Expr # type: ignore
+
+import logging
+logger = logging.getLogger(__name__) 
 
 Predicate = Callable[[Context], bool]
 """Alias for a boolean check on pipeline context"""
@@ -30,7 +34,8 @@ def lambdify_function(function_str: str) -> Any:
         expr: Expr = cast(Expr, sympify(function_str))
         return lambdify(x, expr, modules=['math'])
     except Exception as e:
-        raise RuntimeError(f"Failed mathematical function lambdification: {e}")
+        logger.error(f"Failed mathematical function lambdification... {e}")
+        sys.exit(1)
 
 def clamp_nearest(value: float, window_min: float, window_step: float, window_bit_width: int) -> int:
     """

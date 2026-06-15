@@ -14,7 +14,7 @@ class GenerationSymmetric(GenerationStage):
     
     def execute(self, ctx: Context) -> dict[str, float]:
 
-        self.logger.info("Starting stage execution...")
+        self.logger.info("Starting Symmetric generation stage...")
 
         # Create folder if necessary
         folder_path: Path = ctx.output_folder / ctx.circuit_name / "vhdl"

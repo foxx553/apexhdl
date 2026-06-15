@@ -1,3 +1,4 @@
+import sys
 from pathlib import Path
 import subprocess
 import re
@@ -19,7 +20,8 @@ class SynthesisVivado(SynthesisStage):
 
         # Preliminary checks
         if ctx.fpga_board is None:
-            raise ValueError("Vivado synthesis requires ctx.fpga_board to be set")
+            self.logger.error("Vivado synthesis requires ctx.fpga_board to be set...")
+            sys.exit(1)
 
         # Get source folder path
         folder_path: Path = ctx.output_folder / ctx.circuit_name / "vhdl"
@@ -66,16 +68,26 @@ end arch_top_{ctx.circuit_name};
         top_file: Path = folder_path / f"top_{ctx.circuit_name}.vhd"
         top_file.write_text(vhdl_code)
 
-        # Vivado logs target path
+        # Vivado logs target path and command
         log_file: Path = syn_folder_path / "vivado.log"
-
-        # Vivado execution in batch mode
         cmd: str = f"vivado -mode batch -source {tcl_script} -log {log_file} -tclargs {ctx.fpga_board} {ctx.output_folder} {ctx.circuit_name} {ctx.step}"
-        subprocess.run(cmd, shell=True, text=True, timeout=utils.SUBPROCESS_TIMEOUT)
+        
+        self.logger.info(f"Launching Vivado... Follow detailed progress in {str(log_file)}")
+
+        # Vivado execution with errors handling
+        try:
+            subprocess.run(cmd, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, text=True, timeout=utils.SUBPROCESS_TIMEOUT)
+            self.logger.info("Vivado completed successfully!")
+        except subprocess.CalledProcessError as e:
+            self.logger.error("Vivado failed, please check the log file for details...")
+            self.logger.debug(f"Captured error: {e.stderr}")
+        except subprocess.TimeoutExpired:
+            self.logger.error(f"Vivado timed out, exceeding the {utils.SUBPROCESS_TIMEOUT} seconds threshold...")
 
         metrics_dict: dict[str, float] = {}
 
         # Parse utilization report, if the file exists
+        metrics_dict["LutCount"] = -1
         utilization_file_path: Path = syn_folder_path / f"{ctx.circuit_name}_utilization.rpt"
         if utilization_file_path.exists():
             with utilization_file_path.open('r') as file:
@@ -85,12 +97,14 @@ end arch_top_{ctx.circuit_name};
                         metrics_dict["LutCount"] = int(parts[3])
         
         # Parse timing report, if the file exists
-        timing_file_path: Path = syn_folder_path / f"{ctx.circuit_name}_timing.rpt"
-        if timing_file_path.exists():
-            with timing_file_path.open('r') as file:
-                content: str = file.read()
-                match: Match[str] | None = re.search(r"Data Path Delay:\s+([\d.]+)ns", content)
-                if match:
-                    metrics_dict["CriticalPathLatency (ns)"] = float(match.group(1))
+        if ctx.step != "syn":
+            metrics_dict["CriticalPathLatency (ns)"] = -1
+            timing_file_path: Path = syn_folder_path / f"{ctx.circuit_name}_timing.rpt"
+            if timing_file_path.exists():
+                with timing_file_path.open('r') as file:
+                    content: str = file.read()
+                    match: Match[str] | None = re.search(r"Data Path Delay:\s+([\d.]+)ns", content)
+                    if match:
+                        metrics_dict["CriticalPathLatency (ns)"] = float(match.group(1))
 
         return metrics_dict

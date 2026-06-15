@@ -39,13 +39,7 @@ def main():
     args_dict: dict[str, Any] = runner.build_dict()
 
     # Running pipeline(s)
-    success: bool = runner.run(args_dict)
-
-    # Final log
-    if success:
-        logger.info("Successful execution!")
-    else:
-        logger.error("Error during execution, check logs!")
+    runner.run(args_dict)
 
 # Entry point
 if __name__ == "__main__":
