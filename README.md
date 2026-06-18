@@ -1,6 +1,6 @@
 <h1 style="text-align: center;">ApexHDL</h1>
 
-**Automated toolchain** for quick **prototyping**, **validation** and **benchmarking** of **hardware function evaluators**. Handles everything for the user, **from the VHDL module generation to the on-chip validation**.
+**Automated toolchain** for quick **prototyping**, **validation** and **benchmarking** of **unary and binary function evaluators**. Handles everything for the user, **from the VHDL module generation to the on-chip validation**.
 
 - **Generation** of synthesizable VHDL **module for function evaluation**, using **unary and binary techniques**.
 - **Behavioral simulation** and **Python** plotting for **module validation**.
@@ -8,18 +8,13 @@
 - **Hardware-In-the-Loop** process for module **validation on physical silicon**. 
 - **Benchmarking** feature for **design exploration** (generation techniques, bits of precision, ...) with **results compiled in a CSV report**.
 
+## Using the tool
 
-## Repository
-- `doc/` = **Complete documentation** for ApexHDL set-up, usage, and codebase.
-- `src/` =
-    - `apexhdl.py` = **Main Python script**, to be called in order to use ApexHDL.
-    - `apex/` = Python source code.
-- `tcl/` = Tcl scripts, used for **hardware reporting** and **on-chip validation**.
-- `xdc/` = XDC constraints scripts, used for **hardware reporting** and **on-chip validation**.
+*Note: The highlights provided in this README come from real execution. For clarity's sake, only the most relevant parts of the inputs/outputs are shown.*
 
-## Highlights
+### 1. Define your parameters and call ApexHDL
 
-### 1. Type one command, that's it!
+You may define your parameters either on-the-fly when calling the tool (in the format: `--flag value`), or within a JSON file to save it for later use.
 
 ```json
 {
@@ -37,12 +32,15 @@
 }
 ```
 
+You can then call the tool.
+
 ```bash
 python apexhdl.py --config apex_test.json
 ```
 
-### 2. ApexHDL generates your VHDL evaluator...
+### 2. Then, the tool takes over, generating your VHDL evaluator...
 
+It generates the synthesizable VHDL code of the evaluator, tailored to your parameters.
 ```vhdl
 entity apex_test is
     port (
@@ -56,30 +54,39 @@ architecture arch_apex_test of apex_test is
 end arch_apex_test;
 ```
 
-### 3. ... runs behavioral simulation
+### 3. ... running behavioral simulation
+
+It exhaustively stimulates the evaluator during behavioral simulation. Results are parsed to plot approximation accuracy visualizations.
 
 <img src="doc/img/sim_curves.svg" width="31.5%" /> <img src="doc/img/sim_abs_err.svg" width="32%" /> <img src="doc/img/sim_rel_err.svg" width="32%" />
 
-### 4. ... retrieves hardware metrics
+### 4. ... retrieving hardware metrics
 
-```
-Timing Report
-    Data Path Delay:        8.931ns
-(...)
-```
+It performs standalone synthesis, place and route to retrieve hardware metrics (area, latency).
 
+*(Excerpt from utilization report)*
 ```
 |      Instance     | Module | Total LUTs |
 +-------------------+--------+------------+
 | top_apex_test     |  (top) |         15 |
 (...)
 ```
+*(Excerpt from timinq report)*
+```
+Timing Report
+    Data Path Delay:        8.931ns
+(...)
+```
 
-### 5. ... tests it on physical silicon
+### 5. ... testing it on physical silicon
+
+It wraps the evaluator with the appropriate interface, programs it on the target FPGA, exhaustively stimulates it, and parses the results to compute the same visualizations as during simulation. Approximation accuracy should remain the same.
 
 <img src="doc/img/impl_curves.svg" width="31.5%" /> <img src="doc/img/impl_abs_err.svg" width="32%" /> <img src="doc/img/impl_rel_err.svg" width="32%" />
 
-### 6. ... and leaves you with a complete report
+### 6. ... and leaving you with a complete report
+
+It compiles all retrieved metrics (accuracy, area, latency) into a comprehensive text report.
 
 ```
 Results
@@ -96,9 +103,11 @@ ImplMaxRelError: 0.40624999999999994
 ImplMeanRelError: 0.03827368451958165
 ```
 
-## Benchmarking mode
+## Running a benchmark
 
-### 1. Define multiple values for one parameter
+### 1. Define multiple values for one parameter and call ApexHDL
+
+The workflow remains almost the same. Write naturally the different values you want to try for each parameter and call ApexHDL.
 
 ```json
 {
@@ -107,31 +116,42 @@ ImplMeanRelError: 0.03827368451958165
 }
 ```
 
-### 2. ApexHDL runs all possible combinations...
+### 2. Then, the tool takes over, running all possible combinations...
+
+The tool automatically computes the different combinations and runs them all, one-by-one.
 
 ```bash
 apexhdl - INFO - Starting ApexHDL...
 apex.runner - INFO - Running config 1 of 5...
-(...)
 apex.runner - INFO - Running config 2 of 5...
-(...)
 apex.runner - INFO - Running config 3 of 5...
-(...)
 apex.runner - INFO - Running config 4 of 5...
-(...)
 apex.runner - INFO - Running config 5 of 5...
-(...)
 ```
 
-### 3. ... and leaves you with a complete CSV report
+### 3. ... and leaving you with a complete CSV report
 
+All results are compiled into one CSV to facilitate quantitative comparative analysis.
+
+*(Excerpt of data presented in the CSV)*
 | MethodName  | SimMaxAbsError | SimMeanAbsError | SimMaxRelError | SimMeanRelError | LutCount | CriticalPathLatency (ns) |
-| :--- | :--- | :--- | :---: | :---: | :---: | :---: |
+| :--: | :--: | :--: | :--: | :--: | :--: | :--: |
 | rom | 0.016 | 0.002 | 0.057 | 0.005 | 31 | 7.91 |
 | unary | 0.016 | 0.002 | 0.057 | 0.005 | 32 | 7.99 |
 | hybrid | 0.016 | 0.002 | 0.057 | 0.005 | 46 | 10.31 |
 | bipartite | 0.086 | 0.015 | 0.406 | 0.038 | 15 | 8.93 |
 | symmetric | 0.081 | 0.015 | 0.406 | 0.040 | 27 | 9.41 |
+
+
+## Repository
+
+In this repository, you'll find **everything needed for using** (and eventually **extending**) ApexHDL.
+- `doc/` = **Complete documentation** for ApexHDL set-up, usage, and codebase.
+- `src/` =
+    - `apexhdl.py` = **Main Python script**, to be called in order to use ApexHDL.
+    - `apex/` = Python source code.
+- `tcl/` = Tcl scripts, used for **hardware reporting** and **on-chip validation**.
+- `xdc/` = XDC constraints scripts, used for **hardware reporting** and **on-chip validation**.
 
 ## Citation
 - Authors: **Florian DELHON**, **Kevin PEYMANI**, **Tarek OULD-BACHIR**.
