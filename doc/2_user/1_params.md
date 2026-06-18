@@ -3,21 +3,35 @@
 
 ## 2.1.1. Console
 
+### 2.1.1.1. Tool call
+
 - ApexHDL is a command-line tool, without user interface.
 - To call the tool, **you must be in `src/` sub-folder and run the following command:**
 ```bash
-python apexhdl.py <args> # Replace <args> with the parameters detailed below
+python apexhdl.py <params>
 ```
+
+### 2.1.1.2. Parameters specification
+
+- Replace `<params>` with a series of `--flag val`, where `flag` is the name of the parameter, and `val` the value you want to assign to it.
+- Except for the meta-parameters (defined in **2.1.2.2.**), they can also be **defined in a JSON file** (see **2.1.3.**).
+- The parameters list described in **2.1.2.** writes parameters name in `snake_case`, used in JSON.
+- However, **on the console**, you must **replace it with `kebab-case`** (e.g. `method_name` would be `--method-name` on the console).
 
 ## 2.1.2. Parameters list
 
-### 2.1.2.1. Meta-parameters
+### 2.1.2.1. Quick notes
+
+- In the tables below, `Necessity` column details when you **must specify a value** to the parameter.
+- `Benchmark` column tells whether or not this parameter can be assigned to multiple values, in order to enable benchmarking mode (detailed in **2.2.**).
+
+### 2.1.2.2. Meta-parameters
 | Name | Type | Description | Necessity | Benchmark |
 | --- | --- | --- | --- | --- |
 | `help` | - | Flag for printing console user manual | - | - |
-| `config` | `str` | Path of a JSON file containing configuration | - | - |
+| `config` | `str` | Path of a JSON file containing configuration (see **2.1.3.**) | - | - |
 
-### 2.1.2.2. General
+### 2.1.2.3. General
 | Name | Type | Description | Necessity | Benchmark |
 | --- | --- | --- | --- | --- |
 | `method_name` | Value in `{"rom", "unary", "hybrid", "bipartite", "symmetric"}` | Name of the circuit generation method:<br>- `rom`: single ROM,<br>- `unary`: purely unary,<br>- `hybrid`: hybrid binary/unary,<br>- `bipartite`: bipartite,<br>- `symmetric`: symmetric bipartite | Always | **Yes** |
@@ -25,17 +39,17 @@ python apexhdl.py <args> # Replace <args> with the parameters detailed below
 | `output_folder` | `str` | Path of the folder which will contain all generated artifacts | Always | No |
 | `step` | Value in `{"sim", "syn", "syn-pnr", "impl", "all"}` | Executed stages besides generation and simulation:<br>- `sim`: nothing more,<br>- `syn`: reporting after synthesis,<br>- `syn-pnr`: reporting after place-and-route,<br>- `impl`: on-chip validation,<br>- `all`: all of them | Always | No |
 
-### 2.1.2.3. Maths
+### 2.1.2.4. Maths
 
 | Name | Type | Description | Necessity | Benchmark |
 | --- | --- | --- | --- | --- |
-| `math_function` | `str` | Mathematical function to be approximated | Always | **Yes** |
+| `math_function` | `str` | Mathematical function to be approximated (see **2.1.4.**) | Always | **Yes** |
 | `x_min` | `float` | Minimum X value | Always | No |
 | `x_max` | `float` | Maximum X value | Always | No |
 | `y_min` | `float` | Minimum Y value | Always | No |
 | `y_max` | `float` | Maximum Y value | Always | No |
 
-### 2.1.2.4. Bit-precision
+### 2.1.2.5. Bit-precision
 
 | Name | Type | Description | Necessity | Benchmark |
 | --- | --- | --- | --- | --- |
@@ -43,14 +57,14 @@ python apexhdl.py <args> # Replace <args> with the parameters detailed below
 | `segmentid_width` | `int` | Bits indexing segments (for hybrid, bipartite, and symmetric) | When `method_name` in `{"hybrid", "bipartite", "symmetric"}`<br>> Defaults to $\lfloor$ `data_width` $/2\rfloor$ | No |
 | `groupid_width` | `int` | Bits indexing group of segments (for bipartite, and symmetric) | When `method_name` in `{"bipartite", "symmetric"}`<br>> Defaults to $\lfloor$ `data_width` $/4\rfloor$ | No |
 
-### 2.1.2.5. Tools
+### 2.1.2.6. Tools
 
 | Name | Type | Description | Necessity | Benchmark |
 | --- | --- | --- | --- | --- |
 | `sim_tool` | Value in `{"ghdl"}` | Tool used for behavioral simulation:<br>- `ghdl`: GHDL | When `step` is `"sim"` | No |
 | `eda_tool` | Value in `{"vivado"}` | Tool used for synthesis, place, and route:<br>- `vivado`: Vivado | When `step` in `{"syn", "syn-pnr", "impl"}` | No |
 
-### 2.1.2.6. Target FPGA
+### 2.1.2.7. Target FPGA
 
 | Name | Type | Description | Necessity | Benchmark |
 | --- | --- | --- | --- | --- |
@@ -60,8 +74,8 @@ python apexhdl.py <args> # Replace <args> with the parameters detailed below
 | `password` | `str` | Target FPGA SSH password | When `step` is `impl` | No |
 | `fpga_workdir` | `str` | Target FPGA working directory.<br>**WARNING**: Files will be transferred and executed in this folder | When `step` is `impl` | No |
 
-## 2.1.3. Appendix 1: JSON config file (`--config`)
+## 2.1.3. Appendix 1: JSON config file (`config`)
 
-## 2.1.4. Appendix 2: Mathematical expression parsing (`--math-function`)
+## 2.1.4. Appendix 2: Mathematical expression parsing (`math_function`)
 
 ## 2.1.5. Appendix 3: Examples
