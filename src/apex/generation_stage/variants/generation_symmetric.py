@@ -87,8 +87,8 @@ use IEEE.NUMERIC_STD.ALL;
 entity {ctx.circuit_name} is
     generic (
         DATA_WIDTH      : positive := {ctx.data_width};
-        groupid_width   : positive := {ctx.groupid_width};
-        segmentid_width : positive := {ctx.segmentid_width}
+        GROUPID_WIDTH   : positive := {ctx.groupid_width};
+        SEGMENTID_WIDTH : positive := {ctx.segmentid_width}
     );
     port (
         input_a     : in STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0);
@@ -99,23 +99,23 @@ end {ctx.circuit_name};
 architecture arch_{ctx.circuit_name} of {ctx.circuit_name} is
     
     attribute rom_style             : string;
-    signal offset_entry_lower       : STD_LOGIC_VECTOR(DATA_WIDTH - segmentid_width - 2 downto 0);
-    signal offset_entry_lower_raw   : STD_LOGIC_VECTOR(DATA_WIDTH - segmentid_width - 2 downto 0);
-    signal offset_entry             : STD_LOGIC_VECTOR(groupid_width + DATA_WIDTH - segmentid_width - 2 downto 0);
+    signal offset_entry_lower       : STD_LOGIC_VECTOR(DATA_WIDTH - SEGMENTID_WIDTH - 2 downto 0);
+    signal offset_entry_lower_raw   : STD_LOGIC_VECTOR(DATA_WIDTH - SEGMENTID_WIDTH - 2 downto 0);
+    signal offset_entry             : STD_LOGIC_VECTOR(GROUPID_WIDTH + DATA_WIDTH - SEGMENTID_WIDTH - 2 downto 0);
     signal offset_value_raw         : STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0);
     signal offset_value             : STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0);
     signal input_value              : STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0);
     signal invert                   : STD_LOGIC;
     
     -- Offset table
-    type offset_array_t is array (0 to 2**(groupid_width + DATA_WIDTH - segmentid_width - 1) - 1) of STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0);
+    type offset_array_t is array (0 to 2**(GROUPID_WIDTH + DATA_WIDTH - SEGMENTID_WIDTH - 1) - 1) of STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0);
     constant OFFSET_TABLE : offset_array_t := (
 {offset_code}
     );
     attribute rom_style of OFFSET_TABLE : constant is "distributed";
 
     -- Input table
-    type input_array_t is array (0 to 2**segmentid_width - 1) of STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0);
+    type input_array_t is array (0 to 2**SEGMENTID_WIDTH - 1) of STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0);
     constant INPUT_TABLE : input_array_t := (
 {input_code}
     );
@@ -124,17 +124,17 @@ architecture arch_{ctx.circuit_name} of {ctx.circuit_name} is
 begin
 
     -- Mirroring bit
-    invert <= input_a(DATA_WIDTH - segmentid_width - 1);
+    invert <= input_a(DATA_WIDTH - SEGMENTID_WIDTH - 1);
 
     -- Offset table addressing, taking mirroring into account
-    offset_entry_lower_raw <= input_a(DATA_WIDTH - segmentid_width - 2 downto 0);
+    offset_entry_lower_raw <= input_a(DATA_WIDTH - SEGMENTID_WIDTH - 2 downto 0);
     offset_entry_lower <= offset_entry_lower_raw when invert = '0' else not offset_entry_lower_raw;
-    offset_entry <= input_a(DATA_WIDTH - 1 downto DATA_WIDTH - groupid_width) & offset_entry_lower;
+    offset_entry <= input_a(DATA_WIDTH - 1 downto DATA_WIDTH - GROUPID_WIDTH) & offset_entry_lower;
 
     -- Outputs of input and offset tables, taking mirroring into account
     offset_value_raw <= OFFSET_TABLE(to_integer(unsigned(offset_entry)));
     offset_value <= offset_value_raw when invert = '0' else not offset_value_raw;
-    input_value <= INPUT_TABLE(to_integer(unsigned(input_a(DATA_WIDTH - 1 downto DATA_WIDTH - segmentid_width))));
+    input_value <= INPUT_TABLE(to_integer(unsigned(input_a(DATA_WIDTH - 1 downto DATA_WIDTH - SEGMENTID_WIDTH))));
 
     -- Addition of input and offset, taking mirroring into account
     adder : process(input_value, offset_value)

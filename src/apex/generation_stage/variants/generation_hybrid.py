@@ -107,7 +107,7 @@ use IEEE.NUMERIC_STD.ALL;
 entity {ctx.circuit_name} is
     generic (
         DATA_WIDTH      : positive := {ctx.data_width};
-        segmentid_width : positive := {ctx.segmentid_width}
+        SEGMENTID_WIDTH : positive := {ctx.segmentid_width}
     );
     port (
         input_a     : in STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0);
@@ -118,25 +118,25 @@ end {ctx.circuit_name};
 architecture arch_{ctx.circuit_name} of {ctx.circuit_name} is
 
     attribute rom_style : string;
-    type bias_array_t is array (0 to 2**segmentid_width - 1) of STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0);
+    type bias_array_t is array (0 to 2**SEGMENTID_WIDTH - 1) of STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0);
     constant BIAS_TABLE : bias_array_t := (
 {rom_code}
     );
     attribute rom_style of BIAS_TABLE : constant is "distributed";
 
 {signals_declaration_code}
-    signal encoder_output       : STD_LOGIC_VECTOR(2**(DATA_WIDTH - segmentid_width) - 1 downto 0);
+    signal encoder_output       : STD_LOGIC_VECTOR(2**(DATA_WIDTH - SEGMENTID_WIDTH) - 1 downto 0);
     signal core_value           : STD_LOGIC_VECTOR(LARGEST_CORE_VALUE downto 0);
     signal subfunction_value    : STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0);
-    signal selector             : STD_LOGIC_VECTOR(segmentid_width - 1 downto 0);
+    signal selector             : STD_LOGIC_VECTOR(SEGMENTID_WIDTH - 1 downto 0);
     signal bias                 : STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0);
-    signal least_significants   : STD_LOGIC_VECTOR(DATA_WIDTH - segmentid_width - 1 downto 0);
+    signal least_significants   : STD_LOGIC_VECTOR(DATA_WIDTH - SEGMENTID_WIDTH - 1 downto 0);
 
 begin
 
     -- Routing and selection
-    selector <= input_a(DATA_WIDTH - 1 downto DATA_WIDTH - segmentid_width);
-    least_significants <= input_a(DATA_WIDTH - segmentid_width - 1 downto 0);
+    selector <= input_a(DATA_WIDTH - 1 downto DATA_WIDTH - SEGMENTID_WIDTH);
+    least_significants <= input_a(DATA_WIDTH - SEGMENTID_WIDTH - 1 downto 0);
     bias <= BIAS_TABLE(to_integer(unsigned(selector)));
 
     -- One-hot encoder    
