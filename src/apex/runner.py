@@ -163,8 +163,8 @@ class Runner:
             # Initializing necessary variables/files
             counter: int = 1
             benchmark_name: str = args_dict["circuit_name"]
-            output_folder: Path = args_dict["output_folder"]
-            utils.create_benchmark_csv(output_folder, benchmark_name)
+            benchmark_output_folder: Path = args_dict["output_folder"] / benchmark_name
+            utils.create_benchmark_csv(benchmark_output_folder, benchmark_name)
             is_first: bool = True
 
             # Running all possible configurations
@@ -176,7 +176,8 @@ class Runner:
                 current_args_dict: dict[str, Any] = dict(zip(keys, config))
                 current_ctx: Context = Context(**current_args_dict)
 
-                # Adding ID to circuit_name for uniqueness
+                # Adding ID to circuit_name for uniqueness and fixing output folder
+                current_ctx.output_folder = benchmark_output_folder
                 current_ctx.circuit_name = current_ctx.circuit_name + f"{counter:03}"
                 counter = counter + 1
 
@@ -186,6 +187,6 @@ class Runner:
                 utils.write_apex_report(current_ctx, extracted_metrics)
 
                 # Appending the results in the CSV
-                utils.append_benchmark_csv(output_folder, benchmark_name, current_ctx, extracted_metrics, is_first)
+                utils.append_benchmark_csv(benchmark_output_folder, benchmark_name, current_ctx, extracted_metrics, is_first)
                 is_first = False
     
