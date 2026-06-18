@@ -40,7 +40,7 @@ class Runner:
         ImplementationRegistry.load_variants()
 
         # Init parser
-        self._parser = argparse.ArgumentParser(description="ApexHDL: A Tool for Generating/Benchmarking Unary and Binary Function Evaluators on FPGA")
+        self._parser = argparse.ArgumentParser(description="ApexHDL: A Tool for Generating/Benchmarking Function Evaluators on FPGA")
 
         # Config argument
         conf: Any = self._parser.add_argument_group("Config")

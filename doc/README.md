@@ -1,4 +1,4 @@
-# ApexHDL Documentation
+<h1 style="text-align: center;">ApexHDL Documentation</h1>
 
 Welcome to ApexHDL documentation. It contains all necessary informations for both users and developers.
 
