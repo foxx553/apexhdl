@@ -8,7 +8,7 @@
         "symmetric"
     ],
     "circuit_name": "bench_resources",
-    "output_folder": "../output/bench_resources",
+    "output_folder": "../output",
     "step": "syn",
 
     "math_function": [
@@ -32,10 +32,6 @@
     "sim_tool": "ghdl",
     "eda_tool": "vivado",
 
-    "fpga_board": "xc7z020clg400-1",
-    "ip_address": "192.168.2.99",
-    "username": "xilinx",
-    "password": "xilinx",
-    "fpga_workdir": "/home/xilinx/sandbox"
+    "fpga_board": "xc7z020clg400-1"
 
 }
