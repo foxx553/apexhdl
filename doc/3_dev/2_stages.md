@@ -8,3 +8,5 @@
 ## 3.2.3. Synthesis
 
 ## 3.2.4. Implementation
+
+## 3.2.5. Outputs management

@@ -48,10 +48,31 @@
 - In its constructor, it uses a `Context` instance to select the variants of each step of the pipeline (see **3.1.3.**).
 - When prompted to, it runs each step one after the other, and returns all outputs retrieved throughout the pipeline (see **3.1.4.**).
 
-## 3.1.3. Stage registries
+## 3.1.3. Variants registration/selection
 
-## 3.1.4. Outputs management
+### 3.1.3.1. `Registry` definition
+
+- A "registry" design pattern is used to register and select variants within a pipeline stage.
+- In each `apex.*_stage.*Registry`, there are two classes defined:
+    - A `*Stage` class which is the base class for all variants of the stage, defining the abstract `execute` method,
+    - A `*Registry` class which is the registering class, importing all variants and selecting the appropriate one based on the `Context` instance passed.
+
+### 3.1.3.2. Variants predicates
+
+- Each variant consists in a class in `apex.*_stage.variants` package.
+- Each variant class is meant to be "self-contained", in the sense that all its informations should be in its Python file.
+- It thus includes variant selection criteria, which takes the form of a decorator placed above class declaration.
+- Here's the example of the bipartite generation variant:
+```python
+@GenerationRegistry.register(predicate=lambda ctx: ctx.method_name == "bipartite", priority=1)
+class GenerationBipartite(GenerationStage):
+    (...)
+```
+- In this example:
+    - `predicate` is the condition checker, returning a boolean, which selects this variants if `True` (here, when `method_name` is `"bipartite"`),
+    - `priority` lets you order condition checking among the variants of a stage (higher priorities are evaluated first).
+- This registry is ultimately used by the `Pipeline` to retrieve its appropriate variant (see **3.1.2.2.**).
 
 ## 3.1.5. TCL/XDC files
 
-## 3.1.6. Documentation & linting
+## 3.1.6. Documentation, linting & logging
