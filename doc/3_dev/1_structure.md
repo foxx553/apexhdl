@@ -73,6 +73,30 @@ class GenerationBipartite(GenerationStage):
     - `priority` lets you order condition checking among the variants of a stage (higher priorities are evaluated first).
 - This registry is ultimately used by the `Pipeline` to retrieve its appropriate variant (see **3.1.2.2.**).
 
-## 3.1.5. TCL/XDC files
+## 3.1.5. Tcl/XDC files
+
+- To perform hardware-related operations in EDA tools, the codebase includes Tcl and XDC scripts.
+- At the moment, ApexHDL works with Vivado for the Zynq-7020 FPGA target, and thus contains the following scripts:
+    - `tcl/analyze_evaluator.tcl`, associated with `xdc/virtual_clk.xdc`, for hardware reporting (see **3.2.3.**),
+    - `tcl/{implement_evaluator.tcl, wrap_evaluator.tcl}`, associated with `xdc/pynq_z2.tcl`, for on-chip validation (see **3.2.4.**).
 
 ## 3.1.6. Documentation, linting & logging
+
+### 3.1.6.1. Code documentation
+
+- The code is intentionnally documented in depth, since it is intended to be extended by anyone.
+- Thus:
+    - Every variable type is explicitly written,
+    - Each class attribute is commented so that hovering it lets us understand its purpose,
+    - Each method is commented (notably its purpose, parameters, and return values) so that hovering it lets us understand its use.
+- Concretely, ApexHDL was developed in VSCode using Python strict type checking:
+    - To activate it, go in settings and change parameter `python.analysis.typeCheckingMode` to `strict`.
+  
+### 3.1.6.2. Logging
+
+- ApexHDL codebase uses Python default `logging` package (documented [here](https://docs.python.org/3/library/logging.html)) in order to provide to the user logging of the different execution steps.
+- Logging messages take the following form:
+```bash
+<date-and-time> - <class-name> - <log-level> - <message>
+```
+- To perpetuate variants self-containment, they have ready-to-use logger object (called with `self.logger`), previously defined in `*Registry` class.

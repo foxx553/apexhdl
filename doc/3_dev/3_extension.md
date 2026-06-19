@@ -34,3 +34,6 @@ class <Stage>Bipartite(<Stage>Stage):
     - `<Stage>` with the name of the stage of your variant,
     - `<predicate>` with a function on the `Context` instance (named `ctx`), returning a boolean (you may use `lambda` function for clarity),
     - `<priority>` with a priority integer, knowing that higher priorities are evaluated first (you may look at priorities of other variants of the stage beforehand).
+- In the Python algorithm of your variant:
+    - if you want to use external executables, you may think about using `subprocess` Python capabilities (documented [here](https://docs.python.org/3/library/subprocess.html)),
+    - if you want to use external scripts (namely Tcl, XDC, ...), you may think about putting in the right place in the ApexHDL codebase (namely in existing `tcl/`, `xdc/`, ... or in a new folder).
