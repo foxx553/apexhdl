@@ -156,6 +156,7 @@ In this repository, you'll find **everything needed for using** (and eventually 
 ## Citation
 - Authors: **Florian DELHON**, **Kevin PEYMANI**, **Tarek OULD-BACHIR**.
 - Paper Title: **ApexHDL: A Tool for Generating/Benchmarking Unary and Binary Function Evaluators on FPGA**.
+- Conference: **24th IEEE International NEWCAS Conference**, on June 2026, at Chicoutimi, QC, Canada.
 
 ## Contact
 - Developer/maintainer: **Florian DELHON**, florian.delhon@polymtl.ca. *Feel free to contact me if you'd like to know more about the tool and eventually contribute to its development!*
