@@ -8,22 +8,20 @@
 - ApexHDL is a command-line tool, without user interface.
 - To call the tool, **you must be in `src/` sub-folder and run the following command:**
 ```bash
-python apexhdl.py <params>
+python apexhdl.py <args>
 ```
 
 ### 2.1.1.2. Parameters specification
 
-- Replace `<params>` with a series of `--flag val`, where `flag` is the name of the parameter, and `val` the value you want to assign to it.
-- Except for the meta-parameters (defined in **2.1.2.2.**), they can also be **defined in a JSON file** (see **2.1.3.**).
-- The parameters list described in **2.1.2.** writes parameters name in `snake_case`, used in JSON.
-- However, **on the console**, you must **replace it with `kebab-case`** (e.g. `method_name` would be `--method-name` on the console).
+- Replace `<args>` with a series of `--flag val`, where `flag` is the name of the parameter, and `val` the value you want to assign to it.
+- On the console, parameters name are **in `kebab-case`** (e.g. `method_name` would be `--method-name` on the console).
 
 ## 2.1.2. Parameters list
 
 ### 2.1.2.1. Quick notes
 
 - In the tables below, `Necessity` column details when you **must specify a value** to the parameter.
-- `Benchmark` column tells whether or not this parameter can be assigned to multiple values, in order to enable benchmarking mode (detailed in **2.2.**).
+- `Benchmark` column tells whether or not this parameter **can be assigned to multiple values**, used in benchmarking mode (detailed in **2.2.**).
 
 ### 2.1.2.2. Meta-parameters
 | Name | Type | Description | Necessity | Benchmark |
@@ -76,6 +74,16 @@ python apexhdl.py <params>
 
 ## 2.1.3. Appendix 1: JSON config file (`config`)
 
+- Except for the meta-parameters (in **2.1.2.2.**), parameters can be **defined in a JSON file** (see examples in the `examples/` sub-folder).
+- Following JSON conventions, parameters keys must be **in `snake_case`**, as defined in the parameters list in **2.1.2.**.
+- Once the JSON is defined, you can specify it while calling the tool:
+```bash
+python apexhdl.py --config <path-to-json-file> [ <args> ]
+```
+- Values read in the JSON are **default values**, and can thus be overriden by the `<args>` coming after.
+
 ## 2.1.4. Appendix 2: Mathematical expression parsing (`math_function`)
 
-## 2.1.5. Appendix 3: Examples
+- Internally, ApexHDL uses SymPy for **mathematical expression parsing** (see documentation [here](https://docs.sympy.org/latest/index.html)).
+- Thus, function expressions must be **between double quotes** and strictly **Python-style**.
+- For instance, $200 \times \exp(-\frac{(x-128)^2}{2 \times 30^2})$ will be written `200*exp(-(x-128)**2/(2*30**2))` in Python-style.
