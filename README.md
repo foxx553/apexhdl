@@ -10,7 +10,7 @@
 
 To guide you through your ApexHDL journey, this repository contains everything needed:
 
-- `doc/` = **Complete documentation** for ApexHDL set-up, usage, and codebase.
+- `doc/` = **Documentation** for ApexHDL set-up, usage, and codebase.
 - `src/` =
     - `apexhdl.py` = **Main Python script**, to be called in order to use ApexHDL.
     - `apex/` = Python source code.
@@ -142,7 +142,7 @@ apex.runner - INFO - Running config 5 of 5...
 
 All results are compiled into one CSV to facilitate quantitative comparative analysis.
 
-*(Excerpt of data presented in the CSV)*
+*(Excerpt of the data presented in the CSV)*
 | MethodName  | SimMaxAbsError | SimMeanAbsError | SimMaxRelError | SimMeanRelError | LutCount | CriticalPathLatency (ns) |
 | :--: | :--: | :--: | :--: | :--: | :--: | :--: |
 | rom | 0.016 | 0.002 | 0.057 | 0.005 | 31 | 7.91 |

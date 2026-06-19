@@ -18,13 +18,13 @@
 
 ### 2.3.2.1. Folder structure
 
-- In the context of a benchmark, the `circuit_name` parameter takes the role of the benchmark's name.
+- In the context of a benchmark, the `circuit_name` parameter takes the role of the **benchmark's name**.
 - All benchmarking outputs are placed in folder `output_folder/<circuit_name>/`.
 - Each combination takes the name `<circuit_name><id>`, where `<id>` is a unique ID.
 - Each `<circuit_name><id>` results in a folder `output_folder/<circuit_name>/<circuit_name><id>/`, in which all outputs described in **2.2.** are placed for that particular circuit.
 
 ### 2.3.2.2. Final report
 
-- The results of all combinations are placed in a CSV report `output_folder/<circuit_name>/<circuit_name>.csv`.
-- Each line of the CSV represents a combination `<circuit_name><id>`, a contains the most relevant parameters and all retrieved metrics.
+- The **results of all combinations** are placed in a CSV report `output_folder/<circuit_name>/<circuit_name>.csv`.
+- Each line of the CSV represents a combination `<circuit_name><id>`, a contains the most relevant **parameters** and all retrieved **metrics**.
 - The CSV report can then be opened and/or processed the way you want to perform your own comparative analysis.

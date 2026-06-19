@@ -20,8 +20,8 @@ python apexhdl.py <args>
 
 ### 2.1.2.1. Quick notes
 
-- In the tables below, `Necessity` column details when you **must specify a value** to the parameter.
-- `Benchmark` column tells whether or not this parameter **can be assigned to multiple values**, used in benchmarking mode (detailed in **2.2.**).
+- In the tables below, **"Necessity"** column details when you **must specify a value** to the parameter.
+- **"Benchmark"** column tells whether or not this parameter **can be assigned to multiple values**, useful for benchmarking mode (detailed in **2.2.**).
 
 ### 2.1.2.2. Meta-parameters
 | Name | Type | Description | Necessity | Benchmark |
@@ -52,8 +52,8 @@ python apexhdl.py <args>
 | Name | Type | Description | Necessity | Benchmark |
 | --- | --- | --- | --- | --- |
 | `data_width` | `int` | Word length of input/output values | Always | **Yes** |
-| `segmentid_width` | `int` | Bits indexing segments (for hybrid, bipartite, and symmetric) | When `method_name` in `{"hybrid", "bipartite", "symmetric"}`<br>> Defaults to $\lfloor$ `data_width` $/2\rfloor$ | No |
-| `groupid_width` | `int` | Bits indexing group of segments (for bipartite, and symmetric) | When `method_name` in `{"bipartite", "symmetric"}`<br>> Defaults to $\lfloor$ `data_width` $/4\rfloor$ | No |
+| `segmentid_width` | `int` | Bits indexing segments (for hybrid, bipartite, and symmetric) | When `method_name` in `{"hybrid", "bipartite", "symmetric"}`<br>> Defaults to $\lceil$ `data_width` $/2\rceil$ | No |
+| `groupid_width` | `int` | Bits indexing group of segments (for bipartite, and symmetric) | When `method_name` in `{"bipartite", "symmetric"}`<br>> Defaults to $\lceil$ `data_width` $/4\rceil$ | No |
 
 ### 2.1.2.6. Tools
 
@@ -75,7 +75,7 @@ python apexhdl.py <args>
 ## 2.1.3. Appendix 1: JSON config file (`config`)
 
 - Except for the meta-parameters (in **2.1.2.2.**), parameters can be **defined in a JSON file** (see examples in the `examples/` sub-folder).
-- Following JSON conventions, parameters keys must be **in `snake_case`**, as defined in the parameters list in **2.1.2.**.
+- Following JSON conventions, parameters keys must be **in `snake_case`**, as defined in the parameters list in **2.1.2.**
 - Once the JSON is defined, you can specify it while calling the tool:
 ```bash
 python apexhdl.py --config <path-to-json-file> [ <args> ]
@@ -86,4 +86,4 @@ python apexhdl.py --config <path-to-json-file> [ <args> ]
 
 - Internally, ApexHDL uses SymPy for **mathematical expression parsing** (see documentation [here](https://docs.sympy.org/latest/index.html)).
 - Thus, function expressions must be **between double quotes** and strictly **Python-style**.
-- For instance, $200 \times \exp(-\frac{(x-128)^2}{2 \times 30^2})$ will be written `200*exp(-(x-128)**2/(2*30**2))` in Python-style.
+- For instance, $200 \times \exp(-\frac{(4x-128)^2}{2 \pi \times 30^2})$ will be written `200*exp(-(4*x-128)**2/(2*pi*30**2))` in Python-style.
