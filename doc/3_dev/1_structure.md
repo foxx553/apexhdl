@@ -77,8 +77,8 @@ class GenerationBipartite(GenerationStage):
 
 - To perform hardware-related operations in EDA tools, the codebase includes Tcl and XDC scripts.
 - At the moment, ApexHDL works with Vivado for the Zynq-7020 FPGA target, and thus contains the following scripts:
-    - `tcl/analyze_evaluator.tcl`, associated with `xdc/virtual_clk.xdc`, for hardware reporting (see **3.2.3.**),
-    - `tcl/{implement_evaluator.tcl, wrap_evaluator.tcl}`, associated with `xdc/pynq_z2.tcl`, for on-chip validation (see **3.2.4.**).
+    - `tcl/analyze_evaluator.tcl`, associated with `xdc/virtual_clk.xdc`, for hardware reporting (see **3.2.4.**),
+    - `tcl/{implement_evaluator.tcl, wrap_evaluator.tcl}`, associated with `xdc/pynq_z2.tcl`, for on-chip validation (see **3.2.5.**).
 
 ## 3.1.6. Documentation, linting & logging
 
