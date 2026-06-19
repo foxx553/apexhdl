@@ -22,7 +22,7 @@
 - All you have to do is **adding a new file** in the `apex.*_stage.variants`, following the pattern:
 ```python
 @<Stage>Registry.register(predicate=<predicate>, priority=<priority>)
-class <Stage>Bipartite(<Stage>Stage):
+class <Stage><VariantName>(<Stage>Stage):
     """
     <Variant-documentation>
     """
@@ -32,6 +32,7 @@ class <Stage>Bipartite(<Stage>Stage):
 ```
 - In this pattern, you shall replace:
     - `<Stage>` with the name of the stage of your variant,
+    - `<VariantName>` with the unique name of your variant, with its documentation `<Variant-documentation>`,
     - `<predicate>` with a function on the `Context` instance (named `ctx`), returning a boolean (you may use `lambda` function for clarity),
     - `<priority>` with a priority integer, knowing that higher priorities are evaluated first (you may look at priorities of other variants of the stage beforehand).
 - In the Python algorithm of your variant:

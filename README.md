@@ -151,6 +151,38 @@ All results are compiled into one CSV to facilitate quantitative comparative ana
 | bipartite | 0.086 | 0.015 | 0.406 | 0.038 | 15 | 8.93 |
 | symmetric | 0.081 | 0.015 | 0.406 | 0.040 | 27 | 9.41 |
 
+## Extending the framework
+
+### a. Add new architectural parameters
+
+Add a new field in the `src/apex/context.py`:
+```python
+    parameter_name: <param-type> = field(metadata={
+        "description": "<param-description>",
+        "group": "<param-group>",
+        "allow_multiple": <param-multiple-bool>
+    })
+    """<param-description>"""
+```
+ApexHDL will automatically deal with all technicalities (args parser, user console manual, ...), letting the developer use it in the code, and the user use it in its configurations. 
+
+### b. Add new functionalities
+
+Create a new Python script in `src/apex/*_stage/variants/`, similar to that *simplified example*, in which you will notably define:
+- The selection criteria in the `@register` decorator,
+- The Python algorithm in the `execute` function.
+```python
+@MyRegistry.register(predicate = variant == "my_variant", priority = 1)
+class MyVariant(MyStage):
+    """
+    My super variant
+    """
+    
+    def execute(self, ctx: Context) -> dict[str, float]:
+        (...)
+```
+ApexHDL will automatically integrate your variant into the selection process, ready to be used by the tool.
+
 ## Citing this work
 - Authors: **Florian DELHON**, **Kevin PEYMANI**, **Tarek OULD-BACHIR**.
 - Paper Title: **ApexHDL: A Tool for Generating/Benchmarking Unary and Binary Function Evaluators on FPGA**.
