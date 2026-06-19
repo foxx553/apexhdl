@@ -8,6 +8,15 @@
 - **Hardware-In-the-Loop** process for module **validation on physical silicon**. 
 - **Benchmarking** feature for **design exploration** (generation techniques, bits of precision, ...) with **results compiled in a CSV report**.
 
+To guide you through your ApexHDL journey, this repository contains everything needed:
+
+- `doc/` = **Complete documentation** for ApexHDL set-up, usage, and codebase.
+- `src/` =
+    - `apexhdl.py` = **Main Python script**, to be called in order to use ApexHDL.
+    - `apex/` = Python source code.
+- `tcl/` = Tcl scripts, used for **hardware reporting** and **on-chip validation**.
+- `xdc/` = XDC constraints scripts, used for **hardware reporting** and **on-chip validation**.
+
 ## Using the tool
 
 *Note: The highlights provided in this README come from real execution. For clarity's sake, only the most relevant parts of the inputs/outputs are shown.*
@@ -142,21 +151,10 @@ All results are compiled into one CSV to facilitate quantitative comparative ana
 | bipartite | 0.086 | 0.015 | 0.406 | 0.038 | 15 | 8.93 |
 | symmetric | 0.081 | 0.015 | 0.406 | 0.040 | 27 | 9.41 |
 
-
-## Repository
-
-In this repository, you'll find **everything needed for using** (and eventually **extending**) ApexHDL.
-- `doc/` = **Complete documentation** for ApexHDL set-up, usage, and codebase.
-- `src/` =
-    - `apexhdl.py` = **Main Python script**, to be called in order to use ApexHDL.
-    - `apex/` = Python source code.
-- `tcl/` = Tcl scripts, used for **hardware reporting** and **on-chip validation**.
-- `xdc/` = XDC constraints scripts, used for **hardware reporting** and **on-chip validation**.
-
-## Citation
+## Citing this work
 - Authors: **Florian DELHON**, **Kevin PEYMANI**, **Tarek OULD-BACHIR**.
 - Paper Title: **ApexHDL: A Tool for Generating/Benchmarking Unary and Binary Function Evaluators on FPGA**.
 - Conference: **24th IEEE International NEWCAS Conference**, on June 2026, at Chicoutimi, QC, Canada.
 
-## Contact
+## Contributing to the project
 - Developer/maintainer: **Florian DELHON**, florian.delhon@polymtl.ca. *Feel free to contact me if you'd like to know more about the tool and eventually contribute to its development!*
